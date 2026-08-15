@@ -1,0 +1,2327 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17110d">
+<meta name="description" content="超あまつゆのいと専用・実機入力型の鍛冶手順アシスタント">
+<title>超あまつゆ Forge AI</title>
+<style>:root{color-scheme:dark;--ink:#f7efe6;--muted:#a99a8c;--panel:#211914;--panel2:#18120f;--line:#463328;--amber:#ffb657;--gold:#ffd788;--ember:#ef6a35;--green:#4dd6a2;--red:#ff766f;--blue:#6fd7ff;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 16% 0,#4c2114 0,transparent 31rem),radial-gradient(circle at 100% 20%,#2b1c13 0,transparent 34rem),#0f0b09;color:var(--ink)}body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}.app-shell{width:min(1180px,100%);margin:auto;padding:34px 24px 50px}.hero{display:grid;grid-template-columns:72px 1fr auto;gap:18px;align-items:center;margin-bottom:24px}.brand-mark{width:72px;height:72px;border-radius:22px;overflow:hidden;box-shadow:0 14px 40px #0008,0 0 0 1px #7f4d2d}.brand-mark img{width:100%;height:100%}.eyebrow,.kicker,.rec-kicker{margin:0;color:var(--amber);letter-spacing:.2em;font-size:10px;font-weight:800}.hero h1{font-family:"Hiragino Mincho ProN","Yu Mincho",serif;font-size:clamp(25px,4vw,42px);line-height:1;margin:7px 0}.hero h1 span{color:var(--gold);font-style:italic}.lead{margin:0;color:var(--muted);font-size:13px}.bench-pill{border:1px solid #60442f;background:#1c1410aa;color:var(--ink);border-radius:16px;padding:10px 16px;display:grid;text-align:right;cursor:pointer}.bench-pill b{font-size:22px;color:var(--gold)}.bench-pill span{font-size:9px;letter-spacing:.12em;color:var(--muted)}.status-strip{display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid var(--line);background:#17110de6;border-radius:18px;margin-bottom:18px;overflow:hidden}.status-strip>*{min-height:72px;padding:13px 18px;border-right:1px solid var(--line)}.status-strip>*:last-child{border:0}.status-strip label,.turn-state{display:grid;grid-template-columns:1fr auto auto;align-items:end;gap:5px}.status-strip span{grid-column:1/-1;color:var(--muted);font-size:10px;letter-spacing:.12em}.status-strip input{width:110px;border:0;background:transparent;color:var(--ink);font-size:27px;font-weight:800;outline:0;padding:0}.status-strip b{font-size:12px;color:var(--amber);padding-bottom:4px}.turn-state b{grid-column:1/-1;font-size:17px;padding:3px 0 0}.workspace{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(310px,.8fr);gap:18px}.board-card,.ai-card,.timeline-card{border:1px solid var(--line);background:linear-gradient(145deg,#241a14ed,#15100ded);border-radius:22px;box-shadow:0 22px 70px #0005}.board-card{padding:22px}.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:17px}.section-head h2{font-size:18px;margin:4px 0 0}.ghost-button{border:1px solid #65452f;background:transparent;color:var(--amber);padding:8px 12px;border-radius:10px;font-size:11px;cursor:pointer}.forge-board{display:grid;grid-template-columns:1fr 1fr;gap:11px}.mass{position:relative;min-height:112px;border:1px solid #4b372a;background:#15100d;border-radius:15px;padding:14px;overflow:hidden}.mass.priority-mass{border-color:#7c5735}.mass.critical{box-shadow:inset 0 0 0 1px #3ecf9a,0 0 24px #3ecf9a14}.mass-head{display:flex;justify-content:space-between;align-items:start}.mass-letter{font-family:Georgia,serif;font-size:28px;color:var(--gold);line-height:1}.mass-zone{font-size:10px;color:var(--muted)}.mass-value{font-size:24px;font-weight:900;margin-top:11px;font-variant-numeric:tabular-nums}.mass-value input{width:100%;font:inherit;color:inherit;background:transparent;border:0;border-bottom:1px dashed #755337;outline:none;padding:0}.mass-bar{height:7px;background:#31231b;border-radius:9px;overflow:hidden;margin-top:9px}.mass-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ember),var(--amber));transition:width .3s}.mass.in-zone .mass-bar i{background:linear-gradient(90deg,#1a9f73,var(--green))}.mass.over .mass-bar i{background:linear-gradient(90deg,#cf3737,var(--red))}.mass-state{position:absolute;right:13px;bottom:10px;font-size:9px;color:var(--muted)}.legend{display:flex;gap:16px;flex-wrap:wrap;color:var(--muted);font-size:10px;margin-top:14px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}.dot.priority{background:var(--gold)}.dot.zone{background:var(--green)}.dot.crit{background:var(--blue)}.ai-card{padding:20px;display:flex;flex-direction:column}.ai-topline{display:flex;align-items:center;gap:8px;color:var(--amber);letter-spacing:.13em;font-size:9px;font-weight:800}.ai-orb{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 13px var(--green)}.ai-topline b{margin-left:auto;background:#3a281d;color:var(--gold);border-radius:20px;padding:5px 8px;letter-spacing:0}.recommendation{margin:25px 0 22px;padding:18px;border-radius:17px;background:radial-gradient(circle at 100% 0,#60311955,transparent 60%),#17100c;border:1px solid #5c3c28}.recommendation h2{font-size:28px;line-height:1.18;margin:7px 0 10px;font-family:"Hiragino Mincho ProN","Yu Mincho",serif}.recommendation>p:not(.rec-kicker){font-size:13px;line-height:1.7;color:#d7c7b8;margin:0}.action-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}.action-meta span{border:1px solid #61422e;border-radius:20px;padding:5px 8px;color:var(--amber);font-size:10px}.primary-button{width:100%;border:1px solid #ffc167;background:linear-gradient(135deg,#ed7d32,#b84424);color:#fff7ea;border-radius:13px;min-height:56px;font-weight:900;cursor:pointer;box-shadow:0 12px 26px #c84e2633}.primary-button span,.primary-button small{display:block}.primary-button small{font-size:9px;font-weight:500;opacity:.75;margin-top:2px}.primary-button:disabled{opacity:.45;cursor:default}.secondary-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.secondary-actions button{border:1px solid #51392a;background:#1a120e;color:#d6c5b5;border-radius:11px;padding:11px;cursor:pointer}.privacy-note{font-size:9px;line-height:1.6;color:#75685e;margin:14px 2px 0}.timeline-card{margin-top:18px;padding:18px 20px}.section-head.compact{margin-bottom:10px}.step-count{color:var(--amber);font-size:12px}.history{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;list-style:none;margin:0;padding:0;max-height:250px;overflow:auto}.history li{border:1px solid #3c2b22;background:#15100d;padding:10px;border-radius:11px;font-size:11px;color:#d8c9bc}.history li b{color:var(--gold);display:block;margin-bottom:4px}.history li small{color:var(--muted)}.history .empty{grid-column:1/-1;color:#75685e;text-align:center;padding:22px}footer{text-align:center;color:#5f554d;font-size:9px;padding-top:20px}.modal{border:0;padding:0;background:transparent;color:var(--ink);width:min(520px,calc(100% - 28px))}.modal::backdrop{background:#080604dd;backdrop-filter:blur(6px)}.modal-card{position:relative;border:1px solid #6b4730;border-radius:22px;padding:26px;background:radial-gradient(circle at 100% 0,#562716,transparent 50%),#1a120e;box-shadow:0 40px 100px #000}.modal-close{position:absolute;right:16px;top:13px;border:0;background:transparent;color:#b7a99e;font-size:24px;cursor:pointer}.modal h2{font-family:"Hiragino Mincho ProN","Yu Mincho",serif;font-size:27px;margin:7px 0 10px}.modal-lead{font-size:12px;line-height:1.7;color:var(--muted)}.bench-input{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);background:#120d0a;border-radius:12px;padding:10px 13px;margin:18px 0 9px}.bench-input span{font-size:11px;color:var(--muted)}.bench-input input{width:110px;border:0;background:transparent;color:var(--gold);font-size:22px;font-weight:800;text-align:right;outline:0}.benchmark-result{display:flex;align-items:baseline;gap:9px;margin:22px 0 12px}.benchmark-result strong{font-size:48px;color:var(--gold)}.benchmark-result span{font-size:12px;color:var(--muted)}.benchmark-result.fail strong{color:#ff8e72}.benchmark-result.pass strong{color:var(--green)}.benchmark-scale{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;color:#786b61;font-size:9px}.benchmark-scale i{display:block;position:relative;height:9px;background:#33231a;border-radius:10px}.benchmark-scale i b{display:block;height:100%;width:0;border-radius:10px;background:linear-gradient(90deg,var(--ember),var(--green));transition:width .6s}.benchmark-scale i em{position:absolute;left:70%;top:-4px;width:2px;height:17px;background:var(--gold);box-shadow:0 0 8px var(--gold)}.threshold-note{font-size:9px;color:#76685e}.result-grade{font-size:58px;color:var(--gold);font-family:Georgia,serif}.result-details{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.result-details div{border:1px solid var(--line);border-radius:10px;padding:9px;text-align:center;font-size:10px}.result-details b{display:block;font-size:16px;color:var(--gold)}@media(max-width:760px){.app-shell{padding:20px 12px 34px}.hero{grid-template-columns:54px 1fr}.brand-mark{width:54px;height:54px;border-radius:17px}.bench-pill{grid-column:1/-1;text-align:left;display:flex;justify-content:space-between;align-items:center}.workspace{grid-template-columns:1fr}.status-strip{grid-template-columns:1fr 1fr}.status-strip>*:nth-child(2){border-right:0}.turn-state{grid-column:1/-1;border-top:1px solid var(--line)!important}.history{grid-template-columns:1fr 1fr}.lead{font-size:11px}.board-card{padding:15px}.mass{min-height:103px;padding:12px}.mass-letter{font-size:24px}.mass-value{font-size:21px}}@media(max-width:420px){.history{grid-template-columns:1fr}.status-strip input{width:88px}.legend{gap:9px}.hero h1{font-size:25px}}
+
+.io-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.io-field{border:1px solid var(--line);background:#15100d;border-radius:13px;padding:11px 13px}
+.io-field span{display:block;font-size:9px;letter-spacing:.12em;color:var(--muted);margin-bottom:3px}
+.io-row{display:flex;align-items:center;gap:6px}
+.io-row input{flex:1;min-width:0;width:100%;border:0;background:transparent;color:var(--ink);font-size:24px;font-weight:800;outline:0;padding:0;font-variant-numeric:tabular-nums}
+.nudge{border:1px solid #55402f;background:#221913;color:var(--amber);border-radius:9px;width:34px;height:34px;font-size:17px;line-height:1;cursor:pointer;flex:none}
+.mass .io-row input{font-size:22px}
+.mass{display:flex;flex-direction:column;gap:7px}
+.crit-toggle{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);cursor:pointer;user-select:none}
+.crit-toggle input{width:15px;height:15px;accent-color:#3ecf9a}
+.mass.critical .crit-toggle{color:var(--green)}
+.flag-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.flag{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:#15100d;border-radius:20px;padding:7px 12px;font-size:11px;color:#d0c0b2;cursor:pointer}
+.flag input{accent-color:var(--amber)}
+.alt-list{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px}
+.alt-list li{display:flex;justify-content:space-between;gap:8px;border:1px solid #3b2b21;background:#15100d;border-radius:10px;padding:9px 11px;font-size:12px}
+.alt-list li b{color:var(--gold);font-weight:700}
+.alt-list li small{color:var(--muted);flex:none}
+.forecast{display:grid;gap:5px;margin-top:12px;font-size:11px;color:#cfbfb0}
+.forecast div{display:flex;justify-content:space-between;border-bottom:1px dashed #3a2b22;padding-bottom:4px}
+.forecast em{font-style:normal;color:var(--green)}
+.prob-pill b{font-size:20px}
+.warn{color:var(--red);font-size:11px;margin:10px 0 0}
+.hint{color:var(--muted);font-size:10px;line-height:1.6;margin:10px 2px 0}
+.stepbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.stepbar b{font-size:12px;color:var(--amber)}
+#resultEntry{border:1px solid var(--gold);background:linear-gradient(180deg,#1d1610,#171009);border-radius:18px;padding:16px 15px;margin-bottom:16px}
+.cand-row{border-top:1px dashed #3d2d22;padding:12px 0 4px}
+.cand-row:first-of-type{border-top:0}
+.cand-row.done{opacity:.5}
+.cand-head{display:flex;align-items:baseline;gap:9px;margin-bottom:8px}
+.cand-head b{font-size:19px;color:var(--gold)}
+.cand-head span{font-size:11px;color:var(--muted)}
+.cand-sub{font-size:9px;letter-spacing:.1em;color:var(--muted);margin:8px 0 5px}
+.cand-list{display:flex;flex-wrap:wrap;gap:6px}
+.cand{border:1px solid #55402f;background:#221913;color:var(--ink);border-radius:10px;padding:11px 13px;font-size:16px;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums;min-width:56px}
+.cand.crit{border-color:#7a5a2a;color:var(--gold)}
+.cand.snapbtn{color:var(--green);border-color:#2f5c47;font-size:12px;font-weight:600}
+.cand.other{color:var(--muted);font-size:12px;font-weight:600}
+.cand.on{background:var(--amber);color:#1a1209;border-color:var(--amber)}
+.cand b{display:block;font-size:17px;line-height:1.15}
+.cand i{display:block;font-style:normal;font-size:10px;font-weight:600;color:var(--muted);line-height:1.3}
+.cand.on i{color:#5b4322}
+.cand.crit b{color:var(--gold)}
+.cand.snapbtn,.cand.other{padding:9px 12px}
+#quickPlay{border:1px solid #6b4f2c;background:linear-gradient(180deg,#1f1710,#181109);border-radius:16px;padding:14px 14px 12px;margin:14px 0 4px}
+#quickPlay .cand-head{margin:6px 0 9px}
+#quickPlay .hint{margin-top:9px}
+#camPanel{position:relative;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#000;margin:12px 0}
+#camVideo{display:block;width:100%;height:auto}
+#camStage{position:relative;line-height:0}
+#camOverlay{position:absolute;left:0;top:0;touch-action:none;display:block}
+#camBar{display:flex;gap:8px;align-items:center;padding:10px 12px;background:#15100d;border-top:1px solid var(--line)}
+#camStatus{flex:1;font-size:11px;color:var(--muted);line-height:1.5}
+body{padding-bottom:104px}
+.hud{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;align-items:center;gap:14px;
+  padding:10px 16px;background:linear-gradient(180deg,#1d1510f2,#120d09fa);border-top:1px solid #6b4a30;
+  box-shadow:0 -14px 34px #0009;backdrop-filter:blur(6px)}
+.hud-cells{display:flex;gap:6px;cursor:pointer;flex:none}
+.hud-cell{min-width:56px;border:1px solid #4b372a;border-radius:10px;padding:5px 7px;background:#15100d;text-align:center;line-height:1.15}
+.hud-cell span{display:block;font-size:9px;letter-spacing:.1em;color:var(--muted)}
+.hud-cell b{display:block;font-size:17px;font-variant-numeric:tabular-nums}
+.hud-cell.in-zone{border-color:#2e7f5f}.hud-cell.in-zone b{color:var(--green)}
+.hud-cell.over{border-color:#8d3a35}.hud-cell.over b{color:var(--red)}
+.hud-cell.crit{box-shadow:inset 0 0 0 1px #3ecf9a55}
+.hud-cell.wait{border-color:#f0aa46;background:#2a1c10}
+.hud-cell.wait span{color:var(--amber)}
+.hud-cell.fresh{border-color:#6fd7ff;background:#10202a}
+.hud-cell.fresh b{color:var(--blue)}
+.hud-next{flex:1;min-width:0;cursor:pointer;display:grid;gap:1px}
+.hud-kicker{font-size:9px;letter-spacing:.16em;color:var(--amber);font-weight:800}
+.hud-next b{font-size:19px;font-family:"Hiragino Mincho ProN","Yu Mincho",serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hud-next small{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hud-buttons{display:flex;gap:6px;flex:none}
+.hud-buttons button{border:1px solid #ffc167;background:linear-gradient(135deg,#ed7d32,#b84424);color:#fff7ea;
+  border-radius:11px;padding:11px 14px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap}
+.hud-buttons button#hudOff{border-color:#6fd7ff;background:#123043;color:#bfe9ff;font-weight:700}
+.hud-buttons button#hudUndo{border-color:#51392a;background:#1a120e;color:#d6c5b5;font-weight:600}
+.hud-buttons button:disabled{opacity:.4;cursor:default}
+@media(max-width:760px){body{padding-bottom:150px}
+  .hud{flex-wrap:wrap;gap:8px;padding:9px 11px}
+  .hud-cells{order:1;width:100%;justify-content:space-between}
+  .hud-cell{min-width:0;flex:1;padding:4px 2px}
+  .hud-next{order:2;flex:1 1 auto}
+  .hud-buttons{order:3}
+  .hud-buttons button{padding:10px 11px;font-size:12px}}
+.cam-actions{display:flex;gap:8px;margin-top:10px}
+.cam-actions button{flex:1;border:1px solid #55402f;background:#221913;color:var(--amber);border-radius:12px;padding:12px;font-size:13px;font-weight:700;cursor:pointer}
+
+#camPreviewWrap{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:#15100d;border-top:1px solid var(--line)}
+#camPreview{width:150px;height:auto;border:1px solid var(--line);border-radius:8px;background:#000;flex:none}
+#camShots{display:flex;gap:8px;overflow-x:auto;padding:10px 12px;background:#120d09;border-top:1px solid var(--line)}
+#camShots figure{margin:0;flex:none;text-align:center}
+#camShots img{display:block;height:52px;width:auto;border-radius:6px;border:2px solid #3ecf9a;background:#000}
+#camShots figure.ng img{border-color:#ff6b6b}
+#camShots figcaption{font-size:10px;color:var(--muted);margin-top:3px;white-space:nowrap}
+#camShots figure.ok figcaption b{color:var(--green)}
+#camShots figure.ng figcaption b{color:var(--red)}
+</style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <div class="brand-mark"><img src="data:image/png;base64,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" alt=""></div>
+      <div>
+        <p class="eyebrow">DQX TOOL SMITHING / LIVE ASSIST</p>
+        <h1>超あまつゆ <span>Forge AI</span></h1>
+        <p class="lead">実機の数値をそのまま入力すると、次の最善手を返します。</p>
+      </div>
+      <button id="openBenchmark" class="bench-pill" type="button"><b id="headlineRate">—</b><span>1,000回検証</span></button>
+    </header>
+
+    <section class="workspace">
+      <div class="board-card">
+        <div class="stepbar"><b id="stepLabel">基本手順 1 / 11</b>
+          <button id="skipFixed" class="ghost-button" type="button">基本手順を抜ける</button></div>
+
+        <div class="io-grid">
+          <div class="io-field"><span>温度（℃）</span>
+            <div class="io-row"><button class="nudge" data-temp="-50" type="button">−</button>
+              <input id="tempInput" type="number" inputmode="numeric" step="50" value="1000">
+              <button class="nudge" data-temp="50" type="button">＋</button></div></div>
+          <div class="io-field"><span>集中力 <b id="focusMax" style="color:var(--amber)">/ 253</b></span>
+            <div class="io-row"><button class="nudge" data-focus="-1" type="button">−</button>
+              <input id="focusInput" type="number" inputmode="numeric" value="253">
+              <button class="nudge" data-focus="1" type="button">＋</button></div></div>
+        </div>
+
+        <div class="status-strip" style="margin:12px 0 16px;grid-template-columns:1fr">
+          <div class="turn-state"><span>地金の効果（温度から自動判定）</span><b id="turnEffect">初手・効果なし</b></div>
+        </div>
+
+        <div class="section-head"><div><span class="kicker">LIVE BOARD</span><h2>実機のたたき値を入力</h2></div></div>
+        <div id="board" class="forge-board" aria-label="AからFの鍛冶マス"></div>
+
+        <div class="flag-row">
+          <label class="flag"><input id="hepaCharged" type="checkbox">必殺チャージ中</label>
+          <label class="flag"><input id="hepaActive" type="checkbox">ヘパイトス使用直後（次の打撃が確定会心）</label>
+        </div>
+        <div class="legend"><span><i class="dot priority"></i>会心優先 A・D・E（11幅）</span><span><i class="dot zone"></i>成功範囲</span><span><i class="dot crit"></i>本会心済み</span></div>
+        <p class="hint">実機で1手打つたびに、変化したマスの数値を入力し直してください。温度・集中力・手数は「実行した」を押すと自動で進みます。本会心で基準値に止まったマスは必ずチェックを入れてください（以後そのマスは打たない判断になります）。</p>
+      </div>
+
+      <aside class="ai-card">
+        <div id="resultEntry" hidden></div>
+        <div class="ai-topline"><span class="ai-orb"></span><span>AI RECOMMENDATION</span><b id="phaseBadge">基本手順</b></div>
+        <div class="io-field prob-pill" style="margin-top:16px"><span>いまの盤面でしあげた場合の大成功率</span>
+          <div class="io-row"><b id="probNow" style="font-size:30px;color:var(--gold)">—</b></div>
+          <span id="probNote" style="margin:4px 0 0"></span></div>
+        <div id="recommendation" class="recommendation">
+          <p class="rec-kicker">NEXT ACTION</p>
+          <h2 id="actionName">火力上げ</h2>
+          <p id="actionReason"></p>
+          <div id="actionMeta" class="action-meta"></div>
+          <div id="forecast" class="forecast"></div>
+        </div>
+                <p class="hint cam-help">「画面を取り込む」を押し、共有ダイアログで<b>ドラクエ10のウィンドウ</b>を選びます。次に<b>板（羊皮紙）の外周4隅</b>にオレンジの丸を合わせ、緑のマス目が鉱石の3×2マスに重なれば完了です。四隅は「枠を自動調整」で板を探して自動で合わせられます。位置はこのブラウザに記憶されるので、次回からは合わせ直す必要はありません。枠の色は<b>緑＝待機</b>／<b>橙＝この手で読み取り中</b>／<b>青＝この手で読み取り済み</b>です。</p>
+        <div class="cam-actions"><button id="camOpen" type="button">画面を取り込む</button><button id="camAuto" type="button">枠を自動調整</button><button id="camReset" type="button">枠をリセット</button></div>
+        <p id="camNotice" class="hint" hidden></p>
+        <div id="camPanel" hidden><div id="camStage"><video id="camVideo" playsinline muted></video><svg id="camOverlay"></svg></div>
+          <div id="camShots" hidden></div>
+          <div id="camPreviewWrap"><canvas id="camPreview"></canvas><span id="camStatus">待機中</span></div></div>
+        <div id="quickPlay" hidden></div>
+        <button id="applyButton" class="primary-button" type="button"><span id="applyLabel">この手を実行した</span><small>温度・集中力・手数だけ自動で進めます</small></button>
+        <div class="secondary-actions">
+          <button id="undoButton" type="button">1手戻す</button>
+          <button id="resetButton" type="button">最初から</button>
+        </div>
+        <p class="rec-kicker" style="margin-top:18px">OTHER CANDIDATES</p>
+        <ul id="altList" class="alt-list"></ul>
+        <p class="privacy-note">AIは隠れた基準値を一切参照せず、画面上のたたき値・温度・集中力・本会心状態だけで判断します。</p>
+      </aside>
+    </section>
+
+    <section class="timeline-card">
+      <div class="section-head compact"><div><span class="kicker">ACTION LOG</span><h2>進行ログ</h2></div>
+        <span id="stepCount" class="step-count">0手</span></div>
+      <ol id="history" class="history"><li class="empty">推奨手を実行すると履歴が表示されます。</li></ol>
+    </section>
+
+    <footer><p>非公式の練習・判断支援ツールです。ゲーム内の結果を保証するものではありません。</p></footer>
+    <div id="hud" class="hud">
+      <div class="hud-cells" id="hudCells" title="クリックで盤面へ移動"></div>
+      <div class="hud-next" id="hudNext" title="クリックで推奨手へ移動">
+        <span class="hud-kicker" id="hudKicker">次の推奨</span>
+        <b id="hudAction">—</b>
+        <small id="hudNote"></small>
+      </div>
+      <div class="hud-buttons">
+        <button id="hudOff" type="button" hidden></button>
+        <button id="hudApply" type="button">実行した</button>
+        <button id="hudUndo" type="button">1手戻す</button>
+      </div>
+    </div>
+  </main>
+
+  <dialog id="benchmarkDialog" class="modal">
+    <form method="dialog" class="modal-card">
+      <button class="modal-close" value="close" aria-label="閉じる">×</button>
+      <p class="eyebrow">MONTE CARLO VALIDATION</p>
+      <h2>1,000回の大成功率を実測</h2>
+      <p class="modal-lead">同じ基本手順＋AIアドリブを、隠れ基準値・威力乱数・会心・必殺チャージを変えて再現します。固定シードなので結果は再現可能です。</p>
+      <label class="bench-input"><span>開始集中力</span><input id="benchmarkFocus" type="number" value="253" min="150" max="400"></label>
+      <button id="runBenchmark" type="button" class="primary-button">1,000回を実行</button>
+      <div id="benchmarkResult" class="benchmark-result idle"><strong>—</strong><span>まだ実行していません</span></div>
+      <div class="benchmark-scale"><span>0%</span><i><b id="benchmarkBar"></b><em></em></i><span>100%</span></div>
+      <p class="threshold-note">金色の線が目標の70%。</p>
+    </form>
+  </dialog>
+
+<script>(function (root, factory) {
+  const api = factory();
+  if (typeof module === "object" && module.exports) module.exports = api;
+  root.AmatsuyuAI = api;
+})(typeof globalThis !== "undefined" ? globalThis : this, function () {
+  "use strict";
+// 超あまつゆのいと 鍛冶シミュレータ・コア（機構のみ／AI判断は別ファイル）
+// 仕様準拠フラグで「添付版の挙動」と「仕様書どおりの挙動」を切り替えられる。
+
+const LETTERS = ["A", "B", "C", "D", "E", "F"];
+const ZONES = [[180, 190], [245, 251], [150, 156], [180, 190], [180, 190], [245, 251]];
+const GREAT_TOLERANCE = 7;
+const PRIORITY = [1, 0, 0, 1, 1, 0]; // A・D・E = 11幅・会心優先
+
+const VERTICAL_PAIRS = [[0, 2], [2, 4], [1, 3], [3, 5]];
+const HORIZONTAL_PAIRS = [[0, 1], [2, 3], [4, 5]];
+const DIAGONAL_PAIRS = [[0, 3], [1, 2], [2, 5], [3, 4]];
+const QUAD_BLOCKS = [[0, 1, 2, 3], [2, 3, 4, 5]];
+
+const SKILLS = {
+  tataku:    { id: "tataku",    name: "たたく",         cost: 5,  bases: [12, 13, 14, 15, 16, 17, 18], kind: "one" },
+  tekagen:   { id: "tekagen",   name: "てかげん打ち",   cost: 10, bases: [6, 7, 8, 9],                 kind: "one" },
+  nerai:     { id: "nerai",     name: "ねらい打ち",     cost: 16, bases: [12, 13, 14, 15, 16, 17, 18], kind: "one",  aimed: true },
+  jakunerai: { id: "jakunerai", name: "弱ねらい打ち",   cost: 20, bases: [6, 7, 8, 9],                 kind: "one",  aimed: true },
+  jouge:     { id: "jouge",     name: "上下打ち",       cost: 8,  bases: [15, 16, 17, 19, 20, 21, 22], kind: "pair" },
+  jonerai:   { id: "jonerai",   name: "上下ねらい打ち", cost: 25, bases: [15, 16, 17, 19, 20, 21, 22], kind: "pair", aimed: true },
+  sayu:      { id: "sayu",      name: "左右打ち",       cost: 8,  bases: [15, 16, 17, 19, 20, 21, 22], kind: "pair" },
+  naname:    { id: "naname",    name: "ななめ打ち",     cost: 7,  bases: [15, 16, 17, 19, 20, 21, 22], kind: "pair" },
+  yon:       { id: "yon",       name: "4連打ち",        cost: 12, bases: [15, 16, 17, 19, 20, 21, 22], kind: "four" },
+  cho4:      { id: "cho4",      name: "超4連打ち",      cost: 18, bases: [24, 26, 28, 30, 32, 34, 36], kind: "four" },
+  netsu:     { id: "netsu",     name: "熱風おろし",     cost: 6,  bases: [30, 33, 35, 38, 40, 43, 45], kind: "one", tempAfter: -100 },
+  karyoku:   { id: "karyoku",   name: "火力上げ",       cost: 10, utility: true, tempChange: 300 },
+  hiyashi:   { id: "hiyashi",   name: "冷やしこみ",     cost: 12, utility: true, tempChange: -300 },
+  hepa:      { id: "hepa",      name: "ヘパイトスの炎", cost: 0,  utility: true, special: true }
+};
+
+const DEFAULT_CFG = {
+  baseCrit: 0.062,      // 道具会心率
+  aimedCrit: 0.434,     // ねらい系は一律 43.4%
+  legacyCrit: false,    // true: 添付版どおり baseCrit + critBonus(0.60/0.50)
+  errorCap: true,       // 成功範囲内の誤差は min(4, |v-ideal|)
+  chargePerHit: true,   // 必殺チャージ 1%/打撃（false: 3%/手）
+  chargeRate: 0.01,
+  openingCharge: 0.10,
+  allowHiyashi: true
+};
+
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function randInt(rng, min, max) { return min + Math.floor(rng() * (max - min + 1)); }
+
+function calcDamage(base, temp) {
+  const effective = Math.min(2000, Math.max(0, temp));
+  return Math.max(1, Math.ceil(base * (1000 + effective) / 2000));
+}
+function turnEffect(temp, hasActed) {
+  if (!hasActed || temp <= 0 || temp % 200 !== 0) return { multiplier: 1, label: "等倍" };
+  if (temp % 400 === 0) return { multiplier: 2, label: "倍" };
+  return { multiplier: 0.5, label: "半減" };
+}
+function critRate(skill, cfg) {
+  if (skill.utility) return 0;
+  if (cfg.legacyCrit) {
+    const bonus = skill.id === "nerai" || skill.id === "jakunerai" ? 0.60 : skill.id === "jonerai" ? 0.50 : 0;
+    return Math.min(1, cfg.baseCrit + bonus);
+  }
+  return skill.aimed ? cfg.aimedCrit : cfg.baseCrit;
+}
+
+function createState(options) {
+  const o = options || {};
+  const cfg = { ...DEFAULT_CFG, ...(o.cfg || {}) };
+  const rng = o.rng || Math.random;
+  const focus = o.focus == null ? 253 : o.focus;
+  return {
+    cfg,
+    values: [0, 0, 0, 0, 0, 0],
+    ideals: ZONES.map(([lo, hi]) => randInt(rng, lo, hi)),
+    temp: 1000,
+    focus, maxFocus: focus,
+    hasActed: false,
+    step: 0,
+    phase: "fixed",
+    finished: false,
+    history: [],
+    crits: [false, false, false, false, false, false],
+    hepaCharged: rng() < cfg.openingCharge,
+    hepaActive: false
+  };
+}
+function cloneState(s) {
+  return { ...s, values: s.values.slice(), ideals: s.ideals.slice(), crits: s.crits.slice(), history: s.history.slice() };
+}
+function action(skill, targets, reason) {
+  return { skill, targets: (targets || []).slice(), reason: reason || "" };
+}
+
+function applyAction(inputState, inputAction, rng) {
+  const state = cloneState(inputState);
+  const cfg = state.cfg;
+  const random = rng || Math.random;
+  const skill = SKILLS[inputAction.skill];
+  if (!skill) throw new Error("Unknown skill: " + inputAction.skill);
+  if (state.finished || skill.cost > state.focus) return state;
+  const targets = inputAction.targets.slice();
+  const effect = turnEffect(state.temp, state.hasActed);
+  const record = { skill: skill.id, name: skill.name, targets: targets.slice(), temp: state.temp, effect: effect.label, reason: inputAction.reason || "", hits: [] };
+
+  state.focus -= skill.cost;
+  let hitCount = 0;
+  if (skill.utility) {
+    if (skill.special) {
+      state.temp = Math.max(0, state.temp - 50);
+      state.hepaCharged = false;
+      state.hepaActive = true;
+    } else {
+      state.temp = Math.max(0, state.temp + skill.tempChange);
+    }
+  } else {
+    const pCrit = critRate(skill, cfg);
+    for (const idx of targets) {
+      const base = skill.bases[randInt(random, 0, skill.bases.length - 1)];
+      const raw = Math.max(1, Math.ceil(calcDamage(base, state.temp) * effect.multiplier));
+      const crit = state.hepaActive || random() < pCrit;
+      const before = state.values[idx];
+      let damage = raw, snapped = false;
+      if (crit) {
+        if (before >= state.ideals[idx]) damage = 0;
+        else if (before + raw * 2 >= state.ideals[idx]) { damage = state.ideals[idx] - before; snapped = true; }
+        else damage = raw * 2;
+      }
+      state.values[idx] = before + damage;
+      if (snapped) state.crits[idx] = true;
+      record.hits.push({ idx, before, damage, after: state.values[idx], crit, snapped });
+      hitCount++;
+    }
+    state.temp = Math.max(0, state.temp - 50 + (skill.tempAfter || 0));
+    if (state.hepaActive) state.hepaActive = false;
+  }
+  // 必殺チャージ
+  if (!state.hepaCharged && !state.hepaActive) {
+    if (cfg.chargePerHit) {
+      for (let h = 0; h < hitCount; h++) { if (random() < cfg.chargeRate) { state.hepaCharged = true; break; } }
+    } else if (random() < cfg.chargeRate) state.hepaCharged = true;
+  }
+  state.hasActed = true;
+  state.step += 1;
+  state.history.push(record);
+  if (state.focus < 5 || state.temp <= 0) state.finished = true;
+  return state;
+}
+
+function grade(state) {
+  const cap = state.cfg.errorCap ? 4 : Infinity;
+  let totalError = 0;
+  const detail = state.values.map((v, i) => {
+    const inZone = v >= ZONES[i][0] && v <= ZONES[i][1];
+    const error = inZone ? Math.min(cap, Math.abs(v - state.ideals[i]))
+      : 99 + Math.min(Math.abs(v - ZONES[i][0]), Math.abs(v - ZONES[i][1]));
+    totalError += error;
+    return { letter: LETTERS[i], value: v, ideal: state.ideals[i], inZone, error };
+  });
+  return { great: detail.every((d) => d.inZone) && totalError <= GREAT_TOLERANCE, totalError, detail, allIn: detail.every((d) => d.inZone) };
+}
+
+
+
+  const C = { LETTERS, ZONES, GREAT_TOLERANCE, PRIORITY, SKILLS, DEFAULT_CFG,
+    VERTICAL_PAIRS, HORIZONTAL_PAIRS, DIAGONAL_PAIRS, QUAD_BLOCKS,
+    mulberry32, randInt, calcDamage, turnEffect, critRate,
+    createState, cloneState, action, applyAction, grade };
+  const FIXED = [
+    action("karyoku", [], "基本手順1：火力上げ（1回目）"),
+    action("karyoku", [], "基本手順1：火力上げ（2回目）"),
+    action("netsu", [0], "1600℃の倍ターンでAに熱風おろし"),
+    action("karyoku", [], "基本手順2：火力上げ（1回目）"),
+    action("karyoku", [], "基本手順2：火力上げ（2回目）"),
+    action("naname", [3, 4], "D・Eにななめ打ち"),
+    action("cho4", [2, 3, 4, 5], "2000℃の倍ターンで下4マスに超4連打ち"),
+    action("tataku", [1], "Bにたたく"),
+    action("netsu", [1], "Bに熱風おろし"),
+    action("netsu", [], "B・Fの進んでいない方に熱風おろし（1回目）"),
+    action("netsu", [], "1600℃の倍ターンでB・Fの進んでいない方に熱風おろし（2回目）")
+  ];
+
+  function resolveTargets(state, a) {
+    if (a.skill === "netsu" && a.targets.length === 0) {
+      const preferred = [1, 5].sort((x, y) => state.values[x] - state.values[y]);
+      const heatMax = Math.ceil(calcDamage(45, state.temp) * turnEffect(state.temp, state.hasActed).multiplier);
+      const safePreferred = preferred.find((i) => state.values[i] + heatMax <= ZONES[i][1]);
+      if (safePreferred != null) return [safePreferred];
+      const alternate = [0, 2, 3, 4].filter((i) => state.values[i] + heatMax <= ZONES[i][1])
+        .sort((x, y) => (ZONES[y][0] - state.values[y]) - (ZONES[x][0] - state.values[x]))[0];
+      return [alternate == null ? preferred[0] : alternate];
+    }
+    return a.targets;
+  }
+
+
+  // 案N：必殺を1650℃で撃ち、1600℃の倍ターンでCDEF超4連の確定会心を狙う線
+  const FIXED_N = [
+    action("karyoku", [], "基本手順1：火力上げ（1回目）"),
+    action("karyoku", [], "基本手順1：火力上げ（2回目）"),
+    action("netsu", [0], "1600℃の倍ターンでAに熱風おろし"),
+    action("karyoku", [], "基本手順2：火力上げ（1回目）"),
+    action("karyoku", [], "基本手順2：火力上げ（2回目）"),
+    action("naname", [3, 4], "D・Eにななめ打ち"),
+    action("cho4", [2, 3, 4, 5], "2000℃の倍ターンで下4マスに超4連打ち"),
+    action("tataku", [0], "Aにたたく"),
+    action("netsu", [5], "Fに熱風おろし")
+  ];
+
+  // 案M：従来どおりBを育てたうえで、10手目以降をAIに任せる
+  const FIXED_M = FIXED.slice(0, 9);
+  // 案L：10手目までは従来どおり
+  const FIXED_L = FIXED.slice(0, 10);
+
+// 新AI（V3）: 隠れ基準値を参照せず、表示盤面のみで
+//  (1) 倍ターン(400の倍数)を狙う温度スケジュール
+//  (2) ねらい系の「会心成立バンド」への位置合わせ
+//  (3) 各マスの最終誤差分布を解析計算して P(合計誤差<=7) を最大化
+
+const TOL = C.GREAT_TOLERANCE;
+const EMAX = 4;
+
+const P = {
+  wFocusShort: 30,
+  effDamage: 5.2,
+  finishCost: 7,
+  aimCost: 16,
+  aimSnap: 0.434,
+  baseSnapFuture: 0.04,
+  costWeight: 0.5,
+  bandBonus: 26,       // 次の倍ターンの会心成立バンドに入っている未会心マスへの加点
+  bandPriority: 1.6,   // A・D・E の倍率
+  offSchedule: 55,     // 倍ターンを飛び越す手へのペナルティ
+  doubleTurnAim: 45,   // 倍ターンで ねらい系を撃つことへの加点
+  doubleTurnWaste: 30, // 倍ターンをねらい以外で消費するペナルティ
+  minSnapP: 0.12,      // これ未満の会心期待しかないねらい系は禁止
+  hepaHold: 55,
+  aimHitCost: 15,      // ねらい1打撃あたりの実質集中力
+  maxShots: 2.5,
+  effRatio: 0.78,
+  arriveDouble: 22,    // 会心成立バンドのマスがある状態で倍ターンに着地する加点
+  arriveHalf: 14,      // 微調整が必要な状態で半減ターンに着地する加点
+  fineGap: 14,         // 「微調整が必要」とみなす残りギャップ
+  tekagenPenalty: 12,  // てかげん打ちの抑制
+  hepaReady: 30,       // 超4連で確定本会心にできるマス数への加点
+  forceCho4: true,     // 確定会心中は必ず4連系を使う
+  reachMid: 6,         // 収束確率のロジスティック中心
+  reachGap: 0.02,      // 残りギャップによる悲観補正
+  reachSpread: 14,
+  smartHeatTarget: false,
+  maxFailP: 0.10,        // 温度・集中力に余裕がある間のはみ出し許容確率
+  maxFailPLate: 0.34,    // 追い込まれた局面での許容確率
+  riskTempFloor: 350,
+  riskFocusFloor: 26,
+  arriveAim: 16,        // 次ターンにねらいの組が成立することへの加点
+  pairMaxFail: 0.06,
+  pairSnapMin: 0.30,
+  hepaOffBeat: 600,     // 倍ターン+50℃以外でヘパイトスを撃つことへのペナルティ
+  arriveHepa: 60,       // 必殺チャージ中に「倍ターン+50℃」へ着地することへの加点
+  hepaBoost: 0,         // 火力上げで上の倍ターンへ戻り、確定本会心マス数を増やす価値
+  wTempShort: 30,       // 温度が足りない（0℃で強制終了する）ことへのペナルティ
+  hitsPerAction: 1.45,  // 1手あたりの平均打撃数
+  hepaHoldBack: 0,     // 確定会心で止める予定のマスを、先に成功範囲へ入れてしまう手への抑制
+  chargeValue: 0        // 必殺チャージ1回の価値（打撃数×1%で加点）
+};
+
+/* ---------- テーブル ---------- */
+function errAt(i, v) {
+  const [lo, hi] = ZONES[i]; const n = hi - lo + 1; const d = [0, 0, 0, 0, 0];
+  for (let id = lo; id <= hi; id++) d[Math.min(EMAX, Math.abs(v - id))] += 1 / n;
+  return d;
+}
+const ERR_AT = ZONES.map(([lo, hi], i) => { const t = {}; for (let v = lo; v <= hi; v++) t[v] = errAt(i, v); return t; });
+const CENTER_DIST = ZONES.map(([lo, hi], i) => {
+  const c = Math.round((lo + hi) / 2); const out = [0, 0, 0, 0, 0];
+  for (const v of [c - 1, c, c + 1]) { const d = errAt(i, v); for (let k = 0; k < 5; k++) out[k] += d[k] / 3; }
+  return out;
+});
+const SNAP_DIST = [1, 0, 0, 0, 0];
+
+function rawList(skill, temp, mult) { return skill.bases.map((b) => Math.max(1, Math.ceil(C.calcDamage(b, temp) * mult))); }
+
+/* ---------- 温度スケジュール ---------- */
+function nextDouble(temp) { return Math.floor(temp / 400) * 400; }
+function unitsTo(temp) { return (temp - nextDouble(temp)) / 50; }
+function unitCost(id) {
+  if (id === "karyoku") return -6;
+  if (id === "hiyashi") return 6;
+  if (id === "netsu") return 3;
+  return 1;
+}
+
+/* ---------- 会心成立バンド ---------- */
+const BAND_CACHE = new Map();
+function aimBand(skillId, temp, mult, i) {
+  const key = skillId + "|" + temp + "|" + mult + "|" + i;
+  let b = BAND_CACHE.get(key);
+  if (b) return b;
+  const R = rawList(SKILLS[skillId], temp, mult);
+  const rmin = Math.min(...R), rmax = Math.max(...R);
+  const [lo, hi] = ZONES[i];
+  b = { critLo: hi - 2 * rmin, safeHi: Math.min(hi - rmax, lo - 1), rmin, rmax };
+  BAND_CACHE.set(key, b);
+  return b;
+}
+
+/* ---------- 打撃後の1マス誤差分布 ---------- */
+const HIT_CACHE = new Map();
+function hitOutcome(skillId, temp, mult, i, v, pCrit) {
+  const key = skillId + "|" + temp + "|" + mult + "|" + i + "|" + v + "|" + pCrit;
+  let c = HIT_CACHE.get(key);
+  if (c) return c;
+  const R = rawList(SKILLS[skillId], temp, mult);
+  const [lo, hi] = ZONES[i]; const nI = hi - lo + 1, nR = R.length;
+  const err = [0, 0, 0, 0, 0];
+  let failP = 0, belowP = 0, belowVal = 0, snapP = 0;
+  const acc = (v2, ideal, w) => {
+    if (v2 > hi) { failP += w; return; }
+    if (v2 < lo) { belowP += w; belowVal += w * v2; return; }
+    err[Math.min(EMAX, Math.abs(v2 - ideal))] += w;
+  };
+  for (let ideal = lo; ideal <= hi; ideal++) {
+    for (const raw of R) {
+      const wc = pCrit / (nI * nR), wn = (1 - pCrit) / (nI * nR);
+      if (wc > 0) {
+        let v2;
+        if (v >= ideal) v2 = v;
+        else if (v + 2 * raw >= ideal) { v2 = ideal; snapP += wc; }
+        else v2 = v + 2 * raw;
+        acc(v2, ideal, wc);
+      }
+      if (wn > 0) acc(v + raw, ideal, wn);
+    }
+  }
+  c = { err, failP, belowP, snapP, belowAvg: belowP > 0 ? belowVal / belowP : v };
+  HIT_CACHE.set(key, c);
+  return c;
+}
+
+/* ---------- 将来予測 ---------- */
+function canStillAim(i, v, temp) {
+  for (let t = nextDouble(temp); t >= 400; t -= 400) {
+    const b = aimBand("jonerai", t, 2, i);
+    if (v <= b.safeHi) return true;
+  }
+  const b2 = aimBand("nerai", Math.max(200, temp - 100), 1, i);
+  return v <= b2.safeHi;
+}
+function meanOf(d) { let m = 0; for (let k = 0; k < 5; k++) m += k * d[k]; return m; }
+// 余剰集中力 = 将来のねらい試行回数。期待誤差の大きいマスへ優先配分する。
+function snapPlan(values, crits, slack, temp, tempSlack) {
+  const out = [0, 0, 0, 0, 0, 0];
+  let shots = Math.max(0, slack) / P.aimHitCost;
+  // ねらいも1手＝50℃を消費するので、温度の余裕でも上限がかかる
+  if (tempSlack != null) shots = Math.min(shots, Math.max(0, tempSlack) / 50);
+  if (shots <= 0) return out;
+  const w = [0, 0, 0, 0, 0, 0]; let tot = 0;
+  for (let i = 0; i < 6; i++) {
+    if (crits[i]) continue;
+    const [lo, hi] = ZONES[i]; const v = values[i];
+    if (v > hi) continue;
+    if (!canStillAim(i, v, temp) && v < lo) continue;
+    const base = v >= lo ? errAt(i, v) : CENTER_DIST[i];
+    w[i] = meanOf(base) * (PRIORITY[i] ? P.bandPriority : 1); tot += w[i];
+  }
+  if (tot <= 0) return out;
+  for (let i = 0; i < 6; i++) {
+    if (!w[i]) continue;
+    const n = Math.min(P.maxShots, shots * w[i] / tot);
+    out[i] = 1 - Math.pow(1 - P.aimSnap, n);
+  }
+  return out;
+}
+function mixSnap(d, p) { return d.map((x, k) => (k === 0 ? p + (1 - p) * x : (1 - p) * x)); }
+// まだ成功範囲外のマスが「本当に範囲内へ収まる確率」。
+// 余剰集中力が薄いほど、また残りギャップが大きいほど失敗しやすいと見積もる。
+function reachProb(gap, slack, temp) {
+  const x = (slack - P.reachMid - gap * P.reachGap) / P.reachSpread;
+  return 1 / (1 + Math.exp(-x));
+}
+function predLater(i, v, slack, temp, pSnap) {
+  const [lo] = ZONES[i];
+  if (v >= lo) return mixSnap(errAt(i, v), pSnap || 0);
+  if (slack < 0) return null;
+  const pr = reachProb(lo - v, slack, temp);
+  const d = mixSnap(CENTER_DIST[i], pSnap == null ? P.baseSnapFuture : pSnap);
+  return d.map((x) => x * pr); // 欠損分が「範囲外に終わる確率」
+}
+function effDamage(temp) {
+  const avg = 37.71 * (1000 + Math.min(2000, Math.max(0, temp))) / 2000;
+  return Math.max(2.2, (avg / 6) * P.effRatio);
+}
+// 温度は1手ごとに最低50℃減り、0℃で強制終了する。
+// 残りのマスを仕上げるのに何手（＝何℃）必要かを見積もる。
+function avgHit(temp) {
+  return Math.max(4, 20.5 * (1000 + Math.min(2000, Math.max(0, temp))) / 2000);
+}
+function needTempFor(values, crits, temp) {
+  let hits = 0; const a = avgHit(temp);
+  for (let i = 0; i < 6; i++) {
+    if (crits[i]) continue;
+    const [lo, hi] = ZONES[i]; const v = values[i];
+    if (v > hi) return Infinity;
+    if (v >= lo) continue;
+    hits += Math.max(1, Math.ceil((lo - v) / a));
+  }
+  if (!hits) return 0;
+  return (hits / P.hitsPerAction) * 50;
+}
+function needFocusFor(values, crits, temp) {
+  let need = 0; const eff = effDamage(temp);
+  for (let i = 0; i < 6; i++) {
+    if (crits[i]) continue;
+    const [lo, hi] = ZONES[i]; const v = values[i];
+    if (v > hi) return Infinity;
+    if (v >= lo) continue;
+    need += (lo - v) / eff + P.finishCost;
+  }
+  return need;
+}
+function convolve(dists) {
+  let acc = [1];
+  for (const d of dists) {
+    if (!d) return 0;
+    const out = new Array(TOL + 2).fill(0);
+    for (let a = 0; a < acc.length; a++) {
+      const pa = acc[a]; if (!pa) continue;
+      for (let b = 0; b < 5; b++) { const pb = d[b]; if (!pb) continue; out[Math.min(a + b, TOL + 1)] += pa * pb; }
+    }
+    acc = out;
+  }
+  let p = 0; for (let k = 0; k <= TOL; k++) p += acc[k] || 0;
+  return p;
+}
+
+/* ---------- 盤面評価 ---------- */
+function bandScoreOf(values, crits, temp) {
+  const t = nextDouble(temp);
+  if (t < 400) return 0;
+  let s = 0;
+  for (let i = 0; i < 6; i++) {
+    if (crits[i] || values[i] >= ZONES[i][0]) continue;
+    const b = aimBand("jonerai", t, 2, i);
+    if (values[i] >= b.critLo && values[i] <= b.safeHi) s += P.bandBonus * (PRIORITY[i] ? P.bandPriority : 1);
+    else if (values[i] <= b.safeHi) s += P.bandBonus * 0.25 * (PRIORITY[i] ? P.bandPriority : 1);
+  }
+  return s;
+}
+function boardScore(values, crits, focus, temp) {
+  const need = needFocusFor(values, crits, temp);
+  if (!isFinite(need)) return -2000;
+  const needT = needTempFor(values, crits, temp);
+  if (!isFinite(needT)) return -2000;
+  const slack = focus - need, tempSlack = temp - needT;
+  const plan = snapPlan(values, crits, slack, temp, tempSlack);
+  const dists = [];
+  for (let i = 0; i < 6; i++) {
+    if (crits[i]) { dists.push(SNAP_DIST); continue; }
+    const [lo, hi] = ZONES[i]; const v = values[i];
+    if (v > hi) return -2000;
+    dists.push(predLater(i, v, slack, temp, plan[i]));
+  }
+  let sc = 1000 * convolve(dists);
+  if (slack < 0) sc -= (-slack) * P.wFocusShort;
+  if (tempSlack < 0) sc -= (-tempSlack / 50) * P.wTempShort;
+  return sc + bandScoreOf(values, crits, temp);
+}
+
+// 次のターンに「上下ねらいの組」または「単体ねらい」がどれだけ成立するか。
+// 倍ターンだけでなく半減ターン（範囲内マスの誤差圧縮に最適）も評価する。
+function aimReadyAt(values, crits, temp) {
+  if (temp <= 0) return 0;
+  const mult = C.turnEffect(temp, true).multiplier;
+  const pc = 0.434;
+  const info = [];
+  for (let i = 0; i < 6; i++) {
+    if (crits[i] || values[i] > ZONES[i][1]) { info.push(null); continue; }
+    const o = hitOutcome("jonerai", temp, mult, i, values[i], pc);
+    info.push(o);
+  }
+  let best = 0;
+  for (const [a, b] of VERTICAL_PAIRS) {
+    const oa = info[a], ob = info[b];
+    if (!oa || !ob) continue;
+    if (oa.failP > P.pairMaxFail || ob.failP > P.pairMaxFail) continue;
+    const w = (oa.snapP >= P.pairSnapMin ? (PRIORITY[a] ? P.bandPriority : 1) : 0)
+            + (ob.snapP >= P.pairSnapMin ? (PRIORITY[b] ? P.bandPriority : 1) : 0);
+    if (w > best) best = w;
+  }
+  for (let i = 0; i < 6; i++) {
+    if (crits[i] || values[i] > ZONES[i][1]) continue;
+    const o = hitOutcome("nerai", temp, mult, i, values[i], pc);
+    if (o.failP <= P.pairMaxFail && o.snapP >= P.pairSnapMin) {
+      const w = (PRIORITY[i] ? P.bandPriority : 1) * 0.55;
+      if (w > best) best = w;
+    }
+  }
+  return best;
+}
+
+/* ---------- 必殺の使いどき ---------- */
+// ヘパイトスは温度を50℃下げるので、「倍ターン+50℃」で撃つと
+// 次の超4連が倍ターンの確定会心になり、確定本会心の下限値が最も広がる。
+function isHepaFireTemp(temp) { return temp >= 450 && (temp - 50) % 400 === 0; }
+// その温度以下で最も近い「倍ターン+50℃」
+function fireTempAtOrBelow(t) {
+  let f = Math.floor((t - 50) / 400) * 400 + 50;
+  if (f > t) f -= 400;
+  return f;
+}
+// 指定温度・倍率で超4連を撃った場合に、確実に本会心へ止められるマス数
+function blockSnapCount(values, crits, temp, mult) {
+  let best = 0, bestBlk = null;
+  for (const blk of QUAD_BLOCKS) {
+    let n = 0, dead = false;
+    for (const i of blk) {
+      const [lo, hi] = ZONES[i]; const v = values[i];
+      if (v > hi) { dead = true; break; }
+      if (crits[i]) { n += 1; continue; }
+      const b = aimBand("cho4", temp, mult, i);
+      if (v >= b.critLo && v < lo) n += 1;
+      else if (v >= lo) n += 0.5;
+    }
+    if (!dead && n > best) { best = n; bestBlk = blk; }
+  }
+  return { count: best, block: bestBlk };
+}
+function hepaReadiness(state) {
+  const t = state.temp - 50;
+  const r = blockSnapCount(state.values, state.crits, t, C.turnEffect(t, true).multiplier);
+  let best = r.count;
+  if (state.focus < 30 || state.temp <= 500) best = Math.max(best, 2);
+  return best;
+}
+
+/* ---------- 候補評価 ---------- */
+function evalAction(state, act) {
+  const skill = SKILLS[act.skill];
+  const focusAfter = state.focus - skill.cost;
+  if (focusAfter < 0) return -Infinity;
+  const U = state.hasActed ? unitsTo(state.temp) : 5;
+  const uc = unitCost(act.skill);
+  let sched = 0;
+  if (state.temp >= 400) {
+    if (U === 0) sched += skill.aimed ? P.doubleTurnAim : -P.doubleTurnWaste;
+    else if (uc > U) sched -= P.offSchedule * (uc - U);
+  }
+  if (act.skill === "tekagen") sched -= P.tekagenPenalty;
+  {
+    const t2 = skill.utility
+      ? (skill.special ? Math.max(0, state.temp - 50) : Math.max(0, state.temp + skill.tempChange))
+      : Math.max(0, state.temp - 50 + (skill.tempAfter || 0));
+    const proj = state.values.slice();
+    if (!skill.utility) {
+      const eff0 = C.turnEffect(state.temp, state.hasActed);
+      for (const i of act.targets) {
+        const R = rawList(skill, state.temp, eff0.multiplier);
+        proj[i] = state.values[i] + Math.round((Math.min(...R) + Math.max(...R)) / 2);
+      }
+    }
+    if (state.focus - skill.cost >= SKILLS.jonerai.cost) {
+      sched += P.arriveAim * aimReadyAt(proj, state.crits, t2);
+    }
+    if (state.hepaCharged && !state.hepaActive && act.skill !== "hepa"
+        && state.focus - skill.cost >= SKILLS.cho4.cost && isHepaFireTemp(t2)) {
+      const r = blockSnapCount(proj, state.crits, t2 - 50, C.turnEffect(t2 - 50, true).multiplier);
+      sched += P.arriveHepa * r.count;
+    }
+  }
+
+  if (skill.utility) {
+    const temp2 = skill.special ? Math.max(0, state.temp - 50) : Math.max(0, state.temp + skill.tempChange);
+    let v = boardScore(state.values, state.crits, focusAfter, temp2);
+    if (act.skill === "karyoku" && state.hepaCharged && !state.hepaActive && P.hepaBoost) {
+      const fu = fireTempAtOrBelow(temp2), fn = fireTempAtOrBelow(state.temp);
+      const a = fu >= 450 ? blockSnapCount(state.values, state.crits, fu - 50, C.turnEffect(fu - 50, true).multiplier).count : 0;
+      const b = fn >= 450 ? blockSnapCount(state.values, state.crits, fn - 50, C.turnEffect(fn - 50, true).multiplier).count : 0;
+      v += P.hepaBoost * Math.max(0, a - b);
+    }
+    if (skill.special) {
+      const ready = hepaReadiness(state);
+      v += P.hepaHold + ready * P.hepaReady;
+      const urgent = state.focus < SKILLS.cho4.cost + 12 || state.temp <= 450;
+      if (!isHepaFireTemp(state.temp) && !urgent) v -= P.hepaOffBeat;
+    }
+    return v - skill.cost * P.costWeight + sched;
+  }
+
+  const effect = C.turnEffect(state.temp, state.hasActed);
+  const pCrit = state.hepaActive ? 1 : C.critRate(skill, state.cfg);
+  const temp2 = Math.max(0, state.temp - 50 + (skill.tempAfter || 0));
+  const per = act.targets.map((i) => hitOutcome(act.skill, state.temp, effect.multiplier, i, state.values[i], pCrit));
+  // はみ出しは盤面全体の即死。温度に余裕があるうちは高リスクな一撃を禁止する。
+  if (!state.hepaActive) {
+    const worst = Math.max(...per.map((o) => o.failP));
+    const room = state.temp >= P.riskTempFloor && state.focus >= P.riskFocusFloor;
+    if (worst > (room ? P.maxFailP : P.maxFailPLate)) return -Infinity;
+  }
+  if (skill.aimed && !state.hepaActive) {
+    const best = Math.max(...per.map((o) => o.snapP));
+    if (best < P.minSnapP) return -Infinity;
+  }
+
+  const projValues = state.values.slice();
+  const projCrits = state.crits.slice();
+  act.targets.forEach((i, k) => {
+    const o = per[k];
+    projValues[i] = o.belowP > 0.5 ? Math.round(o.belowAvg) : ZONES[i][0];
+    if (o.snapP > 0.5) projCrits[i] = true;
+  });
+  const need = needFocusFor(projValues, projCrits, temp2);
+  if (!isFinite(need)) return -2000;
+  const needT = needTempFor(projValues, projCrits, temp2);
+  if (!isFinite(needT)) return -2000;
+  const slack = focusAfter - need, tempSlack = temp2 - needT;
+  const plan = snapPlan(projValues, projCrits, slack, temp2, tempSlack);
+
+  const dists = [];
+  for (let i = 0; i < 6; i++) {
+    const k = act.targets.indexOf(i);
+    if (k < 0) {
+      if (state.crits[i]) { dists.push(SNAP_DIST); continue; }
+      const [lo, hi] = ZONES[i]; const v = state.values[i];
+      if (v > hi) return -2000;
+      dists.push(predLater(i, v, slack, temp2, plan[i]));
+      continue;
+    }
+    const o = per[k];
+    const later = predLater(i, Math.round(o.belowAvg), slack, temp2, plan[i]);
+    const inz = mixSnap(o.err, 0);
+    const d = [0, 0, 0, 0, 0];
+    for (let e = 0; e < 5; e++) d[e] = o.err[e] + (later ? o.belowP * later[e] : 0);
+    // 成功範囲に入ったまま未会心のマスは、後からもう一度ねらえる
+    const inZoneMass = o.err.reduce((a, b) => a + b, 0);
+    if (inZoneMass > 0 && plan[i] > 0 && !projCrits[i]) {
+      const boost = plan[i];
+      for (let e = 4; e >= 1; e--) d[e] -= o.err[e] * boost;
+      d[0] += (inZoneMass - o.err[0]) * boost;
+    }
+    dists.push(d);
+  }
+  let v = 1000 * convolve(dists);
+  if (slack < 0) v -= (-slack) * P.wFocusShort;
+  if (tempSlack < 0) v -= (-tempSlack / 50) * P.wTempShort;
+  v -= skill.cost * P.costWeight;
+  v += bandScoreOf(projValues, projCrits, temp2);
+  // 必殺チャージ中は、確定会心で止める予定のマスを成功範囲へ入れてしまわない
+  if (state.hepaCharged && !state.hepaActive && P.hepaHoldBack) {
+    const fireT = state.temp - (state.temp - 50) % 400 - 400 + 50;
+    const t = (isHepaFireTemp(state.temp) ? state.temp : Math.max(450, fireT)) - 50;
+    const plan = blockSnapCount(state.values, state.crits, t, C.turnEffect(t, true).multiplier);
+    if (plan.block) {
+      act.targets.forEach((i, k) => {
+        if (plan.block.indexOf(i) < 0) return;
+        if (state.crits[i] || state.values[i] >= ZONES[i][0]) return;
+        v -= P.hepaHoldBack * (1 - per[k].belowP);
+      });
+    }
+  }
+  // チャージ前は打撃数が多いほど必殺を引ける（1打撃ごとに判定）
+  if (!state.hepaCharged && !state.hepaActive && P.chargeValue) {
+    v += P.chargeValue * act.targets.length * (state.cfg.chargePerHit ? state.cfg.chargeRate : 0);
+  }
+  return v + sched;
+}
+
+/* ---------- 候補列挙 ---------- */
+function enumerate(state) {
+  const out = [];
+  const free = (i) => (!state.crits[i] && state.values[i] <= ZONES[i][1]) || state.hepaActive;
+  const add = (id, targets, reason) => {
+    const s = SKILLS[id];
+    if (!s || s.cost > state.focus) return;
+    if (targets.some((i) => !free(i))) return;
+    out.push(C.action(id, targets, reason));
+  };
+  for (let i = 0; i < 6; i++) {
+    if (state.crits[i]) continue;
+    const [lo, hi] = ZONES[i];
+    if (state.values[i] > hi) continue;
+    add("tataku", [i], `${LETTERS[i]}を調整`);
+    add("tekagen", [i], `${LETTERS[i]}を微調整`);
+    add("netsu", [i], `${LETTERS[i]}を進めつつ温度を150℃下げる`);
+    add("nerai", [i], `${LETTERS[i]}をねらい打ち`);
+    add("jakunerai", [i], `${LETTERS[i]}を弱ねらい打ち（成功範囲内の誤差圧縮）`);
+  }
+  for (const p of VERTICAL_PAIRS) { add("jouge", p, `${LETTERS[p[0]]}・${LETTERS[p[1]]}に上下打ち`); add("jonerai", p, `${LETTERS[p[0]]}・${LETTERS[p[1]]}に上下ねらい打ち`); }
+  for (const p of HORIZONTAL_PAIRS) add("sayu", p, `${LETTERS[p[0]]}・${LETTERS[p[1]]}に左右打ち`);
+  for (const p of DIAGONAL_PAIRS) add("naname", p, `${LETTERS[p[0]]}・${LETTERS[p[1]]}にななめ打ち`);
+  for (const b of QUAD_BLOCKS) { add("yon", b, `${b.map((i) => LETTERS[i]).join("・")}に4連打ち`); add("cho4", b, `${b.map((i) => LETTERS[i]).join("・")}に超4連打ち`); }
+  if (state.cfg.allowHiyashi && state.temp >= 350) out.push(C.action("hiyashi", [], "冷やしこみで温度を300℃下げる"));
+  if (P.hepaBoost && state.hepaCharged && !state.hepaActive && state.temp + 300 <= 2000 && state.focus >= SKILLS.karyoku.cost + SKILLS.cho4.cost + 10)
+    out.push(C.action("karyoku", [], "火力上げで温度を上げ、確定会心を活かせる倍ターンへ戻す"));
+  if (state.hepaCharged && !state.hepaActive) out.push(C.action("hepa", [], "ヘパイトスの炎で次の打撃を確定会心にする"));
+  return out;
+}
+
+function fixedStep(state) {
+  const a = FIXED[state.step];
+  if (a.skill !== "netsu") return a;
+  let tgt;
+  if (a.targets.length) tgt = a.targets;
+  else if (P.smartHeatTarget) {
+    // 「B・Fの進んでいない方」ではなく、盤面評価で良い方へ熱風を落とす
+    let bi = null, bs = -Infinity;
+    for (const i of [1, 5, 0, 2, 3, 4]) {
+      if (state.crits[i] || state.values[i] > ZONES[i][1]) continue;
+      const sc = evalAction(state, C.action("netsu", [i], ""));
+      if (sc > bs) { bs = sc; bi = i; }
+    }
+    tgt = bi == null ? resolveTargets(state, a) : [bi];
+  } else tgt = resolveTargets(state, a);
+  const effect = C.turnEffect(state.temp, state.hasActed);
+  const rmax = Math.max(...rawList(SKILLS.netsu, state.temp, effect.multiplier));
+  const safe = tgt.filter((i) => state.values[i] + rmax <= ZONES[i][1] && !state.crits[i]);
+  if (safe.length) return { ...a, targets: safe };
+  const alt = enumerate(state).filter((c) => c.skill !== "netsu" && c.skill !== "hepa");
+  let best = null, bs = -Infinity;
+  for (const c of alt) { const s = evalAction(state, c); if (s > bs) { bs = s; best = c; } }
+  return best ? { ...best, reason: "倍熱風では必ずはみ出すため、安全な代替手に変更" } : { ...a, targets: tgt };
+}
+
+function recommend(state) {
+  if (state.finished) return { skill: "finish", targets: [], reason: "終了" };
+  if (state.step < FIXED.length) return fixedStep(state);
+  if (state.hepaActive && P.forceCho4) {
+    // 確定会心中はダメージが基準値で頭打ちになるため、はみ出しが起こらない。
+    // よって打撃数が最大の技（超4連）を最も会心が乗るブロックへ撃つのが常に有利。
+    const id = SKILLS.cho4.cost <= state.focus ? "cho4" : (SKILLS.yon.cost <= state.focus ? "yon" : null);
+    if (id) {
+      let bb = null, bs = -Infinity;
+      for (const blk of QUAD_BLOCKS) { const sc = evalAction(state, C.action(id, blk, "")); if (sc > bs) { bs = sc; bb = blk; } }
+      if (bb) return C.action(id, bb, `確定会心を${bb.map((i) => LETTERS[i]).join("・")}の${SKILLS[id].name}に使用`);
+    }
+  }
+  const cands = enumerate(state);
+  let best = null, bs = -Infinity;
+  for (const c of cands) { const s = evalAction(state, c); if (s > bs) { bs = s; best = c; } }
+  const allIn = state.values.every((v, i) => v >= ZONES[i][0] && v <= ZONES[i][1]);
+  const stopVal = allIn ? 1000 * convolve(state.values.map((v, i) => (state.crits[i] ? SNAP_DIST : errAt(i, v)))) : -2000;
+  if (!best || stopVal >= bs) return { skill: "finish", targets: [], reason: "全マスが成功範囲。これ以上は誤差が悪化するためしあげる" };
+  return best;
+}
+
+
+
+  Object.assign(P, {"wFocusShort": 15, "effDamage": 5.2, "finishCost": 7, "aimCost": 16, "aimSnap": 0.434, "baseSnapFuture": 0.04, "costWeight": 0.5, "bandBonus": 26, "bandPriority": 2.4, "offSchedule": 55, "doubleTurnAim": 15, "doubleTurnWaste": 10, "minSnapP": 0.18, "hepaHold": 0, "aimHitCost": 20, "maxShots": 2.5, "effRatio": 0.68, "arriveDouble": 8, "arriveHalf": 6, "fineGap": 14, "tekagenPenalty": 12, "hepaReady": 40, "forceCho4": true, "reachMid": -200, "reachGap": 0, "reachSpread": 14, "smartHeatTarget": false, "maxFailP": 0.1, "maxFailPLate": 0.34, "riskTempFloor": 350, "riskFocusFloor": 26, "arriveAim": 55, "pairMaxFail": 0.06, "pairSnapMin": 0.3, "hepaOffBeat": 600, "arriveHepa": 60, "hepaHoldBack": 0, "chargeValue": 0, "hepaBoost": 0, "wTempShort": 400, "hitsPerAction": 1.2});
+
+  function simulateOne(options) {
+    const o = options || {};
+    const rng = o.rng || mulberry32(o.seed == null ? 1 : o.seed);
+    let state = createState({ focus: o.focus, cfg: o.cfg, rng });
+    let safety = 0;
+    while (!state.finished && safety++ < 90) {
+      let rec = recommend(state);
+      if (!rec || rec.skill === "finish") break;
+      if (!SKILLS[rec.skill] || SKILLS[rec.skill].cost > state.focus) break;
+      if (!SKILLS[rec.skill].utility && (!rec.targets || !rec.targets.length)) {
+        rec = { ...rec, targets: resolveTargets(state, rec) };
+        if (!rec.targets.length) break;
+      }
+      state = applyAction(state, rec, rng);
+    }
+    return { state, result: grade(state) };
+  }
+  function benchmark(count, options) {
+    const n = count || 1000, o = options || {};
+    let great = 0, allIn = 0, focusSum = 0, critSum = 0;
+    const skills = {};
+    for (let i = 0; i < n; i++) {
+      const one = simulateOne({ ...o, seed: (o.seed || 20260814) + i * 9973 });
+      if (one.result.great) great++;
+      if (one.result.allIn) allIn++;
+      focusSum += one.state.maxFocus - one.state.focus;
+      critSum += one.state.crits.filter(Boolean).length;
+      for (const h of one.state.history) skills[h.name] = (skills[h.name] || 0) + 1;
+    }
+    const avg = {}; Object.keys(skills).sort().forEach((k) => { avg[k] = skills[k] / n; });
+    return { trials: n, great, rate: great / n, allIn, allInRate: allIn / n,
+      averageFocusUsed: focusSum / n, averageCrits: critSum / n, skills: avg };
+  }
+
+  // ---- 実機サポート用API ----
+  // 「いまの盤面でしあげた場合」の大成功確率（基準値は範囲内一様と仮定）
+  function greatChance(values, crits) {
+    const dists = [];
+    for (let i = 0; i < 6; i++) {
+      if (crits[i]) { dists.push([1, 0, 0, 0, 0]); continue; }
+      const v = values[i];
+      if (v < ZONES[i][0] || v > ZONES[i][1]) return null;
+      dists.push(errAt(i, v));
+    }
+    return convolve(dists);
+  }
+  // 候補手を評価順に並べる（固定手順中は固定手順を返す）
+  function rankMoves(state) {
+    if (state.step < FIXED.length) return [{ action: fixedStep(state), score: null, fixed: true }];
+    const scored = enumerate(state).map((c) => ({ action: c, score: evalAction(state, c) }))
+      .filter((x) => isFinite(x.score));
+    scored.sort((a, b) => b.score - a.score);
+    return scored;
+  }
+  // 推奨手を実機で撃ったときの、対象マスごとの上昇量と本会心確率
+  function forecast(state, act) {
+    const skill = SKILLS[act.skill];
+    if (!skill || skill.utility) return [];
+    const eff = turnEffect(state.temp, state.hasActed);
+    const pCrit = state.hepaActive ? 1 : critRate(skill, state.cfg);
+    const R = skill.bases.map((b) => Math.max(1, Math.ceil(calcDamage(b, state.temp) * eff.multiplier)));
+    const lo = Math.min(...R), hi = Math.max(...R);
+    return act.targets.map((i) => {
+      const o = hitOutcome(act.skill, state.temp, eff.multiplier, i, state.values[i], pCrit);
+      return { idx: i, letter: LETTERS[i], min: lo, max: hi, critMin: lo * 2, critMax: hi * 2,
+        snapP: o.snapP, overP: o.failP, inZoneP: o.err.reduce((a, b) => a + b, 0) };
+    });
+  }
+
+  // 直前の一手で、対象マスが取り得る結果値の一覧（実機の表示と照合するため）
+  function outcomeCandidates(before, act) {
+    const skill = SKILLS[act.skill];
+    if (!skill || skill.utility) return [];
+    const eff = turnEffect(before.temp, before.hasActed);
+    const raws = skill.bases.map((b) => Math.max(1, Math.ceil(calcDamage(b, before.temp) * eff.multiplier)));
+    const uniq = (arr) => Array.from(new Set(arr)).sort((a, b) => a - b);
+    const rawMin = Math.min.apply(null, raws), rawMax = Math.max.apply(null, raws);
+    return act.targets.map((i) => {
+      const v = before.values[i], hi = ZONES[i][1], lo = ZONES[i][0];
+      const normal = uniq(raws.map((r) => v + r));
+      const crit = uniq(raws.map((r) => v + r * 2).filter((x) => x <= hi || v + 1 > hi));
+      // 実機に表示されるダメージ値の候補を、通常／会心すり抜け／本会心の3種類に分けて作る
+      const dmgNormal = uniq(raws);
+      const dmgCrit = uniq(raws.map((r) => r * 2).filter((dd) => v + dd < lo));
+      const dmgSnap = [];
+      const snapLo = Math.max(lo, v + 1), snapHi = Math.min(hi, v + 2 * rawMax);
+      for (let dd = snapLo - v; dd <= snapHi - v; dd++) if (dd > 0) dmgSnap.push(dd);
+      return { idx: i, letter: LETTERS[i], before: v, zone: [lo, hi],
+        normal, crit, snapRange: snapLo <= snapHi ? [snapLo, snapHi] : null,
+        dmgNormal, dmgCrit, dmgSnap, rawMin, rawMax };
+    });
+  }
+  function actionLabel(a) {
+    if (!a) return "";
+    if (a.skill === "finish") return "しあげる";
+    const name = SKILLS[a.skill] ? SKILLS[a.skill].name : a.skill;
+    const t = a.targets && a.targets.length ? " → " + a.targets.map((i) => LETTERS[i]).join("・") : "";
+    return name + t;
+  }
+  return { LETTERS, ZONES, GREAT_TOLERANCE, PRIORITY, SKILLS, DEFAULT_CFG,
+    VERTICAL_PAIRS, FIXED, calcDamage, turnEffect, createState, cloneState,
+    applyAction, recommend, resolveTargets, grade, simulateOne, benchmark,
+    actionLabel, mulberry32, P, aimBand, hitOutcome,
+    greatChance, rankMoves, forecast, convolve, errAt, enumerate, evalAction, fixedStep,
+    outcomeCandidates };
+});</script>
+<script>(function (root, factory) {
+  const api = factory();
+  if (typeof module === "object" && module.exports) module.exports = api;
+  root.ForgeVision = api;
+})(typeof globalThis !== "undefined" ? globalThis : this, function () {
+  "use strict";
+
+  // 鉱石グリッドのパネル内相対位置（実機映像から実測）
+  const GRID = [0.353, 0.204, 0.663, 0.842];
+  const LETTERS = ["A", "B", "C", "D", "E", "F"];
+  const CW = 16, CH = 24;
+
+  const CFG = {
+    darkDelta: 30,      // 局所平均よりこれだけ暗ければ数字候補
+    blueMax: 120,       // 数字は青が低い
+    minEdge: 10.0,       // 数字らしさ（輪郭の強さ）のしきい値
+    minDigits: 2,       // 2桁以上のまとまりだけ採用
+    hMinRatio: 0.17, hMaxRatio: 0.40  // セル高に対する文字高
+  };
+
+  function cellBox(i, W, H, isGrid) {
+    const gx0 = isGrid ? 0 : GRID[0] * W, gy0 = isGrid ? 0 : GRID[1] * H;
+    const gw = isGrid ? W : (GRID[2] - GRID[0]) * W, gh = isGrid ? H : (GRID[3] - GRID[1]) * H;
+    const c = i % 2, r = (i / 2) | 0;
+    return { x0: Math.round(gx0 + gw * c / 2), y0: Math.round(gy0 + gh * r / 3),
+             x1: Math.round(gx0 + gw * (c + 1) / 2), y1: Math.round(gy0 + gh * (r + 1) / 3) };
+  }
+
+  // 箱型平均フィルタ（局所平均）
+  function boxBlur(src, w, h, rad) {
+    const tmp = new Float32Array(w * h), out = new Float32Array(w * h);
+    for (let y = 0; y < h; y++) {
+      let acc = 0;
+      for (let x = -rad; x <= rad; x++) acc += src[y * w + Math.min(w - 1, Math.max(0, x))];
+      for (let x = 0; x < w; x++) {
+        tmp[y * w + x] = acc / (2 * rad + 1);
+        acc -= src[y * w + Math.min(w - 1, Math.max(0, x - rad))];
+        acc += src[y * w + Math.min(w - 1, Math.max(0, x + rad + 1))];
+      }
+    }
+    for (let x = 0; x < w; x++) {
+      let acc = 0;
+      for (let y = -rad; y <= rad; y++) acc += tmp[Math.min(h - 1, Math.max(0, y)) * w + x];
+      for (let y = 0; y < h; y++) {
+        out[y * w + x] = acc / (2 * rad + 1);
+        acc -= tmp[Math.min(h - 1, Math.max(0, y - rad)) * w + x];
+        acc += tmp[Math.min(h - 1, Math.max(0, y + rad + 1)) * w + x];
+      }
+    }
+    return out;
+  }
+
+  function labelBlobs(mask, w, h) {
+    const lab = new Int32Array(w * h).fill(0);
+    const blobs = []; const stack = [];
+    let cur = 0;
+    for (let i = 0; i < w * h; i++) {
+      if (!mask[i] || lab[i]) continue;
+      cur++; stack.length = 0; stack.push(i); lab[i] = cur;
+      let x0 = w, x1 = -1, y0 = h, y1 = -1, n = 0;
+      while (stack.length) {
+        const p = stack.pop(); const px = p % w, py = (p / w) | 0;
+        n++;
+        if (px < x0) x0 = px; if (px > x1) x1 = px;
+        if (py < y0) y0 = py; if (py > y1) y1 = py;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const qx = px + dx, qy = py + dy;
+          if (qx < 0 || qy < 0 || qx >= w || qy >= h) continue;
+          const q = qy * w + qx;
+          if (mask[q] && !lab[q]) { lab[q] = cur; stack.push(q); }
+        }
+      }
+      blobs.push({ x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1, n });
+    }
+    return blobs;
+  }
+
+  // パネル画像（RGBA ImageData 相当）から、あるマスの数字グループを探す
+  function scanCell(panel, i, minDigits) {
+    const W = panel.width, H = panel.height, d = panel.data;
+    const b = cellBox(i, W, H, !!panel.isGrid);
+    const cw = b.x1 - b.x0, ch = b.y1 - b.y0;
+    if (cw < 20 || ch < 20) return [];
+    const G = new Float32Array(cw * ch), B = new Float32Array(cw * ch);
+    for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) {
+      const s = ((b.y0 + y) * W + b.x0 + x) * 4;
+      G[y * cw + x] = d[s + 1]; B[y * cw + x] = d[s + 2];
+    }
+    const loc = boxBlur(G, cw, ch, Math.max(4, Math.round(ch * 0.18)));
+    const mask = new Uint8Array(cw * ch);
+    for (let k = 0; k < cw * ch; k++) mask[k] = (G[k] < loc[k] - CFG.darkDelta && B[k] < CFG.blueMax) ? 1 : 0;
+    const hMin = ch * CFG.hMinRatio, hMax = ch * CFG.hMaxRatio;
+    const digits = labelBlobs(mask, cw, ch)
+      .filter((o) => o.h > hMin && o.h < hMax && o.w > 6 && o.w < o.h * 1.25 && o.n / (o.w * o.h) > 0.28)
+      .sort((p, q) => p.x - q.x);
+    const groups = [];
+    for (const o of digits) {
+      let placed = false;
+      for (const g of groups) {
+        const l = g[g.length - 1];
+        // 同じ数字を構成する桁は、高さも上端もほぼ揃う。ここを緩くすると
+        // 鉱石の光の塊が桁として混ざり、2桁の数字が3桁に化ける。
+        if (Math.abs(o.y - l.y) < l.h * 0.22 && Math.abs(o.h - l.h) < l.h * 0.18
+            && o.x - (l.x + l.w) > -l.h * 0.15 && o.x - (l.x + l.w) < l.h * 0.55) { g.push(o); placed = true; break; }
+      }
+      if (!placed) groups.push([o]);
+    }
+    const out = [];
+    for (const g of groups) {
+      if (g.length < (minDigits || CFG.minDigits) || g.length > 3) continue;
+      const x = g[0].x, y = Math.min.apply(null, g.map((o) => o.y));
+      const wdt = g[g.length - 1].x + g[g.length - 1].w - x, hgt = Math.max.apply(null, g.map((o) => o.h));
+      // 輪郭の強さ（鉱石の模様は勾配が緩い）
+      let edge = 0, cnt = 0;
+      for (let yy = Math.max(1, y - 4); yy < Math.min(ch - 1, y + hgt + 4); yy++)
+        for (let xx = Math.max(1, x - 4); xx < Math.min(cw - 1, x + wdt + 4); xx++) {
+          const gx = G[yy * cw + xx + 1] - G[yy * cw + xx - 1];
+          const gy = G[(yy + 1) * cw + xx] - G[(yy - 1) * cw + xx];
+          edge += Math.sqrt(gx * gx + gy * gy) / 2; cnt++;
+        }
+      edge = cnt ? edge / cnt : 0;
+      if (edge < CFG.minEdge) continue;
+      out.push({ cell: i, letter: LETTERS[i], digits: g, edge,
+        box: { x: b.x0 + x, y: b.y0 + y, w: wdt, h: hgt },
+        vecs: g.map((o) => normalize(G, cw, ch, o)) });
+    }
+    return out;
+  }
+
+  function normalize(G, cw, ch, o) {
+    const x0 = Math.max(0, o.x - 3), x1 = Math.min(cw, o.x + o.w + 3);
+    const y0 = Math.max(0, o.y - 4), y1 = Math.min(ch, o.y + o.h + 4);
+    const w = x1 - x0, h = y1 - y0;
+    const v = new Float32Array(w * h); const srt = [];
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const t = 255 - G[(y0 + y) * cw + x0 + x]; v[y * w + x] = t; srt.push(t); }
+    srt.sort((a, b2) => a - b2);
+    const base = srt[Math.floor(srt.length * 0.10)];
+    let mx = 0;
+    for (let k = 0; k < v.length; k++) { v[k] = Math.max(0, v[k] - base); if (v[k] > mx) mx = v[k]; }
+    if (mx <= 1) return null;
+    let bx0 = w, bx1 = -1, by0 = h, by1 = -1, cnt = 0;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      if (v[y * w + x] / mx > 0.5) { cnt++; if (x < bx0) bx0 = x; if (x > bx1) bx1 = x; if (y < by0) by0 = y; if (y > by1) by1 = y; }
+    }
+    if (cnt < 25 || bx1 < bx0 || by1 < by0) return null;
+    const bw = bx1 - bx0 + 1, bh = by1 - by0 + 1;
+    const nw = Math.max(1, Math.min(CW, Math.round(bw * CH / bh)));
+    const out = new Float32Array(CW * CH), ox = (CW - nw) >> 1;
+    for (let y = 0; y < CH; y++) for (let x = 0; x < nw; x++) {
+      const sx = bx0 + Math.min(bw - 1, Math.floor(x * bw / nw));
+      const sy = by0 + Math.min(bh - 1, Math.floor(y * bh / CH));
+      out[y * CW + ox + x] = v[sy * w + sx] / mx;
+    }
+    let mean = 0; for (let k = 0; k < out.length; k++) mean += out[k];
+    mean /= out.length;
+    let n = 0; for (let k = 0; k < out.length; k++) { out[k] -= mean; n += out[k] * out[k]; }
+    n = Math.sqrt(n);
+    if (n <= 0) return null;
+    for (let k = 0; k < out.length; k++) out[k] /= n;
+    return out;
+  }
+
+  function dot(a, b) { let s = 0; for (let i = 0; i < a.length; i++) s += a[i] * b[i]; return s; }
+
+  // 1桁ぶんの画像が、0〜9のどれにどれだけ似ているか。
+  // 実測では本物の数字は 0.75〜0.99、別の数字との取り違えでも最大 0.88、
+  // 数字ですらない模様は 0.2 前後。0.60 を下回るものは数字ではないと判断する。
+  const MIN_DIGIT = 0.60;
+  const MIN_GROUP = 0.70;
+  const MIN_GROUP_ONE = 0.74;   // 1桁は情報が少ないぶん厳しく
+  function digitScore(store, v) {
+    let bd = -9;
+    for (let d = 0; d <= 9; d++) {
+      const arr = store[d];
+      if (!arr) continue;
+      for (const t of arr) { const sc = dot(v, t); if (sc > bd) bd = sc; }
+    }
+    return bd;
+  }
+  // 鉱石の光が桁として拾われることがあるので、端にある「数字らしくない塊」を落とす
+  function trimNoise(store, vecs) {
+    let cur = vecs.slice(), ds = cur.map((v) => digitScore(store, v));
+    for (let guard = 0; guard < 2 && cur.length > 1; guard++) {
+      let w = 0;
+      for (let k = 1; k < ds.length; k++) if (ds[k] < ds[w]) w = k;
+      if (ds[w] >= MIN_DIGIT) break;
+      if (w !== 0 && w !== cur.length - 1) break; // 真ん中が悪いのは単に読めていない
+      cur = cur.filter((_, k) => k !== w);
+      ds = cur.map((v) => digitScore(store, v));
+    }
+    const min = ds.length ? Math.min.apply(null, ds) : -9;
+    return { vecs: cur, min: min };
+  }
+
+  // 候補リストに縛られず、各桁を 0〜9 から素直に選ぶ読み方。
+  // 候補読みと食い違ったら「候補リストのほうが間違っている」と判断できる。
+  function bestFree(store, vecs) {
+    let text = "", tot = 0;
+    for (const v of vecs) {
+      if (!v) return null;
+      let bd = -9, bc = null;
+      for (let d = 0; d <= 9; d++) {
+        const arr = store[d];
+        if (!arr) continue;
+        for (const t of arr) { const sc = dot(v, t); if (sc > bd) { bd = sc; bc = d; } }
+      }
+      if (bc == null) return null;
+      text += bc; tot += bd;
+    }
+    return { text: text, score: tot / vecs.length };
+  }
+
+  /* ---------- テンプレート辞書 ---------- */
+  function createStore() { const s = {}; for (let d = 0; d <= 9; d++) s[d] = []; return s; }
+  function learn(store, text, vecs) {
+    if (!store || text.length !== vecs.length) return 0;
+    let n = 0;
+    for (let i = 0; i < vecs.length; i++) {
+      if (!vecs[i]) continue;
+      const arr = store[text[i]];
+      if (!arr) continue;
+      if (arr.length >= 8) arr.shift();
+      arr.push(Array.from(vecs[i])); n++;
+    }
+    return n;
+  }
+  function scoreText(store, vecs, text) {
+    let tot = 0;
+    for (let i = 0; i < vecs.length; i++) {
+      const arr = store[text[i]];
+      if (!arr || !arr.length || !vecs[i]) return -9;
+      let b = -2;
+      for (const t of arr) b = Math.max(b, dot(vecs[i], t));
+      tot += b;
+    }
+    return tot / vecs.length;
+  }
+  // 候補値のなかから最もよく一致するものを選ぶ
+  function pickBest(store, vecs, candidates) {
+    let best = null, bs = -9, second = -9;
+    for (const c of candidates) {
+      const s = String(c);
+      if (s.length !== vecs.length) continue;
+      const sc = scoreText(store, vecs, s);
+      if (sc > bs) { second = bs; bs = sc; best = c; }
+      else if (sc > second) second = sc;
+    }
+    return best == null ? null : { value: best, score: bs, second: second };
+  }
+  function readGroup(store, group, candidates) {
+    if (group.vecs.some((v) => !v)) return null;
+    // 先に桁として成立しないものを落とす。ここを通さずに候補と突き合わせると、
+    // 光の塊を1桁とみなしたまま「78」が3桁の「216」に化ける。
+    const t = trimNoise(store, group.vecs);
+    if (!t.vecs.length || t.min < MIN_DIGIT) return null;
+    const vecs = t.vecs;
+    const r = pickBest(store, vecs, candidates);
+    // 一致度が低いまま候補から1つ選ぶと、似ていない数字に化ける。
+    // 実測では正しく読めているときは 0.80 前後、取り違えでは 0.70 を割る。
+    if (!r || r.score < (vecs.length === 1 ? MIN_GROUP_ONE : MIN_GROUP)) return null;
+    const free = bestFree(store, vecs);
+    return { value: r.value, score: r.score, margin: r.score - Math.max(r.second, -1),
+             digits: vecs.length, minDigit: t.min,
+             free: free ? free.text : null, freeScore: free ? free.score : -9 };
+  }
+  // 読めなかったときに「実際は何に見えていたか」を返す（原因追跡用）
+  function probe(store, group) {
+    if (!group.vecs.length || group.vecs.some((v) => !v)) return null;
+    const t = trimNoise(store, group.vecs);
+    if (!t.vecs.length) return null;
+    const free = bestFree(store, t.vecs);
+    return free ? { text: free.text, min: t.min } : null;
+  }
+
+  /* ---------- 射影変換：カメラ画像の四隅 → 正規化パネル ---------- */
+  const PW = 1034, PH = 736;
+  const GW = Math.round((GRID[2] - GRID[0]) * PW), GH = Math.round((GRID[3] - GRID[1]) * PH);
+  function homography(c) { // c: TL,TR,BR,BL
+    const [p0, p1, p2, p3] = c;
+    const dx1 = p1.x - p2.x, dx2 = p3.x - p2.x, dy1 = p1.y - p2.y, dy2 = p3.y - p2.y;
+    const sx = p0.x - p1.x + p2.x - p3.x, sy = p0.y - p1.y + p2.y - p3.y;
+    const den = dx1 * dy2 - dx2 * dy1 || 1e-6;
+    const g = (sx * dy2 - dx2 * sy) / den, h = (dx1 * sy - sx * dy1) / den;
+    return [p1.x - p0.x + g * p1.x, p3.x - p0.x + h * p3.x, p0.x,
+            p1.y - p0.y + g * p1.y, p3.y - p0.y + h * p3.y, p0.y, g, h, 1];
+  }
+  // 鉱石グリッドの範囲だけを等倍で切り出す（全パネルを変換するより4〜5倍軽い）
+  function rectifyGrid(src, corners) {
+    const M = homography(corners), out = new Uint8ClampedArray(GW * GH * 4);
+    const sw = src.width, sh = src.height, sd = src.data;
+    for (let y = 0; y < GH; y++) {
+      const v = GRID[1] + (GRID[3] - GRID[1]) * (y + 0.5) / GH;
+      for (let x = 0; x < GW; x++) {
+        const u = GRID[0] + (GRID[2] - GRID[0]) * (x + 0.5) / GW;
+        const d = M[6] * u + M[7] * v + M[8];
+        const sx = Math.round((M[0] * u + M[1] * v + M[2]) / d);
+        const sy = Math.round((M[3] * u + M[4] * v + M[5]) / d);
+        const o = (y * GW + x) * 4;
+        if (sx >= 0 && sy >= 0 && sx < sw && sy < sh) {
+          const i = (sy * sw + sx) * 4;
+          out[o] = sd[i]; out[o + 1] = sd[i + 1]; out[o + 2] = sd[i + 2]; out[o + 3] = 255;
+        } else out[o + 3] = 255;
+      }
+    }
+    return { width: GW, height: GH, data: out, isGrid: true };
+  }
+  // 学習済みテンプレート（実機映像から作成）を読み込む
+  function loadStore(packed) {
+    const store = createStore();
+    for (const ch of Object.keys(packed)) {
+      const { s, d } = packed[ch];
+      const bin = typeof atob === "function" ? atob(d) : Buffer.from(d, "base64").toString("binary");
+      const n = CW * CH, cnt = bin.length / n;
+      for (let k = 0; k < cnt; k++) {
+        const v = new Float32Array(n);
+        for (let i = 0; i < n; i++) { let b = bin.charCodeAt(k * n + i); if (b > 127) b -= 256; v[i] = b / 127 * s; }
+        store[ch].push(Array.from(v));
+      }
+    }
+    return store;
+  }
+
+  return { GRID, LETTERS, CFG, PW, PH, GW, GH, cellBox, scanCell, createStore, learn, readGroup, scoreText,
+    normalize, dot, bestFree, digitScore, probe, rectifyGrid, homography, loadStore };
+});
+</script>
+<script>window.FORGE_TEMPLATES={"3":{"s":0.13415,"d":"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"},"2":{"s":0.11744,"d":"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"},"9":{"s":0.11722,"d":"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"},"7":{"s":0.0905,"d":"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"},"5":{"s":0.16901,"d":"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"},"0":{"s":0.14102,"d":"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"},"1":{"s":0.09755,"d":"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"},"8":{"s":0.13606,"d":"waaSiomRp77T3OTm7/4P9P3PrJSZrsbb6ev3ASRJQgwe/s6ts8nUzs7S3ekPT2YuHiP90s/Xz8C/wsrO4itoQRA2IPDe18nCzc/JxMcRZEUFPTIB5dLO4/z438/MFmM9+0A8DerQ3w8tI/7o8DBZIO8/QxXs0+4kOSYF+xZHN/TsOkIX8NjrERf+7vkpTxHM8TY9FPTe3enp3uD7NFEEvP83OBYA59za297xGkVJ97sNPjUPAuzh3+PoAjRMNeq/FjstB/vq4uXr5/wuRzHpxB05Iv7z7Onu8efvDjs/9sMtPRz78PD/Egzz7fotSAC/OjwZAfb9IEArA/b9JkkGvT0tDwYBDTdNNQ8ABStMB747HwcJCxo8RzMWBgszSwC3Lw0CDREcLTYpFg8aO0f7sRXz+A8UGhwhGRMcL0Q++bzx1eILFR8eGhYaKT5DJfPSyLK/9RAhJiQlKDE+IPfs3qSZoMnzFBwhJSwtFN3E1dqKhoecwu79CgoP/8ikn7LDno6QkZWmvNDd6e7o5vL75a6Olpmpxdnn6/D3BSg8KQjatKSgttfc3tna4e8iW1UvEPXKtMba2dXNztjc/k1lPSkl+97d2NLU1NTTzuU9YDcnQiP86NXV5fPw3c7qOVEoG1Y5BOja5gsbEPDeADw3BhNaQAjr4vYkJgzw7xo/E9sRUD4O7uDxEwju4/YpO/S+EUc1CvDg5fLp4OX8Ky/htRU/LQnz5ePl4uT4EzIh2rsZOygH+e3n5OXvDC06GNPBITclBvnr5eXq7gksOxvWxTA6IgDz5ujz8fABHTgm3sQ6PB/99fULHQv9BBg+NeK9OzcaAQANNUQmCwgYQULouD8uFgoOIEdOMhgQGj9F77hBIRERFipHSjYhFx8+P+q0OBALFhwsOTguIh4rQDPasCL9ARkfJiYmJiUmNz8i0LT84O0THCUlKissLDouBcy8zL3N/hQnLTIwMSwrBdnEwq6lrtn7GR0fISwfBs+vt8KclZWy0PUDEBUU88qima69p5mNh4uTmqayvMO7v93tktq7opWZq7zK1Nrj6vkYGbIL6MKorcXT1djZ4/ENQVT7IxLlvsLS1M3NztXb9DpmISMwCNjR083IztLS0NoqbC8TPCTy3dHK0+Xk087VJmovBkM2BejR0/AOBeXa8TdbHP9GQQ/v2OYSLyD77hVKPfr7R0IS8uP2HyoW/vglUBrS/UlBFvnt9AoL/vkFNVQIuwFGQh8H9u/y9vf9GktN/LoKQz8iEPnv7/DyAi1RPPC9E0E3Gw348fPz8gYyTDHvyRpCNRYF+fn9+vcDH0I288UlQCgNAPwEEgz9/QoyPfa4MjkbB/4EGjEhBAAFK0H6rzcrEQcCDi1ALA4DBy5H+600IQwKBxg2QTAXBw0xRPSnLRIFCwsZLzktGA0XNDzvoBz7/AsMFR8oIhUSIzY08Kf73OcHDhYZHBoWHC8yI/TC0rjD9w4cICAhIys2JQv53amYoNL9Fx8lJyswJfjj7eGNgYWm0/wNFhYbD+W7udfXjo6RmK3O6f8JAv/7+OnGrY6ZsMbnAQP38u7t7wUU98yWqsn1DgjqzMPIy87mDhv2orvkEgzs0sfDxMbMz+8kEajMBCD808jU29vQysbfIx604hQe8dHYABwg/N3W7xoOwPAeGu3e+zhTQBf++QwY+MLvIhjt5QNESSEMCwwfC9jA7ykf8OX2HBj79fwPLP/Dv+spLgDq7/Tz7PAAHjP1t7veGzgW9fHs8/UAKUAt4q+63hk1Hf3x8Pb2BjtIIdiwwPAoKg749fv58/8rOR7YsNAGIRQE/gcgHv8AFCwo47PiHSgSCg81TTsXCg8jLOy0+DI1FxMkWGBILw0KHi7xugk1LxgcOVxZSzYSEycy8boSOzIeHjdRT0ErGCAxNeqyDD87JR8lMzcvIhkfNC7ervo1OyskHRkZGx4fLjgUyqffIj47Kx4YGBgiLzsp7LSixgIySUEyKzA1PjsqAs+ona/VBTNFRT9BRUEn/NK0oZifrcfpBh4rKR8I5cesn5eUjo2Yttnw+wAA/v7/99ewmZCSq9gACgX++fX5Bgv42aqisdb+Ewfx4uTm7PP+AgLMuNsFGA/36OPl5eTm8QET68X4Ih4B7e/8+ejc3Ob/E/7VDTEQ7+DpFiEJ7uHm+hD55BgtB+TO9Ds/IQL1+QQK5vAfKATu0wRTSywOBA8SAtTvIS0I/OwPQjIZAwgaFfPC6CE1Df38DyAPAPgJGw7fqeQdORv9/QcLAfr9EhoAxpLiGjgvDgMFCgYDCx8b9raI5h00OB4PDhQRDxknG/Gvhu4oMy0ZFR4jGxYgKBvwrYX5Li4iGCI3MyEcJigh9a6HAy0oIyU0Sz0mIioqI/mzjQkrJCYtQFNCLiYrKCP6uJAMKSMmLkRQQDQkJCIh/LiNDychJy9GTD85JyAgHvm1iwchICYzSEI/Pi0eIBXqq4f3GSAnMz0+PDgsGRcF156F4AweJzA2NDIsIA4I8cKUhLrlBhMaHR4dFgv9686jiYOcveT0+wEDA/7y4MmrjYSDjY2Uob/p+vP27uzx+/3jv42cuNLyAPTc2N3f3+sEC+uWstgFDfzj2NTa2tja9iELoMDxFwbk2t/g3drd1+ssHKTQCBz52t/5CADq59zvLBuz6RcZ89zsITgl++3uBCIIv/YhFvTm8ik3GfTr/BYN47/2Jxb17/onKwv29QYh/sW79jAe9/L2Cwr39v0NJ/a3ufIyMAbz8vr99vwWKSjlq7XmKD0c+/b6//4DLD8j1KS36yw/IwQDBQQGCCw+IdWoxAM6NRgDBhAMBAUeNCLVqdoWMiEPBhs1JwYFEigp2aTvKSwRERw/VjwZDhEhMuupAzYvEhk0XF5GKhUWIzLyrhA5MhwhPV5XQykaIywv7rMVPjgnJDBLTDYjJSwyMOetCTg4LConMTMpJCkwNyPWo+4sODIsJywtKysxNi4Av53PDzI8My0xMzMyMy0L1q6ZtugaOz87OTg4NjAR47ykmqC64wwiKygiHxsI3bupnZiXorbT8QP+9erfzbalmpOOlZSes83i5+Lc3+br8efFp5mlvtro6+fk4+Tk6ezq68ihtNv09Off397b19ze4wDprsf4Au3c2+Li39XZ1dwMBbXUBwno19/y+vPi3dbeDAW84QkC49ryFyQS+vHt9Q30xe0K++HjAy0xGAH9AAwG2cbwDwTr7gUbGAT4+gkU9r/B8BsV9/QACAT9+f8SF+uzuuwkJwD0AAcICQQOIhrkrrzqJjYM+wQMDgcJHzEY1azB9i02DwEIDg8LDiEvE9Cryw0xJAkKGhoVExAWHg3Upd8fLRoQGzQ0JBwTEhQM26TwGiIbGylFSDUhGBcRC+Cl/hYfHyA5U08/KCEfFQ/joQwkKCgsRVVLQDQvLCAX46UUMTAuNUdSS0M9PTovG+CoEjY1MDI9Pj5GREM+NRnSoAAyNzc5Pj08REZDNin/t5PzLTU7Q0dIQD5BQDAK0aCL1gwtOTw+Pzw8Pzca47SYiLvZAyMrMjc3ODQb68OplImsvNLt9wUPDgb528KvnZGIio+hs9D3BQD79Pf/DAvowY2evN8ACvjYzc/T2/UTDuWYr9QGEPzdx8TJys7W+iEDo8T1GAPbycvKysrLyeIlF6jYDRz1y8fh8PDdz8jfHxa48B0a7tHhHDwzBObi+BkHwfYjGO3f+kVYNQf5/RMU7sDzKBrv5f04Ow/4+QolBcy+9TEm9+fuAwDq4+sLLvi2vO0rNg3v6urs6u8GJjDsrrjhHzsh++/u8vQBMEIk16e66SQ3IAH49fb5AzNAGc6oxPwtKA/+/QD++wAgMx3SrdYLJRcGABAkGwACESgo4bDqJCsPCBA6UjsZCwwgMvGx/jc2ExMtXGJLLxAOHjL3ugo4MxogP19aSjAWGiUu8rsSOzMjJDVMTjskHSQrLuy2Djo2JSQkLzUnHR0lMSfgsvcwNyokHRsdHR8kLy8Ky6jXHTo5Kx4bHSErNDMT3bShvPcoQT40MTE3Qz4i776jmKbJ+Cg/Q0JDR0Ej9MmvnJSZpL3gABsoJRoA3cGqn5WQ"},"4":{"s":0.12491,"d":"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"},"6":{"s":0.123,"d":"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"}};</script>
+<script>(function () {
+  "use strict";
+  const V = window.ForgeVision;
+  const $ = (s) => document.querySelector(s);
+
+  const cam = {
+    stream: null, video: null, canvas: null, ctx: null, timer: null,
+    corners: null, store: null, votes: {}, active: false,
+    onRead: null, onOff: null, targets: [], fps: 10, lastGroups: [], shots: [], raw: null, seen: {},
+    readIdx: {}, off: {}, lock: {}
+  };
+  window.ForgeCam = cam;
+
+  function status(t) { const el = $("#camStatus"); if (el) el.textContent = t; }
+  // パネル非表示のときでも見える通知行（取り込み停止・エラー用）
+  function notice(t) { const el = $("#camNotice"); if (!el) return; el.textContent = t || ""; el.hidden = !t; }
+  function vw() { return cam.video.videoWidth || 1280; }
+  function vh() { return cam.video.videoHeight || 720; }
+
+  cam.init = function () {
+    cam.store = V.loadStore(window.FORGE_TEMPLATES || {});
+    cam.video = $("#camVideo");
+    cam.canvas = document.createElement("canvas");
+    cam.ctx = cam.canvas.getContext("2d", { willReadFrequently: true });
+  };
+
+  cam.start = async function () {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+      notice("このブラウザは画面の取り込みに対応していません。PCのChromeまたはEdgeで開いてください。"); return false;
+    }
+    try {
+      cam.stream = await navigator.mediaDevices.getDisplayMedia({
+        video: { frameRate: { ideal: 15 }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+        audio: false,
+        // 自分のタブを選ばせない・ウィンドウ選択を促す
+        preferCurrentTab: false,
+        selfBrowserSurface: "exclude",
+        surfaceSwitching: "include"
+      });
+      cam.video.srcObject = cam.stream;
+      await new Promise((res) => {
+        if (cam.video.readyState >= 2) return res();
+        cam.video.addEventListener("loadedmetadata", res, { once: true });
+      });
+      await cam.video.play();
+      $("#camPanel").hidden = false;
+      // ブラウザの「共有を停止」やウィンドウを閉じたときに後片付けする
+      const tr = cam.stream.getVideoTracks()[0];
+      if (tr) tr.addEventListener("ended", () => { cam.stop(); notice("画面の取り込みが終了しました。もう一度「画面を取り込む」を押してください。"); });
+      notice("");
+      const hadSaved = cam.corners ? true : loadCorners();
+      if (!cam.corners) defaultCorners();
+      draw();
+      // 記憶がない初回だけ、板を探して自動で合わせる
+      if (!hadSaved) setTimeout(() => { if (cam.stream) cam.autoAlign(true); }, 500);
+      if (cam.timer) clearInterval(cam.timer);
+      cam.timer = setInterval(tick, Math.round(1000 / cam.fps));
+      status("板の四隅にオレンジの丸を合わせてください。緑の枠が鉱石の3×2に重なればOKです。");
+      return true;
+    } catch (e) {
+      const name = e && e.name ? e.name : "不明";
+      notice(name === "NotAllowedError"
+        ? "取り込みがキャンセルされました。候補タップでも入力できます。"
+        : "画面を取り込めませんでした（" + name + "）。候補タップで入力してください。");
+      return false;
+    }
+  };
+
+  cam.stop = function () {
+    cam.active = false;
+    cam.targets = [];
+    cam.lock = {}; cam.off = {}; cam.readIdx = {};
+    if (cam.timer) { clearInterval(cam.timer); cam.timer = null; }
+    if (cam.stream) { cam.stream.getTracks().forEach((t) => t.stop()); cam.stream = null; }
+    $("#camPanel").hidden = true;
+    const btn = $("#camOpen");
+    if (btn) btn.textContent = "画面を取り込む";
+  };
+
+  function defaultCorners() {
+    const w = vw(), h = vh(), mx = w * 0.10, my = h * 0.16;
+    cam.corners = [{ x: mx, y: my }, { x: w - mx, y: my }, { x: w - mx, y: h - my }, { x: mx, y: h - my }];
+  }
+  // 画面取り込みではウィンドウ位置が固定なので、合わせた四隅を覚えて次回に使う
+  const CORNER_KEY = "forge.corners.v1";
+  function saveCorners() {
+    if (!cam.corners) return;
+    try {
+      localStorage.setItem(CORNER_KEY, JSON.stringify({ w: vw(), h: vh(), c: cam.corners }));
+    } catch (e) {}
+  }
+  function loadCorners() {
+    try {
+      const raw = localStorage.getItem(CORNER_KEY);
+      if (!raw) return false;
+      const o = JSON.parse(raw);
+      if (!o || !o.c || o.c.length !== 4 || !o.w || !o.h) return false;
+      // 取り込み解像度が違っても比率でそのまま使える
+      const sx = vw() / o.w, sy = vh() / o.h;
+      cam.corners = o.c.map((p) => ({ x: p.x * sx, y: p.y * sy }));
+      return true;
+    } catch (e) { return false; }
+  }
+  /* ---------- 枠の自動調整 ----------
+     板（羊皮紙）の明るいクリーム色の面を探し、その外接矩形から四隅を割り出す。
+     鉱石は橙、ゲージは黒、床はもっと暗いベージュなので、この色条件だと板だけが残る。 */
+  const PANEL_RATIO = [[-0.0238, -0.2100], [1.0104, -0.1989], [1.0062, 1.1394], [-0.0021, 1.0762]];
+
+  function findPanelBox() {
+    const v = cam.video;
+    const W = vw(), H = vh();
+    if (!W || !H) return null;
+    const sc = Math.min(1, 480 / W);
+    const w = Math.max(32, Math.round(W * sc)), h = Math.max(32, Math.round(H * sc));
+    const cv = document.createElement("canvas");
+    cv.width = w; cv.height = h;
+    const g = cv.getContext("2d", { willReadFrequently: true });
+    g.drawImage(v, 0, 0, w, h);
+    let d;
+    try { d = g.getImageData(0, 0, w, h).data; } catch (e) { return null; }
+    const n = w * h, mask = new Uint8Array(n);
+    for (let i = 0, q = 0; i < n; i++, q += 4) {
+      const R = d[q], G = d[q + 1], B = d[q + 2], rb = R - B;
+      if (R > 212 && G > 185 && rb > 48 && rb < 105 && Math.abs(R - G) < 38) mask[i] = 1;
+    }
+    // 最大の連結成分を取る（塗りつぶし法）
+    const seen = new Uint8Array(n), stack = new Int32Array(n);
+    let best = null;
+    for (let start = 0; start < n; start++) {
+      if (!mask[start] || seen[start]) continue;
+      let sp = 0, cnt = 0;
+      let x0 = w, x1 = -1, y0 = h, y1 = -1;
+      stack[sp++] = start; seen[start] = 1;
+      while (sp > 0) {
+        const i = stack[--sp], x = i % w, y = (i / w) | 0;
+        cnt++;
+        if (x < x0) x0 = x;
+        if (x > x1) x1 = x;
+        if (y < y0) y0 = y;
+        if (y > y1) y1 = y;
+        if (x > 0 && mask[i - 1] && !seen[i - 1]) { seen[i - 1] = 1; stack[sp++] = i - 1; }
+        if (x < w - 1 && mask[i + 1] && !seen[i + 1]) { seen[i + 1] = 1; stack[sp++] = i + 1; }
+        if (y > 0 && mask[i - w] && !seen[i - w]) { seen[i - w] = 1; stack[sp++] = i - w; }
+        if (y < h - 1 && mask[i + w] && !seen[i + w]) { seen[i + w] = 1; stack[sp++] = i + w; }
+      }
+      if (!best || cnt > best.cnt) best = { cnt: cnt, x0: x0, x1: x1, y0: y0, y1: y1 };
+    }
+    if (!best) return null;
+    const bw = best.x1 - best.x0 + 1, bh = best.y1 - best.y0 + 1;
+    const ratio = bw / Math.max(1, bh);
+    // 板らしさの確認。外れていたら自動調整はあきらめて手動に任せる
+    if (best.cnt < n * 0.015 || bw < w * 0.18 || bw > w * 0.92 || ratio < 1.1 || ratio > 2.8) return null;
+    if (best.cnt < bw * bh * 0.35) return null;
+    const k = W / w;
+    return { x: best.x0 * k, y: best.y0 * k, w: bw * k, h: bh * k };
+  }
+
+  cam.autoAlign = function (quiet) {
+    if (!cam.stream) { if (!quiet) notice("先に「画面を取り込む」を押してください。"); return false; }
+    const box = findPanelBox();
+    if (!box) {
+      const msg = "板を見つけられませんでした。鍛冶画面が映っているか確認して、四隅を手で合わせてください。";
+      if (quiet) status(msg); else notice(msg);
+      return false;
+    }
+    cam.corners = PANEL_RATIO.map((r) => ({ x: box.x + r[0] * box.w, y: box.y + r[1] * box.h }));
+    saveCorners();
+    draw();
+    status("枠を自動調整しました。緑のマス目が鉱石の3×2からズレていたら、丸をドラッグして直してください。");
+    notice("");
+    return true;
+  };
+
+  cam.reset = function () {
+    defaultCorners();
+    try { localStorage.removeItem(CORNER_KEY); } catch (e) {}
+    draw();
+    status("枠をリセットしました。四隅を板に合わせてください。");
+  };
+
+  function mapUV(u, v) {
+    const M = V.homography(cam.corners), d = M[6] * u + M[7] * v + M[8];
+    return { x: (M[0] * u + M[1] * v + M[2]) / d, y: (M[3] * u + M[4] * v + M[5]) / d };
+  }
+  function gridToVideo(gx, gy) {
+    const [X0, Y0, X1, Y1] = V.GRID;
+    return mapUV(X0 + (X1 - X0) * gx / V.GW, Y0 + (Y1 - Y0) * gy / V.GH);
+  }
+
+  /* ---------- オーバーレイ描画 ---------- */
+  function draw() {
+    const ov = $("#camOverlay");
+    if (!ov || !cam.corners) return;
+    const w = vw(), h = vh();
+    ov.setAttribute("viewBox", `0 0 ${w} ${h}`);
+    ov.setAttribute("preserveAspectRatio", "none");
+    const vr = cam.video.getBoundingClientRect(), pr = ov.parentElement.getBoundingClientRect();
+    ov.style.left = (vr.left - pr.left) + "px"; ov.style.top = (vr.top - pr.top) + "px";
+    ov.style.width = vr.width + "px"; ov.style.height = vr.height + "px";
+    const c = cam.corners, r = Math.max(18, w * 0.028), sw = Math.max(3, w * 0.004);
+    const [X0, Y0, X1, Y1] = V.GRID;
+    const watch = {};
+    cam.targets.forEach((t) => { watch[t.idx] = true; });
+    const DONE = "#6fd7ff";
+    const colOf = (i) => (watch[i] ? "#f0aa46" : (cam.readIdx[i] ? DONE : "#3ecf9a"));
+    let g = "";
+    for (let i = 0; i < 6; i++) {
+      const col = i % 2, row = (i / 2) | 0;
+      const p0 = mapUV(X0 + (X1 - X0) * col / 2, Y0 + (Y1 - Y0) * row / 3);
+      const p1 = mapUV(X0 + (X1 - X0) * (col + 1) / 2, Y0 + (Y1 - Y0) * row / 3);
+      const p2 = mapUV(X0 + (X1 - X0) * (col + 1) / 2, Y0 + (Y1 - Y0) * (row + 1) / 3);
+      const p3 = mapUV(X0 + (X1 - X0) * col / 2, Y0 + (Y1 - Y0) * (row + 1) / 3);
+      const pts = [p0, p1, p2, p3].map((p) => `${p.x},${p.y}`).join(" ");
+      const ink = colOf(i);
+      const fill = watch[i] ? "rgba(240,170,70,.24)" : (cam.readIdx[i] ? "rgba(111,215,255,.14)" : "none");
+      g += `<polygon points="${pts}" fill="${fill}" stroke="${ink}" stroke-width="${watch[i] ? sw * 1.6 : sw}"/>`;
+      g += `<text x="${p0.x + (p1.x - p0.x) * 0.10}" y="${p0.y + (p3.y - p0.y) * 0.24}" fill="${ink}" font-size="${Math.round(h * 0.038)}" font-weight="800">${"ABCDEF"[i]}${cam.readIdx[i] ? " ✓" : ""}</text>`;
+    }
+    for (const d of cam.lastGroups) {
+      const a = gridToVideo(d.box.x - 6, d.box.y - 6), b = gridToVideo(d.box.x + d.box.w + 6, d.box.y + d.box.h + 6);
+      const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y);
+      g += `<rect x="${x}" y="${y}" width="${Math.abs(b.x - a.x)}" height="${Math.abs(b.y - a.y)}" fill="none" stroke="#ff6b6b" stroke-width="${sw * 1.6}"/>`;
+      if (d.label) g += `<text x="${x}" y="${y - h * 0.012}" fill="#ff6b6b" font-size="${Math.round(h * 0.042)}" font-weight="800">${d.label}</text>`;
+    }
+    const pts = c.map((p) => `${p.x},${p.y}`).join(" ");
+    ov.innerHTML = `<polygon points="${pts}" fill="rgba(240,170,70,.05)" stroke="#f0aa46" stroke-width="${sw * 1.5}"/>${g}`
+      + c.map((p) => `<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="rgba(240,170,70,.92)" stroke="#1a1209" stroke-width="${sw}"/>`).join("");
+  }
+
+  /* ---------- 四隅ドラッグ ---------- */
+  function bindDrag() {
+    const ov = $("#camOverlay");
+    let idx = -1;
+    // 座標基準は必ず video 要素の矩形（SVGの箱とズレていても正しく変換する）
+    const toVideo = (ev) => {
+      const r = cam.video.getBoundingClientRect();
+      return { x: (ev.clientX - r.left) / r.width * vw(), y: (ev.clientY - r.top) / r.height * vh() };
+    };
+    ov.addEventListener("pointerdown", (ev) => {
+      if (!cam.corners) return;
+      const p = toVideo(ev);
+      let bd = Infinity;
+      cam.corners.forEach((c, i) => { const d = (c.x - p.x) * (c.x - p.x) + (c.y - p.y) * (c.y - p.y); if (d < bd) { bd = d; idx = i; } });
+      if (bd > (vw() * 0.35) * (vw() * 0.35)) { idx = -1; return; }
+      ev.preventDefault();
+      try { ov.setPointerCapture(ev.pointerId); } catch (e) {}
+      cam.corners[idx] = p; draw();
+    });
+    ov.addEventListener("pointermove", (ev) => {
+      if (idx < 0) return;
+      ev.preventDefault();
+      cam.corners[idx] = toVideo(ev); draw();
+    });
+    const end = (ev) => {
+      if (idx >= 0) { try { ov.releasePointerCapture(ev.pointerId); } catch (e) {} saveCorners(); }
+      idx = -1;
+    };
+    ov.addEventListener("pointerup", end);
+    ov.addEventListener("pointercancel", end);
+  }
+
+  /* ---------- 走査 ---------- */
+  cam.watch = function (targets, onRead) {
+    const list = targets || [];
+    const sig = list.map((t) => t.idx + ":" + t.candidates.join(",")).join("|");
+    cam.onRead = onRead;
+    if (sig !== cam.sig) {
+      // 対象や候補が変わったときだけ投票を作り直す。
+      // 同じ対象なら票を持ち越す（複数マス技で票が消えるのを防ぐ）
+      const keep = {};
+      for (const t of list) if (cam.votes[t.idx]) keep[t.idx] = cam.votes[t.idx];
+      cam.votes = keep; cam.sig = sig;
+      cam.readIdx = {}; cam.off = {};
+    }
+    cam.targets = list;
+    cam.active = list.length > 0;
+    if (cam.active) status(`${list.map((t) => t.letter).join("・")} のダメージ表示を待っています`);
+    draw();
+  };
+  cam.unwatch = function () { cam.active = false; cam.targets = []; cam.votes = {}; cam.sig = ""; cam.readIdx = {}; cam.off = {}; draw(); };
+
+  // 画面取り込みは再取得のたびに共有ダイアログが出るので、自動では取り直さない
+  let stalls = 0;
+  function ensureAlive() {
+    const v = cam.video;
+    if (!cam.stream) return false;
+    const tr = cam.stream.getVideoTracks()[0];
+    if (!tr || tr.readyState !== "live") {
+      cam.stop();
+      notice("画面の取り込みが終了しました。もう一度「画面を取り込む」を押してください。");
+      return false;
+    }
+    if (v.paused || v.ended || v.readyState < 2 || !v.videoWidth) {
+      stalls++;
+      if (v.paused || v.ended) v.play().catch(() => {});
+      // 最小化中などは映像が来ない。ウィンドウを表示すれば自動で戻る
+      if (stalls === 20) status("映像が届いていません。ドラクエ10のウィンドウが最小化されていないか確認してください。");
+      return false;
+    }
+    if (stalls) { stalls = 0; draw(); }
+    return true;
+  }
+  cam.restart = async function () {
+    try { if (cam.stream) cam.stream.getTracks().forEach((t) => t.stop()); } catch (e) {}
+    cam.stream = null;
+    const keep = cam.corners;
+    const ok = await cam.start();
+    if (ok && keep) { cam.corners = keep; draw(); }
+    return ok;
+  };
+
+  function grabGrid() {
+    const w = vw(), h = vh();
+    if (!w || !h) return null;
+    const scale = Math.min(1, 1600 / w);
+    cam.canvas.width = Math.round(w * scale); cam.canvas.height = Math.round(h * scale);
+    cam.ctx.drawImage(cam.video, 0, 0, cam.canvas.width, cam.canvas.height);
+    const img = cam.ctx.getImageData(0, 0, cam.canvas.width, cam.canvas.height);
+    return V.rectifyGrid(img, cam.corners.map((p) => ({ x: p.x * scale, y: p.y * scale })));
+  }
+
+  // 検出部分の切り抜き画像を作る（実機表示と読み取り結果の突き合わせ用）
+  function cropShot(grid, box) {
+    if (!cam.raw) { cam.raw = document.createElement("canvas"); }
+    if (cam.raw.width !== grid.width || cam.raw.height !== grid.height) {
+      cam.raw.width = grid.width; cam.raw.height = grid.height;
+    }
+    cam.raw.getContext("2d").putImageData(new ImageData(grid.data, grid.width, grid.height), 0, 0);
+    const pad = 10;
+    const sx = Math.max(0, box.x - pad), sy = Math.max(0, box.y - pad);
+    const sw = Math.min(grid.width - sx, box.w + pad * 2), sh = Math.min(grid.height - sy, box.h + pad * 2);
+    if (sw < 4 || sh < 4) return null;
+    const out = document.createElement("canvas");
+    const sc = Math.min(3, 150 / sw);
+    out.width = Math.round(sw * sc); out.height = Math.round(sh * sc);
+    const g = out.getContext("2d");
+    g.imageSmoothingEnabled = false;
+    g.drawImage(cam.raw, sx, sy, sw, sh, 0, 0, out.width, out.height);
+    try { return out.toDataURL("image/png"); } catch (e) { return null; }
+  }
+  function addShot(url, letter, label, ok) {
+    if (!url) return;
+    cam.shots.unshift({ url, letter, label, ok, t: Date.now() });
+    if (cam.shots.length > 8) cam.shots.pop();
+    renderShots();
+  }
+  function renderShots() {
+    const host = $("#camShots");
+    if (!host) return;
+    host.hidden = !cam.shots.length;
+    host.innerHTML = cam.shots.map((s) =>
+      `<figure class="${s.ok ? "ok" : "ng"}"><img src="${s.url}" alt=""><figcaption>${s.letter} <b>${s.label}</b></figcaption></figure>`
+    ).join("");
+  }
+  cam.clearShots = function () { cam.shots = []; renderShots(); };
+
+  function drawPreview(grid) {
+    const cv = $("#camPreview");
+    if (!cv || !grid) return;
+    cv.width = grid.width; cv.height = grid.height;
+    const g = cv.getContext("2d");
+    g.putImageData(new ImageData(grid.data, grid.width, grid.height), 0, 0);
+    g.lineWidth = 2; g.strokeStyle = "#3ecf9a"; g.font = "bold 16px sans-serif";
+    for (let i = 0; i < 6; i++) {
+      const b = V.cellBox(i, grid.width, grid.height, true);
+      g.strokeRect(b.x0 + 1, b.y0 + 1, b.x1 - b.x0 - 2, b.y1 - b.y0 - 2);
+      g.fillStyle = "#3ecf9a"; g.fillText("ABCDEF"[i], b.x0 + 5, b.y0 + 18);
+    }
+    g.strokeStyle = "#ff6b6b"; g.lineWidth = 3;
+    for (const d of cam.lastGroups) g.strokeRect(d.box.x - 4, d.box.y - 4, d.box.w + 8, d.box.h + 8);
+  }
+
+  function tick() {
+    if (!ensureAlive()) return;
+    let grid;
+    try { grid = grabGrid(); } catch (e) { return; }
+    if (!grid) return;
+    const found = [], done = [];
+    const scanIdx = cam.active ? cam.targets.map((t) => t.idx) : [0, 1, 2, 3, 4, 5];
+    const now0 = Date.now();
+    for (const i of scanIdx) {
+      const tg = cam.targets.filter((x) => x.idx === i)[0];
+      // ねらい打ちや半減ターンではダメージが1桁になる。
+      // 候補に1桁の値があるときだけ、1桁のまとまりも読み取り対象にする。
+      const minD = tg && tg.candidates.some((c) => c < 10) ? 1 : 2;
+      const gs = V.scanCell(grid, i, minD);
+      // 実機のダメージ表示は数秒残るため、次の手が始まった直後に同じ数字を
+      // もう一度読んでしまう。いちど読んだマスは「表示が消えた」のを確認するまで封じる。
+      const lk = cam.lock[i];
+      if (lk) {
+        if (!gs.length) { lk.clear++; if (lk.clear >= 2) delete cam.lock[i]; }
+        else lk.clear = 0;
+        if (cam.lock[i]) {
+          if (now0 - lk.t > 8000) delete cam.lock[i];   // 念のための時間切れ
+          else { if (gs.length) found.push({ box: gs[0].box, label: "表示が消えるのを待っています" }); continue; }
+        }
+      }
+      if (!gs.length) continue;
+      const g = gs.reduce((a, b) => (b.edge > a.edge ? b : a));
+      const t = tg;
+      let label = "";
+      if (t) {
+        const r = V.readGroup(cam.store, g, t.candidates);
+        // 候補に縛らず読んだ結果のほうが明確に良いときは、候補リスト自体が間違っている。
+        // そのまま採用すると別の数字にすり替わるので採用せず、検出した値を知らせる。
+        const offCand = r && r.free && r.free !== String(r.value)
+          && r.freeScore > r.score + 0.03;
+        if (offCand) {
+          cam.off[i] = (cam.off[i] || 0) + 1;
+          label = "候補外 " + (+r.free);
+          if (cam.off[i] === 3) {
+            addShot(cropShot(grid, g.box), g.letter, "候補外 " + (+r.free), false);
+            notice(`${g.letter} で ${+r.free} を読み取りましたが、いまの温度から計算した候補に入っていません。`
+              + "実機の温度と「温度（℃）」欄が合っているか確認してください。");
+            if (cam.onOff) cam.onOff(i, +r.free);
+          }
+        } else if (r) {
+          const v = (cam.votes[i] = cam.votes[i] || { tally: {}, vecs: null, strong: 0 });
+          v.tally[r.value] = (v.tally[r.value] || 0) + (r.margin > 0.12 ? 2 : 1);
+          if (r.margin > 0.18) v.strong = (v.strong || 0) + 1;
+          v.vecs = g.vecs;
+          let best = null, secondCnt = 0;
+          for (const k of Object.keys(v.tally)) if (best === null || v.tally[k] > v.tally[best]) best = k;
+          for (const k of Object.keys(v.tally)) if (k !== best) secondCnt = Math.max(secondCnt, v.tally[k]);
+          label = best + "（" + v.tally[best] + "）";
+          // 確信が高ければ少ない票で確定（複数マス技を取りこぼさないため）
+          const need = v.strong >= 2 ? 2 : 3;
+          if (v.tally[best] >= need && v.tally[best] > secondCnt) {
+            done.push({ idx: i, letter: g.letter, val: +best, vecs: v.vecs, box: g.box, strong: v.strong || 0 });
+          }
+        } else {
+          // 候補のどれとも一致しなかった → 画像を残して原因を追えるようにする
+          const now = Date.now();
+          if (!cam.seen[i] || now - cam.seen[i] > 2000) {
+            cam.seen[i] = now;
+            const pr = V.probe(cam.store, g);
+            addShot(cropShot(grid, g.box), g.letter,
+              pr && pr.min >= 0.60 ? `候補外 ${+pr.text}` : "数字と判定できず", false);
+          }
+          label = "?";
+        }
+      }
+      found.push({ box: g.box, label: label });
+    }
+    cam.lastGroups = found;
+    drawPreview(grid);
+    // 読み取れたマスをまとめて反映（1フレームに複数マスでも取りこぼさない）
+    for (const dn of done) {
+      addShot(cropShot(grid, dn.box), dn.letter, dn.val + (dn.snap ? "（本会心）" : ""), true);
+      delete cam.votes[dn.idx];
+      cam.targets = cam.targets.filter((x) => x.idx !== dn.idx);
+      cam.readIdx[dn.idx] = true;
+      cam.lock[dn.idx] = { t: Date.now(), clear: 0 };
+      delete cam.off[dn.idx];
+      if (dn.strong >= 2) { try { V.learn(cam.store, String(dn.val), dn.vecs); } catch (e) {} }
+    }
+    cam.active = cam.targets.length > 0;
+    draw();
+    if (done.length) {
+      status(done.map((x) => `${x.letter} = ${x.val}`).join(" / ") + " を読み取りました");
+      for (const dn of done) if (cam.onRead) cam.onRead(dn.idx, dn.val);
+    }
+  }
+
+  cam.bind = function () {
+    cam.init(); bindDrag();
+    $("#camOpen").addEventListener("click", async function () {
+      if (cam.stream) { cam.stop(); return; }
+      const ok = await cam.start();
+      if (ok) { this.textContent = "取り込みを止める"; if (window.onCamReady) window.onCamReady(); }
+    });
+    $("#camAuto").addEventListener("click", () => cam.autoAlign(false));
+    $("#camReset").addEventListener("click", cam.reset);
+    window.addEventListener("resize", draw);
+    // 画面復帰・アプリ切り替え後に自動で再開する
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && cam.stream) { cam.video.play().catch(() => {}); ensureAlive(); draw(); }
+    });
+    cam.video.addEventListener("pause", () => { if (cam.stream) cam.video.play().catch(() => {}); });
+    cam.video.addEventListener("stalled", () => { if (cam.stream) ensureAlive(); });
+    // 何かの拍子に止まったときはクリックで再生だけ試す（取り直しはしない）
+    $("#camPanel").addEventListener("click", () => {
+      if (!cam.stream) return;
+      cam.video.play().catch(() => {});
+    });
+  };
+})();
+</script>
+<script>(function () {
+  "use strict";
+  const AI = window.AmatsuyuAI;
+  const $ = (s) => document.querySelector(s);
+  const L = AI.LETTERS, Z = AI.ZONES;
+  const FIXED_LEN = AI.FIXED.length;
+
+  let state = fresh();
+  let undoStack = [];
+  let pending = null; // 直前の一手の結果入力待ち
+  let lastRec = null;   // 固定バー用に、いま表示している推奨手を控えておく
+  let offOffer = null;  // 候補外だが読み取れた値（ワンタップで反映する）
+  let freshCells = {};  // 直近に読み取り・入力で変わったマス
+  let freshTimer = null;
+  function markFresh(i) {
+    freshCells[i] = true;
+    if (freshTimer) clearTimeout(freshTimer);
+    freshTimer = setTimeout(() => { freshCells = {}; renderHud(); }, 6000);
+  }
+
+  function fresh() {
+    const s = AI.createState({ focus: 253, rng: AI.mulberry32(1) });
+    s.ideals = [0, 0, 0, 0, 0, 0]; // 実機モードでは使わない（AIも参照しない）
+    s.hepaCharged = false;
+    return s;
+  }
+  function snapshot() {
+    undoStack.push(JSON.stringify({ values: state.values, temp: state.temp, focus: state.focus,
+      crits: state.crits, step: state.step, hasActed: state.hasActed,
+      hepaCharged: state.hepaCharged, hepaActive: state.hepaActive, log }));
+    if (undoStack.length > 60) undoStack.shift();
+  }
+  let log = [];
+
+  /* ---------- 描画 ---------- */
+  function render() {
+    const eff = AI.turnEffect(state.temp, state.hasActed);
+    $("#tempInput").value = state.temp;
+    $("#focusInput").value = state.focus;
+    $("#focusMax").textContent = "/ " + state.maxFocus;
+    $("#turnEffect").textContent = !state.hasActed && state.temp === 1000 ? "初手・効果なし" : eff.label + "ターン";
+    $("#turnEffect").style.color = eff.label === "倍" ? "var(--gold)" : eff.label === "半減" ? "var(--blue)" : "var(--amber)";
+    $("#stepLabel").textContent = state.step < FIXED_LEN ? `基本手順 ${state.step + 1} / ${FIXED_LEN}` : `アドリブ ${state.step - FIXED_LEN + 1} 手目`;
+    $("#skipFixed").style.display = state.step < FIXED_LEN ? "" : "none";
+    $("#phaseBadge").textContent = state.step < FIXED_LEN ? "基本手順" : "AIアドリブ";
+    renderBoard();
+    renderPending();
+    renderRecommendation();
+    renderHud();
+    renderLog();
+    $("#undoButton").disabled = !undoStack.length;
+  }
+
+  function renderBoard() {
+    $("#board").innerHTML = state.values.map((v, i) => {
+      const [lo, hi] = Z[i], inZone = v >= lo && v <= hi, over = v > hi;
+      const cls = ["mass", [0, 3, 4].includes(i) ? "priority-mass" : "", inZone ? "in-zone" : "", over ? "over" : "", state.crits[i] ? "critical" : ""].join(" ");
+      const pct = Math.min(100, Math.max(0, v / (hi * 1.08) * 100));
+      return `<div class="${cls}" data-index="${i}">
+        <div class="mass-head"><span class="mass-letter">${L[i]}</span><span class="mass-zone">${lo}–${hi}${[0,3,4].includes(i)?"・11幅":"・7幅"}</span></div>
+        <div class="io-row"><button class="nudge" data-d="-1" type="button">−</button>
+          <input type="number" inputmode="numeric" aria-label="${L[i]}のたたき値" value="${v}">
+          <button class="nudge" data-d="1" type="button">＋</button></div>
+        <div class="mass-bar"><i style="width:${pct}%"></i></div>
+        <label class="crit-toggle"><input type="checkbox" ${state.crits[i] ? "checked" : ""}>本会心で止まった</label>
+      </div>`;
+    }).join("");
+    $("#board").querySelectorAll(".mass").forEach((el) => {
+      const i = +el.dataset.index;
+      const input = el.querySelector('input[type="number"]');
+      input.addEventListener("change", () => { snapshot(); state.values[i] = Math.max(0, +input.value || 0); render(); });
+      el.querySelectorAll(".nudge").forEach((b) => b.addEventListener("click", () => {
+        snapshot(); state.values[i] = Math.max(0, state.values[i] + (+b.dataset.d)); render();
+      }));
+      el.querySelector('input[type="checkbox"]').addEventListener("change", (e) => {
+        snapshot(); state.crits[i] = e.target.checked; render();
+      });
+    });
+    $("#hepaCharged").checked = state.hepaCharged;
+    $("#hepaActive").checked = state.hepaActive;
+  }
+
+  function renderRecommendation() {
+    lastRec = null;
+    if (pending) {
+      $("#actionName").textContent = "結果を入力してください";
+      $("#actionReason").textContent = `${pending.label} で実機に出たダメージを、下の候補からタップしてください。大きい数字がダメージ、下の小さい数字が合計値です。候補にない値なら直接入力できます（そのときは計算式が実機と違う可能性があります）。`;
+      $("#actionMeta").innerHTML = ""; $("#forecast").innerHTML = ""; $("#altList").innerHTML = "";
+      $("#applyButton").disabled = true; $("#quickPlay").hidden = true;
+      $("#probNow").textContent = "—"; $("#probNote").textContent = "結果入力待ち";
+      return;
+    }
+    const bad = state.values.some((v, i) => v > Z[i][1]);
+    const ranked = AI.rankMoves(state);
+    const rec = ranked.length ? ranked[0].action : null;
+    const done = state.values.every((v, i) => v >= Z[i][0] && v <= Z[i][1]);
+    const p = AI.greatChance(state.values, state.crits);
+
+    $("#probNow").textContent = p == null ? "—" : (p * 100).toFixed(1) + "%";
+    $("#probNote").textContent = p == null
+      ? "成功範囲外のマスが残っています"
+      : `本会心 ${state.crits.filter(Boolean).length} マス・許容合計誤差 ${AI.GREAT_TOLERANCE}`;
+
+    if (bad) {
+      $("#actionName").textContent = "はみ出しあり";
+      $("#actionReason").textContent = state.values.map((v, i) => v > Z[i][1] ? L[i] : null).filter(Boolean).join("・") + " が成功範囲を超えています。このマスは大成功対象から外れます。残りを整えるか、値を修正してください。";
+      $("#actionMeta").innerHTML = "";
+      $("#forecast").innerHTML = "";
+      $("#altList").innerHTML = "";
+      $("#applyButton").disabled = true; $("#quickPlay").hidden = true;
+      return;
+    }
+    if (!rec) {
+      $("#actionName").textContent = "しあげる";
+      $("#actionReason").textContent = "撃てる手がありません。しあげてください。";
+      $("#actionMeta").innerHTML = ""; $("#forecast").innerHTML = ""; $("#altList").innerHTML = "";
+      $("#applyButton").disabled = true; $("#quickPlay").hidden = true;
+      return;
+    }
+    const stopBetter = done && ranked[0].score != null && ranked[0].score <= 1000 * p;
+    if (stopBetter) {
+      $("#actionName").textContent = "しあげる";
+      $("#actionReason").textContent = `全6マスが成功範囲内です。これ以上打つと誤差が悪化するため、ここでしあげるのが最善です（推定大成功率 ${(p * 100).toFixed(1)}%）。`;
+      $("#actionMeta").innerHTML = "<span>全マス成功範囲</span>";
+      $("#forecast").innerHTML = "";
+      $("#applyButton").disabled = true; $("#quickPlay").hidden = true;
+    } else {
+      const sk = AI.SKILLS[rec.skill];
+      const eff = AI.turnEffect(state.temp, state.hasActed);
+      $("#actionName").textContent = AI.actionLabel(rec);
+      let note = rec.reason || "";
+      if (state.hepaCharged && rec.skill !== "hepa") {
+        let fire = Math.floor((state.temp - 50) / 400) * 400 + 50;
+        if (fire > state.temp) fire -= 400;
+        note += fire >= 450
+          ? `　※必殺は${fire}℃まで温存します。そこで撃つと次が${fire - 50}℃の倍ターンになり、超4連の確定会心が最も広い範囲で本会心になります。`
+          : "　※必殺は確定会心を活かせる場面まで温存します。";
+      }
+      if (rec.skill === "hepa") note += `　次の手は${state.temp - 50}℃の倍ターンです。超4連打ちを撃つと4マスすべて確定会心になります。`;
+      $("#actionReason").textContent = note;
+      $("#actionMeta").innerHTML = `<span>消費 ${sk.cost}</span><span>${state.temp}℃・${eff.label}</span>`
+        + (rec.targets.length ? `<span>対象 ${rec.targets.map((i) => L[i]).join("・")}</span>` : "")
+        + `<span>残り ${state.focus - sk.cost}</span>`;
+      const fc = AI.forecast(state, rec);
+      $("#forecast").innerHTML = fc.length ? fc.map((f) =>
+        `<div><span>${f.letter} の見込み</span><span>非会心 +${f.min}〜${f.max}　会心 <em>本会心${(f.snapP * 100).toFixed(0)}%</em>${f.overP > 0.001 ? `　はみ出し ${(f.overP * 100).toFixed(0)}%` : ""}</span></div>`
+      ).join("") : "";
+      lastRec = rec;
+      renderQuickPlay(rec);
+      armCamera(rec);
+      $("#applyButton").disabled = false;
+      $("#applyLabel").textContent = `${AI.actionLabel(rec)} を実行した`;
+    }
+    $("#altList").innerHTML = ranked.slice(1, 5).map((x) =>
+      `<li><b>${AI.actionLabel(x.action)}</b><small>消費 ${AI.SKILLS[x.action.skill].cost}${x.score != null ? " ・評価 " + x.score.toFixed(0) : ""}</small></li>`
+    ).join("");
+  }
+
+  // 打つ前にダメージ候補を出しておき、1タップで「実行＋結果入力」を済ませる
+  function renderQuickPlay(rec) {
+    const host = $("#quickPlay");
+    const sk = AI.SKILLS[rec.skill];
+    if (!sk || sk.utility) { host.hidden = true; host.innerHTML = ""; return; }
+    const cand = AI.outcomeCandidates(state, rec);
+    if (!cand.length) { host.hidden = true; host.innerHTML = ""; return; }
+    const first = cand[0];
+    host.hidden = false;
+    host.innerHTML = `<p class="rec-kicker">1タップで実行＋結果入力</p>
+      <div class="cand-head"><b>${first.letter}</b><span>現在 ${first.before}　実機に出たダメージをタップ</span></div>
+      <div class="cand-list">${first.normal.map((v) => `<button type="button" class="cand" data-v="${v}"><b>+${v - first.before}</b><i>${v}</i></button>`).join("")}</div>
+      ${first.crit.length ? `<div class="cand-sub">会心（2倍）</div><div class="cand-list">${first.crit.map((v) => `<button type="button" class="cand crit" data-v="${v}"><b>+${v - first.before}</b><i>${v}</i></button>`).join("")}</div>` : ""}
+      <div class="cand-list"><button type="button" class="cand snapbtn" data-snap="1">緑で止まった（本会心）</button><button type="button" class="cand other" data-other="1">ダメージを直接入力</button></div>
+      ${cand.length > 1 ? `<p class="hint">残り ${cand.slice(1).map((c) => c.letter).join("・")} は、このあと続けて入力します。</p>` : ""}`;
+    host.querySelectorAll(".cand").forEach((btn) => btn.addEventListener("click", () => {
+      let dmg = null, snap = false;
+      if (btn.dataset.snap) {
+        const t = prompt(`${first.letter} に出たダメージ（本会心で基準値に止まった分）`, "");
+        if (t == null || t === "") return;
+        dmg = +t || 0; snap = true;
+      } else if (btn.dataset.other) {
+        const t = prompt(`${first.letter} に出たダメージを入力（0＝変化なし）`, "");
+        if (t == null || t === "") return;
+        dmg = +t || 0;
+      } else dmg = +btn.dataset.v - first.before;
+      applyRecommended();
+      const idx = first.idx;
+      state.values[idx] = Math.max(0, first.before + dmg);
+      if (snap) state.crits[idx] = true;
+      if (pending) {
+        pending.picked[idx] = state.values[idx];
+        if (pending.cand.every((c) => pending.picked[c.idx] != null)) pending = null;
+      }
+      render();
+    }));
+  }
+
+  // カメラに「次に出るはずのダメージ候補」を教える
+  function armCamera(rec) {
+    const C = window.ForgeCam;
+    if (!C || !C.stream) return;
+    const sk = AI.SKILLS[rec.skill];
+    if (!sk || sk.utility) { C.unwatch(); return; }
+    const cand = AI.outcomeCandidates(state, rec);
+    if (!cand.length) { C.unwatch(); return; }
+    const targets = cand.map((c) => ({ idx: c.idx, letter: c.letter, candidates: dmgList(c) }));
+    const applyRead = (idx, dmg) => {
+      const c = cand.find((x) => x.idx === idx);
+      if (!c) return;
+      if (!pending) applyRecommended();   // 最初の1マスで手を確定させる
+      state.values[idx] = Math.max(0, c.before + dmg);
+      markFresh(idx);
+      if (isSnapDamage(c, dmg)) state.crits[idx] = true;
+      if (pending) {
+        pending.picked[idx] = state.values[idx];
+        if (pending.cand.every((x) => pending.picked[x.idx] != null)) pending = null;
+      }
+      offOffer = null;
+      render();
+    };
+    offOffer = null;
+    C.watch(targets, applyRead);
+    // 候補に無い値を読み取ったときは、そのまま反映できるボタンを出す
+    C.onOff = (idx, dmg) => {
+      const c = cand.find((x) => x.idx === idx);
+      if (!c) return;
+      offOffer = { idx: idx, letter: c.letter, dmg: dmg, apply: () => applyRead(idx, dmg) };
+      renderHud();
+    };
+  }
+
+  // 実機に出るダメージ値の候補（通常・会心すり抜け・本会心をすべて含む）
+  function dmgList(c) {
+    return Array.from(new Set([].concat(c.dmgNormal || [], c.dmgCrit || [], c.dmgSnap || [])))
+      .filter((d) => d > 0).sort((a, b) => a - b);
+  }
+  // 読み取ったダメージが「本会心で基準値に止まった」ものかを判定する
+  function isSnapDamage(c, d) {
+    if (!c.dmgSnap || c.dmgSnap.indexOf(d) < 0) return false;
+    if ((c.dmgNormal || []).indexOf(d) >= 0) return false;
+    if ((c.dmgCrit || []).indexOf(d) >= 0) return false;
+    return true;
+  }
+
+  function renderPending() {
+    const host = $("#resultEntry");
+    if (!pending) { host.hidden = true; host.innerHTML = ""; return; }
+    host.hidden = false;
+    const C = window.ForgeCam;
+    if (C && C.stream) {
+      const left = pending.cand.filter((c) => pending.picked[c.idx] == null);
+      if (left.length) C.watch(left.map((c) => ({ idx: c.idx, letter: c.letter, candidates: dmgList(c) })),
+        (idx, dmg) => {
+          const c = pending.cand.find((x) => x.idx === idx);
+          if (!c) return;
+          state.values[idx] = Math.max(0, c.before + dmg);
+          if (isSnapDamage(c, dmg)) state.crits[idx] = true;
+          pending.picked[idx] = state.values[idx];
+          if (pending.cand.every((x) => pending.picked[x.idx] != null)) pending = null;
+          render();
+        });
+    }
+    const rows = pending.cand.map((c) => {
+      const done = pending.picked[c.idx] != null;
+      const btn = (v, cls) => `<button type="button" class="cand ${cls || ""} ${pending.picked[c.idx] === v ? "on" : ""}" data-idx="${c.idx}" data-v="${v}"><b>+${v - c.before}</b><i>${v}</i></button>`;
+      const normals = c.normal.map((v) => btn(v)).join("");
+      const crits = c.crit.length ? c.crit.map((v) => btn(v, "crit")).join("") : "";
+      const snap = c.snapRange ? `<button type="button" class="cand snapbtn" data-idx="${c.idx}" data-snap="1">緑で止まった（本会心）</button>` : "";
+      return `<div class="cand-row ${done ? "done" : ""}">
+        <div class="cand-head"><b>${c.letter}</b><span>現在 ${c.before}　実機に出たダメージをタップ</span></div>
+        <div class="cand-list">${normals}</div>
+        ${crits ? `<div class="cand-sub">会心（2倍）</div><div class="cand-list">${crits}</div>` : ""}
+        <div class="cand-list">${snap}<button type="button" class="cand other" data-idx="${c.idx}" data-other="1">ダメージを直接入力</button></div>
+      </div>`;
+    }).join("");
+    host.innerHTML = `<div class="section-head compact"><div><span class="kicker">RESULT</span><h2>${pending.label} の結果</h2></div>
+      <button id="skipPending" class="ghost-button" type="button">後で入力</button></div>${rows}`;
+    host.querySelectorAll(".cand").forEach((b) => b.addEventListener("click", () => {
+      const idx = +b.dataset.idx;
+      if (b.dataset.snap) {
+        const c = pending.cand.find((x) => x.idx === idx);
+        const dmg = prompt(`${c.letter} に出たダメージ（本会心で基準値に止まった分）`, "");
+        if (dmg == null || dmg === "") return;
+        state.values[idx] = Math.max(0, c.before + (+dmg || 0)); state.crits[idx] = true; pending.picked[idx] = state.values[idx];
+      } else if (b.dataset.other) {
+        const c = pending.cand.find((x) => x.idx === idx);
+        const dmg = prompt(`${c.letter} に出たダメージを入力（0＝変化なし）`, "");
+        if (dmg == null || dmg === "") return;
+        state.values[idx] = Math.max(0, c.before + (+dmg || 0)); pending.picked[idx] = state.values[idx];
+      } else {
+        state.values[idx] = +b.dataset.v; pending.picked[idx] = state.values[idx];
+      }
+      if (pending.cand.every((c) => pending.picked[c.idx] != null)) pending = null;
+      render();
+    }));
+    const sk = host.querySelector("#skipPending");
+    if (sk) sk.addEventListener("click", () => { pending = null; render(); });
+  }
+
+  // 盤面・読み取り状況・次の一手を1か所にまとめ、画面を行き来しなくて済むようにする
+  function renderHud() {
+    const waiting = {};
+    if (pending) for (const c of pending.cand) if (pending.picked[c.idx] == null) waiting[c.idx] = true;
+    $("#hudCells").innerHTML = state.values.map((v, i) => {
+      const [lo, hi] = Z[i];
+      const cls = ["hud-cell",
+        waiting[i] ? "wait" : "",
+        !waiting[i] && freshCells[i] ? "fresh" : "",
+        v >= lo && v <= hi ? "in-zone" : "",
+        v > hi ? "over" : "",
+        state.crits[i] ? "crit" : ""].join(" ");
+      return `<div class="${cls}"><span>${L[i]}${waiting[i] ? " 待機" : ""}</span><b>${v}</b></div>`;
+    }).join("");
+
+    const act = $("#hudAction"), note = $("#hudNote"), kick = $("#hudKicker");
+    if (pending) {
+      const rest = pending.cand.filter((c) => pending.picked[c.idx] == null).map((c) => c.letter);
+      kick.textContent = "結果まち";
+      act.textContent = rest.length ? `${rest.join("・")} の数値を待っています` : "結果を反映中";
+      note.textContent = `${pending.label} を実行しました。実機のダメージ表示を読み取ります。`;
+    } else if (lastRec) {
+      const sk = AI.SKILLS[lastRec.skill];
+      const eff = AI.turnEffect(state.temp, state.hasActed);
+      kick.textContent = "次の推奨";
+      act.textContent = AI.actionLabel(lastRec);
+      note.textContent = `${state.temp}℃・${eff.label}　消費 ${sk.cost}　残り集中力 ${state.focus - sk.cost}`;
+    } else {
+      kick.textContent = "状況";
+      act.textContent = $("#actionName").textContent || "—";
+      note.textContent = $("#probNote").textContent || "";
+    }
+    const off = $("#hudOff");
+    if (offOffer) {
+      off.hidden = false;
+      off.textContent = `${offOffer.letter} に +${offOffer.dmg} を反映`;
+    } else off.hidden = true;
+    $("#hudApply").disabled = $("#applyButton").disabled;
+    $("#hudApply").textContent = pending ? "結果まち" : "実行した";
+    $("#hudUndo").disabled = !undoStack.length;
+  }
+
+  function renderLog() {
+    $("#stepCount").textContent = log.length + "手";
+    $("#history").innerHTML = log.length
+      ? log.slice().reverse().map((h, ri) => `<li><b>${log.length - ri}. ${h.name}</b><small>${h.temp}℃ ${h.eff} ・ 消費${h.cost}</small></li>`).join("")
+      : '<li class="empty">推奨手を実行すると履歴が表示されます。</li>';
+  }
+
+  /* ---------- 手の適用（数値以外の状態だけ自動更新） ---------- */
+  function applyRecommended() {
+    const ranked = AI.rankMoves(state);
+    if (!ranked.length) return;
+    const rec = ranked[0].action;
+    const sk = AI.SKILLS[rec.skill];
+    if (!sk || sk.cost > state.focus) return;
+    snapshot();
+    const eff = AI.turnEffect(state.temp, state.hasActed);
+    const cand = AI.outcomeCandidates(state, rec);
+    log.push({ name: AI.actionLabel(rec), temp: state.temp, eff: eff.label, cost: sk.cost });
+    state.focus -= sk.cost;
+    if (sk.utility) {
+      if (sk.special) { state.temp = Math.max(0, state.temp - 50); state.hepaCharged = false; state.hepaActive = true; }
+      else state.temp = Math.max(0, state.temp + sk.tempChange);
+    } else {
+      state.temp = Math.max(0, state.temp - 50 + (sk.tempAfter || 0));
+      state.hepaActive = false;
+    }
+    state.hasActed = true;
+    state.step += 1;
+    if (!sk.utility && cand.length) pending = { label: AI.actionLabel(rec), cand, picked: {} };
+    render();
+  }
+
+  function undo() {
+    if (!undoStack.length) return;
+    pending = null;
+    const s = JSON.parse(undoStack.pop());
+    Object.assign(state, { values: s.values, temp: s.temp, focus: s.focus, crits: s.crits,
+      step: s.step, hasActed: s.hasActed, hepaCharged: s.hepaCharged, hepaActive: s.hepaActive });
+    log = s.log;
+    render();
+  }
+
+  /* ---------- 配線 ---------- */
+  $("#applyButton").addEventListener("click", applyRecommended);
+  $("#applyLabel").parentElement.querySelector("small").textContent = "結果はあとで入力する場合はこちら";
+  $("#undoButton").addEventListener("click", undo);
+  $("#hudApply").addEventListener("click", applyRecommended);
+  $("#hudUndo").addEventListener("click", undo);
+  $("#hudOff").addEventListener("click", () => { if (offOffer) offOffer.apply(); });
+  const goTo = (sel) => { const el = $(sel); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }); };
+  $("#hudCells").addEventListener("click", () => goTo("#board"));
+  $("#hudNext").addEventListener("click", () => goTo("#recommendation"));
+  $("#resetButton").addEventListener("click", () => {
+    if (!confirm("最初からやり直しますか？")) return;
+    const mf = state.maxFocus; state = fresh(); state.focus = mf; state.maxFocus = mf; log = []; undoStack = []; pending = null; render();
+  });
+  $("#skipFixed").addEventListener("click", () => { snapshot(); state.step = FIXED_LEN; state.hasActed = true; render(); });
+  $("#tempInput").addEventListener("change", (e) => { snapshot(); state.temp = Math.max(0, +e.target.value || 0); render(); });
+  $("#focusInput").addEventListener("change", (e) => { snapshot(); state.focus = Math.max(0, +e.target.value || 0); if (state.focus > state.maxFocus) state.maxFocus = state.focus; render(); });
+  $("#hepaCharged").addEventListener("change", (e) => { snapshot(); state.hepaCharged = e.target.checked; render(); });
+  $("#hepaActive").addEventListener("change", (e) => { snapshot(); state.hepaActive = e.target.checked; if (e.target.checked) state.hepaCharged = false; render(); });
+  document.querySelectorAll("[data-temp]").forEach((b) => b.addEventListener("click", () => {
+    snapshot(); state.temp = Math.max(0, state.temp + (+b.dataset.temp)); render();
+  }));
+  document.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => {
+    snapshot(); state.focus = Math.max(0, state.focus + (+b.dataset.focus)); render();
+  }));
+
+  $("#openBenchmark").addEventListener("click", () => { $("#benchmarkFocus").value = state.maxFocus; $("#benchmarkDialog").showModal(); });
+  $("#runBenchmark").addEventListener("click", () => {
+    const btn = $("#runBenchmark"), focus = Math.max(150, +$("#benchmarkFocus").value || 253);
+    btn.disabled = true; btn.textContent = "計算中…";
+    setTimeout(() => {
+      const b = AI.benchmark(1000, { focus, seed: 20260814 }), pct = b.rate * 100, res = $("#benchmarkResult");
+      res.className = `benchmark-result ${b.rate >= .7 ? "pass" : "fail"}`;
+      res.innerHTML = `<strong>${pct.toFixed(1)}%</strong><span>${b.great} / 1,000回 大成功<br>全マス成功範囲 ${(b.allInRate * 100).toFixed(1)}%・平均本会心 ${b.averageCrits.toFixed(2)}マス<br>平均消費集中力 ${b.averageFocusUsed.toFixed(1)}</span>`;
+      $("#benchmarkBar").style.width = `${pct}%`;
+      $("#headlineRate").textContent = `${pct.toFixed(1)}%`;
+      btn.disabled = false; btn.textContent = "もう一度1,000回を実行";
+    }, 40);
+  });
+
+  if (window.ForgeCam) { window.ForgeCam.bind(); window.onCamReady = render; }
+  render();
+})();
+</script>
+</body>
+</html>
