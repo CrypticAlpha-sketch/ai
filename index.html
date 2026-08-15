@@ -1287,7 +1287,7 @@ function recommend(state) {
   const cam = {
     stream: null, video: null, canvas: null, ctx: null, timer: null,
     corners: null, store: null, votes: {}, active: false,
-    onRead: null, targets: [], fps: 8, lastGroups: []
+    onRead: null, targets: [], fps: 10, lastGroups: []
   };
   window.ForgeCam = cam;
 
@@ -1418,12 +1418,49 @@ function recommend(state) {
 
   /* ---------- 走査 ---------- */
   cam.watch = function (targets, onRead) {
-    cam.targets = targets || []; cam.onRead = onRead; cam.votes = {};
-    cam.active = cam.targets.length > 0;
-    if (cam.active) status(`${cam.targets.map((t) => t.letter).join("・")} のダメージ表示を待っています`);
+    const list = targets || [];
+    const sig = list.map((t) => t.idx + ":" + t.candidates.join(",")).join("|");
+    cam.onRead = onRead;
+    if (sig !== cam.sig) {
+      // 対象や候補が変わったときだけ投票を作り直す。
+      // 同じ対象なら票を持ち越す（複数マス技で票が消えるのを防ぐ）
+      const keep = {};
+      for (const t of list) if (cam.votes[t.idx]) keep[t.idx] = cam.votes[t.idx];
+      cam.votes = keep; cam.sig = sig;
+    }
+    cam.targets = list;
+    cam.active = list.length > 0;
+    if (cam.active) status(`${list.map((t) => t.letter).join("・")} のダメージ表示を待っています`);
     draw();
   };
-  cam.unwatch = function () { cam.active = false; cam.targets = []; cam.votes = {}; draw(); };
+  cam.unwatch = function () { cam.active = false; cam.targets = []; cam.votes = {}; cam.sig = ""; draw(); };
+
+  // iOS では映像が勝手に一時停止したりトラックが切れることがあるので毎回確認して復帰させる
+  let reviving = false, stalls = 0;
+  function ensureAlive() {
+    const v = cam.video;
+    if (!cam.stream) return false;
+    const tr = cam.stream.getVideoTracks()[0];
+    const bad = !tr || tr.readyState !== "live";
+    if (bad || v.paused || v.ended || v.readyState < 2 || !v.videoWidth) {
+      stalls++;
+      if (v.paused || v.ended) v.play().catch(() => {});
+      if (bad && !reviving) { reviving = true; status("カメラを再接続しています…"); cam.restart().then(() => { reviving = false; stalls = 0; }); }
+      else if (stalls === 12) status("カメラが止まりました。映像をタップすると再開します。");
+      else if (stalls > 60 && !reviving) { reviving = true; cam.restart().then(() => { reviving = false; stalls = 0; }); }
+      return false;
+    }
+    if (stalls) { stalls = 0; draw(); }
+    return true;
+  }
+  cam.restart = async function () {
+    try { if (cam.stream) cam.stream.getTracks().forEach((t) => t.stop()); } catch (e) {}
+    cam.stream = null;
+    const keep = cam.corners;
+    const ok = await cam.start();
+    if (ok && keep) { cam.corners = keep; draw(); }
+    return ok;
+  };
 
   function grabGrid() {
     const w = vw(), h = vh();
@@ -1452,10 +1489,11 @@ function recommend(state) {
   }
 
   function tick() {
+    if (!ensureAlive()) return;
     let grid;
     try { grid = grabGrid(); } catch (e) { return; }
     if (!grid) return;
-    const found = [];
+    const found = [], done = [];
     const scanIdx = cam.active ? cam.targets.map((t) => t.idx) : [0, 1, 2, 3, 4, 5];
     for (const i of scanIdx) {
       const gs = V.scanCell(grid, i);
@@ -1466,22 +1504,18 @@ function recommend(state) {
       if (t) {
         const r = V.readGroup(cam.store, g, t.candidates);
         if (r) {
-          const v = (cam.votes[i] = cam.votes[i] || { tally: {}, vecs: null });
+          const v = (cam.votes[i] = cam.votes[i] || { tally: {}, vecs: null, strong: 0 });
           v.tally[r.value] = (v.tally[r.value] || 0) + (r.margin > 0.12 ? 2 : 1);
+          if (r.margin > 0.18) v.strong = (v.strong || 0) + 1;
           v.vecs = g.vecs;
-          let best = null;
+          let best = null, secondCnt = 0;
           for (const k of Object.keys(v.tally)) if (best === null || v.tally[k] > v.tally[best]) best = k;
+          for (const k of Object.keys(v.tally)) if (k !== best) secondCnt = Math.max(secondCnt, v.tally[k]);
           label = best + "（" + v.tally[best] + "）";
-          if (v.tally[best] >= 3) {
-            const val = +best, vecs = v.vecs;
-            delete cam.votes[i];
-            cam.targets = cam.targets.filter((x) => x.idx !== i);
-            cam.active = cam.targets.length > 0;
-            try { V.learn(cam.store, String(val), vecs); } catch (e) {}
-            cam.lastGroups = [];
-            status(`${g.letter} = ${val} を読み取りました`);
-            if (cam.onRead) cam.onRead(i, val);
-            return;
+          // 確信が高ければ少ない票で確定（複数マス技を取りこぼさないため）
+          const need = v.strong >= 2 ? 2 : 3;
+          if (v.tally[best] >= need && v.tally[best] > secondCnt) {
+            done.push({ idx: i, letter: g.letter, val: +best, vecs: v.vecs });
           }
         }
       }
@@ -1489,7 +1523,18 @@ function recommend(state) {
     }
     cam.lastGroups = found;
     drawPreview(grid);
+    // 読み取れたマスをまとめて反映（1フレームに複数マスでも取りこぼさない）
+    for (const dn of done) {
+      delete cam.votes[dn.idx];
+      cam.targets = cam.targets.filter((x) => x.idx !== dn.idx);
+      try { V.learn(cam.store, String(dn.val), dn.vecs); } catch (e) {}
+    }
+    cam.active = cam.targets.length > 0;
     draw();
+    if (done.length) {
+      status(done.map((x) => `${x.letter} = ${x.val}`).join(" / ") + " を読み取りました");
+      for (const dn of done) if (cam.onRead) cam.onRead(dn.idx, dn.val);
+    }
   }
 
   cam.bind = function () {
@@ -1501,6 +1546,18 @@ function recommend(state) {
     });
     $("#camReset").addEventListener("click", cam.reset);
     window.addEventListener("resize", draw);
+    // 画面復帰・アプリ切り替え後に自動で再開する
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && cam.stream) { cam.video.play().catch(() => {}); ensureAlive(); }
+    });
+    cam.video.addEventListener("pause", () => { if (cam.stream) cam.video.play().catch(() => {}); });
+    cam.video.addEventListener("stalled", () => { if (cam.stream) ensureAlive(); });
+    // 停止したときはタップで即再開できるようにする
+    $("#camPanel").addEventListener("click", () => {
+      if (!cam.stream) return;
+      cam.video.play().catch(() => {});
+      if (cam.video.paused) cam.restart();
+    });
   };
 })();
 </script>
@@ -1703,7 +1760,7 @@ function recommend(state) {
     C.watch(targets, (idx, dmg) => {
       const c = cand.find((x) => x.idx === idx);
       if (!c) return;
-      applyRecommended();
+      if (!pending) applyRecommended();   // 最初の1マスで手を確定させる
       state.values[idx] = Math.max(0, c.before + dmg);
       if (pending) {
         pending.picked[idx] = state.values[idx];
