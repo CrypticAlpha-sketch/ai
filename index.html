@@ -58,14 +58,15 @@
 #quickPlay .hint{margin-top:9px}
 #camPanel{position:relative;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#000;margin:12px 0}
 #camVideo{display:block;width:100%;height:auto}
-#camOverlay{position:absolute;left:0;top:0;width:100%;height:100%;touch-action:none;display:block}
+#camStage{position:relative;line-height:0}
+#camOverlay{position:absolute;left:0;top:0;touch-action:none;display:block}
 #camBar{display:flex;gap:8px;align-items:center;padding:10px 12px;background:#15100d;border-top:1px solid var(--line)}
 #camStatus{flex:1;font-size:11px;color:var(--muted);line-height:1.5}
 .cam-actions{display:flex;gap:8px;margin-top:10px}
 .cam-actions button{flex:1;border:1px solid #55402f;background:#221913;color:var(--amber);border-radius:12px;padding:12px;font-size:13px;font-weight:700;cursor:pointer}
 
 #camPreviewWrap{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:#15100d;border-top:1px solid var(--line)}
-#camPreview{width:110px;height:auto;border:1px solid var(--line);border-radius:8px;background:#000;flex:none}
+#camPreview{width:150px;height:auto;border:1px solid var(--line);border-radius:8px;background:#000;flex:none}
 </style>
 </head>
 <body>
@@ -126,7 +127,7 @@
         </div>
                 <p class="hint cam-help">カメラは、テレビに映っている<b>板（羊皮紙）の外周4隅</b>にオレンジの丸を合わせます。緑のマス目が鉱石の3×2マスに重なれば位置合わせ完了です。あとは推奨手を実機で打つだけで、ダメージ表示を自動で読み取ります。</p>
         <div class="cam-actions"><button id="camOpen" type="button">カメラで読み取る</button><button id="camReset" type="button">枠をリセット</button></div>
-        <div id="camPanel" hidden><video id="camVideo" playsinline muted></video><svg id="camOverlay"></svg>
+        <div id="camPanel" hidden><div id="camStage"><video id="camVideo" playsinline muted></video><svg id="camOverlay"></svg></div>
           <div id="camPreviewWrap"><canvas id="camPreview"></canvas><span id="camStatus">待機中</span></div></div>
         <div id="quickPlay" hidden></div>
         <button id="applyButton" class="primary-button" type="button"><span id="applyLabel">この手を実行した</span><small>温度・集中力・手数だけ自動で進めます</small></button>
@@ -1356,6 +1357,10 @@ function recommend(state) {
     if (!ov || !cam.corners) return;
     const w = vw(), h = vh();
     ov.setAttribute("viewBox", `0 0 ${w} ${h}`);
+    ov.setAttribute("preserveAspectRatio", "none");
+    const vr = cam.video.getBoundingClientRect(), pr = ov.parentElement.getBoundingClientRect();
+    ov.style.left = (vr.left - pr.left) + "px"; ov.style.top = (vr.top - pr.top) + "px";
+    ov.style.width = vr.width + "px"; ov.style.height = vr.height + "px";
     const c = cam.corners, r = Math.max(18, w * 0.028), sw = Math.max(3, w * 0.004);
     const [X0, Y0, X1, Y1] = V.GRID;
     const watch = {};
@@ -1386,8 +1391,9 @@ function recommend(state) {
   function bindDrag() {
     const ov = $("#camOverlay");
     let idx = -1;
+    // 座標基準は必ず video 要素の矩形（SVGの箱とズレていても正しく変換する）
     const toVideo = (ev) => {
-      const r = ov.getBoundingClientRect();
+      const r = cam.video.getBoundingClientRect();
       return { x: (ev.clientX - r.left) / r.width * vw(), y: (ev.clientY - r.top) / r.height * vh() };
     };
     ov.addEventListener("pointerdown", (ev) => {
