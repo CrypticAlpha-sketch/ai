@@ -1620,6 +1620,28 @@ function recommend(state) {
     return { width: GW, height: GH, data: out, isGrid: true };
   }
   // 学習済みテンプレート（実機映像から作成）を読み込む
+  // どの数字とどの数字が似ているかを、辞書そのものから測っておく。
+  // 実測では 4と6 が 0.878 でいちばん紛らわしく、5と8、1と2、2と3 が続く。
+  const CONFUSE_AT = 0.79;
+  let confusePairs = null;
+  function buildConfuse(store) {
+    const set = {};
+    for (let a = 0; a <= 9; a++) for (let b = a + 1; b <= 9; b++) {
+      let mx = -9;
+      for (const t of store[a] || []) for (const u of store[b] || []) { const q = dot(t, u); if (q > mx) mx = q; }
+      if (mx >= CONFUSE_AT) { set[a + "-" + b] = true; set[b + "-" + a] = true; }
+    }
+    confusePairs = set;
+  }
+  // 2つの数値が「1桁だけ、しかも紛らわしい組で」違うか
+  function confusable(a, b) {
+    const x = String(a), y = String(b);
+    if (!confusePairs || x.length !== y.length) return false;
+    let diff = -1;
+    for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) { if (diff >= 0) return false; diff = i; }
+    return diff >= 0 && !!confusePairs[x[diff] + "-" + y[diff]];
+  }
+
   function loadStore(packed) {
     const store = createStore();
     for (const ch of Object.keys(packed)) {
@@ -1632,10 +1654,11 @@ function recommend(state) {
         store[ch].push(Array.from(v));
       }
     }
+    buildConfuse(store);
     return store;
   }
 
-  return { GRID, EGRID, LETTERS, CFG, PW, PH, GW, GH, cellBox, scanCell, createStore, learn, readGroup, scoreText,
+  return { GRID, EGRID, confusable, LETTERS, CFG, PW, PH, GW, GH, cellBox, scanCell, createStore, learn, readGroup, scoreText,
     normalize, dot, bestFree, digitScore, readAll, probe, rectifyGrid, homography, loadStore,
     MIN_GROUP, MIN_GROUP_ONE };
 });
@@ -1747,7 +1770,11 @@ function recommend(state) {
   /* ---------- 枠の自動調整 ----------
      板（羊皮紙）の明るいクリーム色の面を探し、その外接矩形から四隅を割り出す。
      鉱石は橙、ゲージは黒、床はもっと暗いベージュなので、この色条件だと板だけが残る。 */
-  const PANEL_RATIO = [[-0.0238, -0.2100], [1.0104, -0.1989], [1.0062, 1.1394], [-0.0021, 1.0762]];
+  // 板は画面に対してほぼ正対しており、実測した5つの取り込みすべてで
+  // 上下辺の傾きは0.5度未満、左右の高さの差も2%以内だった。
+  // そのため自動調整は傾きのない長方形を返す。
+  const PR_U0 = -0.0130, PR_U1 = 1.0083, PR_V0 = -0.2045, PR_V1 = 1.1078;
+  const PANEL_RATIO = [[PR_U0, PR_V0], [PR_U1, PR_V0], [PR_U1, PR_V1], [PR_U0, PR_V1]];
 
   function findPanelBox() {
     const v = cam.video;
@@ -2084,8 +2111,15 @@ function recommend(state) {
             }
           } else {
             const floor = v.digits === 1 ? V.MIN_GROUP_ONE : V.MIN_GROUP;
-            const sure = (v.n >= 3 && meanBest >= floor && lead >= 0.012)
-              || (v.n >= 2 && meanBest >= 0.84 && lead >= 0.04);
+            // 1位と2位が「4と6」のように紛らわしい組で競っているときは、
+            // わずかな差で決め打ちせず、はっきり離れるまで待つ。
+            // 黙って別の数字を入れるより、読めないままのほうが害が小さい。
+            // 一致度がそこそこ止まりのときだけ厳しくする。はっきり読めているなら待たない。
+            const risky = second !== null && meanBest < 0.88 && V.confusable(+best, +second);
+            const need = risky ? 0.04 : 0.012;
+            const sure = (v.n >= 3 && meanBest >= floor && lead >= need)
+              || (v.n >= 2 && meanBest >= 0.84 && lead >= Math.max(0.04, need));
+            if (!sure && risky && v.n >= 5) label = `${best}? ${second}? 判別中`;
             if (sure) done.push({ idx: i, letter: g.letter, val: +best, vecs: v.vecs, box: g.box, lead: lead });
           }
         } else {
