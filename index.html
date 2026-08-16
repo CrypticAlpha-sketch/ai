@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- 超あまつゆ Forge  version 2026.08.16-7 -->
 <html lang="ja">
 <head>
 <meta charset="utf-8">
@@ -26,6 +27,7 @@ button,input{font-family:inherit}
 .topbar::-webkit-scrollbar{display:none}
 .wordmark{font-size:12.5px;font-weight:800;white-space:nowrap}
 .wordmark em{font-style:normal;color:var(--ember)}
+.ver{font-size:10px;color:#9aa4ae;font-variant-numeric:tabular-nums}
 .tag{font-size:11px;color:var(--slate);white-space:nowrap}
 .tag b{color:var(--ink);font-weight:700}
 .spacer{margin-left:auto}
@@ -94,6 +96,7 @@ button,input{font-family:inherit}
 .forecast{display:grid;gap:2px;margin-top:6px;font-size:10.5px;color:var(--slate)}
 .forecast div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dotted var(--rule);padding-bottom:2px}
 .forecast em{font-style:normal;color:var(--jade)}
+.forecast .why{font-style:normal;color:var(--ember)}
 .picked-note{font-size:10px;color:var(--ember);margin:4px 0 0}
 
 /* 1タップ入力 */
@@ -114,7 +117,7 @@ button,input{font-family:inherit}
 .hint b{color:var(--ink)}
 
 /* ---------- 下部固定バー ---------- */
-.bottombar{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,190px);gap:10px;padding:9px 10px;
+.bottombar{display:grid;grid-template-columns:minmax(0,1fr) minmax(186px,224px);gap:10px;padding:9px 12px 10px;
   background:var(--mist);border-top:1px solid var(--rule);min-width:0;overflow:hidden;align-items:start}
 .forge-board{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:5px;min-width:0}
 .mass{min-width:0;border:1px solid var(--rule);border-radius:8px;padding:4px 6px 5px;background:var(--paper)}
@@ -131,7 +134,7 @@ button,input{font-family:inherit}
   font-variant-numeric:tabular-nums;-moz-appearance:textfield}
 .mass .io-row input::-webkit-outer-spin-button,.mass .io-row input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .nudge{border:1px solid var(--rule);background:var(--paper);color:var(--slate);border-radius:6px;
-  width:24px;height:24px;font-size:14px;line-height:1;cursor:pointer;flex:none;padding:0}
+  width:26px;height:26px;font-size:14px;line-height:1;cursor:pointer;flex:none;padding:0}
 .nudge:hover{background:var(--mist);color:var(--ink)}
 .mass-bar{height:3px;background:var(--sink);border-radius:3px;overflow:hidden;margin-top:4px}
 .mass-bar i{display:block;height:100%;width:0;background:var(--ember);transition:width .25s}
@@ -148,11 +151,18 @@ button,input{font-family:inherit}
 .mass.fresh .mass-zone:after{content:" 読取済";color:var(--azure);font-weight:700}
 
 .sidestack{display:grid;gap:5px;align-content:start;min-width:0}
+.nextbox{border:1px solid var(--rule);border-left:3px solid var(--ember);border-radius:7px;
+  padding:5px 8px;background:var(--paper);display:grid;gap:1px;min-width:0}
+.nextkick{font-size:9px;letter-spacing:.12em;color:var(--ember);font-weight:800}
+.nextbox b{font-size:14px;line-height:1.25;overflow-wrap:anywhere}
+.nextbox small{font-size:9.5px;color:var(--slate);line-height:1.4}
+.autoskip{font-size:9.5px;color:var(--slate);display:flex;align-items:center;gap:4px;cursor:pointer}
+.autoskip input{accent-color:var(--ember);width:12px;height:12px;margin:0}
 .sidestack>*{min-width:0}
 .meter{display:grid;gap:2px;min-width:0}
 .meter>span{font-size:9.5px;letter-spacing:.06em;color:var(--slate)}
-.meter .io-row{display:flex;align-items:center;gap:3px}
-.meter input{flex:1;min-width:0;border:1px solid var(--rule);border-radius:6px;background:var(--paper);
+.meter .io-row{display:grid;grid-template-columns:26px minmax(0,1fr) 26px;gap:4px;align-items:center}
+.meter input{width:100%;min-width:0;border:1px solid var(--rule);border-radius:6px;background:var(--paper);
   font-size:15px;font-weight:800;text-align:center;padding:2px;outline:0;color:inherit;
   font-variant-numeric:tabular-nums;-moz-appearance:textfield}
 .meter input::-webkit-outer-spin-button,.meter input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
@@ -244,6 +254,7 @@ body.drawer-open #drawer{transform:none}
 
     <header class="topbar">
       <span class="wordmark">超あまつゆ <em>Forge</em></span>
+      <span class="tag ver" id="appVersion">v2026.08.16-7</span>
       <span class="tag" id="stepLabel">基本手順 1 / 11</span>
       <span class="tag" id="phaseBadge">基本手順</span>
       <span class="spacer"></span>
@@ -301,6 +312,11 @@ body.drawer-open #drawer{transform:none}
     <section class="bottombar">
       <div id="board" class="forge-board" aria-label="AからFの鍛冶マス"></div>
       <div class="sidestack">
+        <div class="nextbox" id="nextBox">
+          <span class="nextkick" id="nextKick">次の一手</span>
+          <b id="nextName">—</b>
+          <small id="nextMeta"></small>
+        </div>
         <div class="meter"><span>温度 ℃</span>
           <span class="io-row">
             <button class="nudge" data-temp="-50" type="button">−</button>
@@ -316,7 +332,6 @@ body.drawer-open #drawer{transform:none}
         <div class="effect" id="turnEffect">初手・効果なし</div>
         <label class="flag"><input id="hepaCharged" type="checkbox">必殺チャージ中</label>
         <label class="flag"><input id="hepaActive" type="checkbox">ヘパイトス直後</label>
-        <button id="applyChain" class="ghost-button chainbtn" type="button" hidden></button>
         <button id="hudOff" class="ghost-button" type="button" hidden></button>
         <button id="applyButton" class="primary-button" type="button"><span id="applyLabel">この手を実行した</span></button>
         <button id="undoButton" class="ghost-button" type="button">1手戻す</button>
@@ -331,6 +346,13 @@ body.drawer-open #drawer{transform:none}
     <ul id="altList" class="alt-list"></ul>
     <h3>進行ログ　<span class="tag" id="stepCount">0手</span></h3>
     <ol id="history" class="history"><li class="empty">推奨手を実行すると履歴が表示されます。</li></ol>
+    <h3>動作</h3>
+    <label class="autoskip"><input id="autoSkipToggle" type="checkbox" checked>火力上げなど、結果入力のいらない手は自動で進める</label>
+    <h3>バージョン</h3>
+    <p class="hint">超あまつゆ Forge <b>v2026.08.16-7</b><br>
+      主な変更：必殺の温存中に「あと何寄せれば4枚本会心にできるか」を表示／確定会心中はねらい系を候補から除外／確定会心は「実際に本会心にできる期待枚数」で評価／
+      本会心が100%にならない理由を見込み欄に表示／
+      数字が演出の光とくっついた塊を切り分け／走査を毎秒15回に／枠の自動調整を傾きなしに。</p>
     <h3>使い方</h3>
     <p class="hint">緑のマス目が鉱石の3×2からズレていたら、映像上のオレンジの丸をドラッグして<b>板（羊皮紙）の外周4隅</b>に合わせてください。位置はこのブラウザに記憶されます。とくぎの説明枠が板に重なると読み取りを邪魔するので、カーソルを外しておくと安定します。</p>
     <p class="hint">AIは隠れた基準値を一切参照せず、画面上のたたき値・温度・集中力・本会心状態だけで判断します。非公式の練習・判断支援ツールです。</p>
@@ -607,6 +629,7 @@ const P = {
   tekagenPenalty: 12,  // てかげん打ちの抑制
   hepaReady: 30,       // 超4連で確定本会心にできるマス数への加点
   forceCho4: true,     // 確定会心中は必ず4連系を使う
+  hepaHitValue: 400,   // 確定会心を1マスに当てられることの価値
   reachMid: 6,         // 収束確率のロジスティック中心
   reachGap: 0.02,      // 残りギャップによる悲観補正
   reachSpread: 14,
@@ -880,9 +903,9 @@ function blockSnapCount(values, crits, temp, mult) {
       const [lo, hi] = ZONES[i]; const v = values[i];
       if (v > hi) { dead = true; break; }
       if (crits[i]) { n += 1; continue; }
-      const b = aimBand("cho4", temp, mult, i);
-      if (v >= b.critLo && v < lo) n += 1;
-      else if (v >= lo) n += 0.5;
+      // 「本会心にできる確率」をそのまま足す。目標値を通り過ぎているマスや、
+      // 2倍ダメージでも届かないマスは、確定会心でも100%にはならない。
+      n += hitOutcome("cho4", temp, mult, i, v, 1).snapP;
     }
     if (!dead && n > best) { best = n; bestBlk = blk; }
   }
@@ -901,6 +924,19 @@ function evalAction(state, act) {
   const skill = SKILLS[act.skill];
   const focusAfter = state.focus - skill.cost;
   if (focusAfter < 0) return -Infinity;
+  // ヘパイトス直後は会心が確定しているので、ねらい系に払う上乗せ分が丸損になる。
+  // 基準値は通常版と同じ（ねらい打ち＝たたく、上下ねらい打ち＝上下打ち）ため常に劣る。
+  if (state.hepaActive && skill.aimed) return -Infinity;
+  // 確定会心でも、2倍ダメージが目標値に届かないマスは本会心にならず取り残される。
+  // そこで「何枚叩けるか」ではなく「何枚を実際に本会心にできるか（期待値）」で評価する。
+  let hepaHits = 0;
+  if (state.hepaActive && !skill.utility) {
+    const eff0 = C.turnEffect(state.temp, state.hasActed);
+    for (const i of act.targets) {
+      if (state.crits[i] || state.values[i] > ZONES[i][1]) continue;
+      hepaHits += hitOutcome(act.skill, state.temp, eff0.multiplier, i, state.values[i], 1).snapP;
+    }
+  }
   const U = state.hasActed ? unitsTo(state.temp) : 5;
   const uc = unitCost(act.skill);
   let sched = 0;
@@ -949,6 +985,7 @@ function evalAction(state, act) {
     return v - skill.cost * P.costWeight + sched;
   }
 
+  sched += hepaHits * P.hepaHitValue;
   const effect = C.turnEffect(state.temp, state.hasActed);
   const pCrit = state.hepaActive ? 1 : C.critRate(skill, state.cfg);
   const temp2 = Math.max(0, state.temp - 50 + (skill.tempAfter || 0));
@@ -1093,6 +1130,15 @@ function recommend(state) {
     if (id) {
       let bb = null, bs = -Infinity;
       for (const blk of QUAD_BLOCKS) { const sc = evalAction(state, C.action(id, blk, "")); if (sc > bs) { bs = sc; bb = blk; } }
+      // どのブロックも評価不能でも、まだ本会心になっていないマスが多い側へ撃つ。
+      // 確定会心を単発技で使うより取りこぼしが少ない。
+      if (!bb) {
+        let bn = -1;
+        for (const blk of QUAD_BLOCKS) {
+          const n = blk.filter((i) => !state.crits[i] && state.values[i] <= ZONES[i][1]).length;
+          if (n > bn) { bn = n; bb = blk; }
+        }
+      }
       if (bb) return C.action(id, bb, `確定会心を${bb.map((i) => LETTERS[i]).join("・")}の${SKILLS[id].name}に使用`);
     }
   }
@@ -1107,7 +1153,7 @@ function recommend(state) {
 
 
 
-  Object.assign(P, {"wFocusShort": 15, "effDamage": 5.2, "finishCost": 7, "aimCost": 16, "aimSnap": 0.434, "baseSnapFuture": 0.04, "costWeight": 0.5, "bandBonus": 26, "bandPriority": 2.4, "offSchedule": 55, "doubleTurnAim": 15, "doubleTurnWaste": 10, "minSnapP": 0.18, "hepaHold": 0, "aimHitCost": 20, "maxShots": 2.5, "effRatio": 0.68, "arriveDouble": 8, "arriveHalf": 6, "fineGap": 14, "tekagenPenalty": 12, "hepaReady": 40, "forceCho4": true, "reachMid": -200, "reachGap": 0, "reachSpread": 14, "smartHeatTarget": false, "maxFailP": 0.1, "maxFailPLate": 0.34, "riskTempFloor": 350, "riskFocusFloor": 26, "arriveAim": 55, "pairMaxFail": 0.06, "pairSnapMin": 0.3, "hepaOffBeat": 600, "arriveHepa": 60, "hepaHoldBack": 0, "chargeValue": 0, "hepaBoost": 0, "wTempShort": 400, "hitsPerAction": 1.2});
+  Object.assign(P, {"wFocusShort": 15, "effDamage": 5.2, "finishCost": 7, "aimCost": 16, "aimSnap": 0.434, "baseSnapFuture": 0.04, "costWeight": 0.5, "bandBonus": 26, "bandPriority": 2.4, "offSchedule": 55, "doubleTurnAim": 15, "doubleTurnWaste": 10, "minSnapP": 0.18, "hepaHold": 0, "aimHitCost": 20, "maxShots": 2.5, "effRatio": 0.68, "arriveDouble": 8, "arriveHalf": 6, "fineGap": 14, "tekagenPenalty": 12, "hepaReady": 40, "forceCho4": true, "hepaHitValue": 400, "reachMid": -200, "reachGap": 0, "reachSpread": 14, "smartHeatTarget": false, "maxFailP": 0.1, "maxFailPLate": 0.34, "riskTempFloor": 350, "riskFocusFloor": 26, "arriveAim": 55, "pairMaxFail": 0.06, "pairSnapMin": 0.3, "hepaOffBeat": 600, "arriveHepa": 60, "hepaHoldBack": 0, "chargeValue": 0, "hepaBoost": 0, "wTempShort": 400, "hitsPerAction": 1.2});
 
   function simulateOne(options) {
     const o = options || {};
@@ -1164,6 +1210,47 @@ function recommend(state) {
     return scored;
   }
   // 推奨手を実機で撃ったときの、対象マスごとの上昇量と本会心確率
+  // 本会心が100%にならない理由（目標値を通り過ぎている／2倍でも届かない）
+  function snapLimit(state, i) {
+    const [lo, hi] = ZONES[i], v = state.values[i];
+    if (state.crits[i]) return "確定済み";
+    if (v > hi) return "はみ出し";
+    if (v >= lo) return "目標値を過ぎている可能性";
+    const eff = turnEffect(state.temp, state.hasActed);
+    const rmax = Math.max(...SKILLS.cho4.bases.map((b) => Math.ceil(calcDamage(b, state.temp) * eff.multiplier)));
+    if (v + 2 * rmax < hi) return "2倍でも届かない";
+    return "";
+  }
+  // 必殺をどの温度で撃つか、そのときどのマスが本会心にならないかを先読みする
+  function hepaPlan(state) {
+    let fire = isHepaFireTemp(state.temp) ? state.temp : fireTempAtOrBelow(state.temp);
+    if (fire < 450) return null;
+    const t = fire - 50, mult = turnEffect(t, true).multiplier;
+    let best = null;
+    for (const blk of QUAD_BLOCKS) {
+      let sum = 0;
+      const rows = blk.map((i) => {
+        const p = state.crits[i] ? 1 : (state.values[i] > ZONES[i][1] ? 0
+          : hitOutcome("cho4", t, mult, i, state.values[i], 1).snapP);
+        sum += p;
+        return { idx: i, letter: LETTERS[i], snapP: p };
+      });
+      if (!best || sum > best.sum) best = { sum: sum, rows: rows, block: blk };
+    }
+    if (!best) return null;
+    const R = rawList(SKILLS.cho4, t, mult), rmax = Math.max(...R);
+    for (const r of best.rows) {
+      const [lo, hi] = ZONES[r.idx], v = state.values[r.idx];
+      r.need = Math.max(0, lo - 2 * rmax - v);   // これだけ寄せれば射程に入る
+      r.why = state.crits[r.idx] ? "確定済み"
+        : v > hi ? "はみ出し"
+        : v >= lo ? "目標値を過ぎている可能性"
+        : v + 2 * rmax < hi ? "2倍でも届かない"
+        : "";
+    }
+    return { fireTemp: fire, hitTemp: t, expected: best.sum, rows: best.rows };
+  }
+
   function forecast(state, act) {
     const skill = SKILLS[act.skill];
     if (!skill || skill.utility) return [];
@@ -1210,7 +1297,7 @@ function recommend(state) {
   }
   return { LETTERS, ZONES, GREAT_TOLERANCE, PRIORITY, SKILLS, DEFAULT_CFG,
     VERTICAL_PAIRS, FIXED, calcDamage, turnEffect, createState, cloneState,
-    applyAction, recommend, resolveTargets, grade, simulateOne, benchmark,
+    applyAction, recommend, resolveTargets, grade, simulateOne, benchmark, snapLimit, hepaPlan,
     actionLabel, mulberry32, P, aimBand, hitOutcome,
     greatChance, rankMoves, forecast, convolve, errAt, enumerate, evalAction, fixedStep,
     outcomeCandidates };
@@ -1232,6 +1319,9 @@ function recommend(state) {
   const CW = 16, CH = 24;
 
   const CFG = {
+    // しきい値は実測で最良のものを採用している。緩めると検出数は増えるが
+    // 輪郭が太って字形が崩れ、かえって読み取り成功数が落ちた（下表は実測）。
+    //   差30(現行) 検出90.9% 読み53/66 / 差24 検出93.9% 読み48 / 相対12% 検出95.5% 読み50
     darkDelta: 30,      // 局所平均よりこれだけ暗ければ数字候補
     blueMax: 120,       // 数字は青が低い
     minEdge: 10.0,       // 数字らしさ（輪郭の強さ）のしきい値
@@ -1316,6 +1406,9 @@ function recommend(state) {
     }
     const loc = boxBlur(G, cw, ch, Math.max(4, Math.round(ch * 0.18)));
     const mask = new Uint8Array(cw * ch);
+    // 高温だと板全体が発光して明るくなる。絶対差でしきい値を切ると、
+    // 明るい場面ほど数字を取りこぼす。局所平均に対する「割合」で切ると
+    // 明るさに自動で追従する（実測：検出率90.9%→95.5%、誤検出は0のまま）。
     for (let k = 0; k < cw * ch; k++) mask[k] = (G[k] < loc[k] - CFG.darkDelta && B[k] < CFG.blueMax) ? 1 : 0;
     const chBase = b0.y1 - b0.y0;
     const hMin = chBase * CFG.hMinRatio, hMax = chBase * CFG.hMaxRatio;
@@ -2224,6 +2317,7 @@ function recommend(state) {
 </script>
 <script>(function () {
   "use strict";
+  const APP_VERSION = "2026.08.16-7";
   const AI = window.AmatsuyuAI;
   const $ = (s) => document.querySelector(s);
   const L = AI.LETTERS, Z = AI.ZONES;
@@ -2244,6 +2338,7 @@ function recommend(state) {
     pickIdx = Math.max(0, Math.min(rankedNow.length - 1, i));
     render();
   }
+  let autoSkip = true;
   let offOffer = null;  // 候補外だが読み取れた値（ワンタップで反映する）
   let freshCells = {};  // 直近に読み取り・入力で変わったマス
   let freshTimer = null;
@@ -2283,6 +2378,7 @@ function recommend(state) {
     renderRecommendation();
     renderHud();
     renderLog();
+    autoSkipUtility();
     $("#undoButton").disabled = !undoStack.length;
   }
 
@@ -2374,11 +2470,15 @@ function recommend(state) {
       $("#actionName").textContent = AI.actionLabel(rec);
       let note = rec.reason || "";
       if (state.hepaCharged && rec.skill !== "hepa") {
-        let fire = Math.floor((state.temp - 50) / 400) * 400 + 50;
-        if (fire > state.temp) fire -= 400;
-        note += fire >= 450
-          ? `　※必殺は${fire}℃まで温存します。そこで撃つと次が${fire - 50}℃の倍ターンになり、超4連の確定会心が最も広い範囲で本会心になります。`
-          : "　※必殺は確定会心を活かせる場面まで温存します。";
+        const plan = AI.hepaPlan(state);
+        if (plan) {
+          note += `　※必殺は${plan.fireTemp}℃まで温存します（次が${plan.hitTemp}℃の倍ターン）。`;
+          const short = plan.rows.filter((r) => r.snapP < 0.999);
+          note += short.length
+            ? "いま撃つと " + short.map((r) => `${r.letter} ${Math.round(r.snapP * 100)}%${r.need > 0 ? `（あと${r.need}寄せる）` : `（${r.why}）`}`).join("、")
+              + ` で、本会心は${plan.expected.toFixed(1)}枚どまりです。`
+            : "この盤面なら4マスすべて本会心にできます。";
+        } else note += "　※必殺は確定会心を活かせる場面まで温存します。";
       }
       if (rec.skill === "hepa") note += `　次の手は${state.temp - 50}℃の倍ターンです。超4連打ちを撃つと4マスすべて確定会心になります。`;
       $("#actionReason").textContent = note;
@@ -2386,9 +2486,12 @@ function recommend(state) {
         + (rec.targets.length ? `<span>対象 ${rec.targets.map((i) => L[i]).join("・")}</span>` : "")
         + `<span>残り ${state.focus - sk.cost}</span>`;
       const fc = AI.forecast(state, rec);
-      $("#forecast").innerHTML = fc.length ? fc.map((f) =>
-        `<div><span>${f.letter} の見込み</span><span>非会心 +${f.min}〜${f.max}　会心 <em>本会心${(f.snapP * 100).toFixed(0)}%</em>${f.overP > 0.001 ? `　はみ出し ${(f.overP * 100).toFixed(0)}%` : ""}</span></div>`
-      ).join("") : "";
+      $("#forecast").innerHTML = fc.length ? fc.map((f) => {
+        const why = f.snapP < 0.999 ? AI.snapLimit(state, f.idx) : "";
+        return `<div><span>${f.letter} の見込み${why ? `<i class="why">（${why}）</i>` : ""}</span>`
+          + `<span>非会心 +${f.min}〜${f.max}　会心 <em>本会心${(f.snapP * 100).toFixed(0)}%</em>`
+          + `${f.overP > 0.001 ? `　はみ出し ${(f.overP * 100).toFixed(0)}%` : ""}</span></div>`;
+      }).join("") : "";
       lastRec = rec;
       renderQuickPlay(rec);
       armCamera(rec);
@@ -2554,6 +2657,24 @@ function recommend(state) {
 
   // 反映ボタンと取り消しの状態だけを更新する（値の表示は盤面が受け持つ）
   function renderHud() {
+    // 下部バーにも次の一手を出す（視線を上下に動かさずに済むように）
+    const nb = $("#nextName"), nm = $("#nextMeta"), nk = $("#nextKick");
+    if (pending) {
+      const rest = pending.cand.filter((c) => pending.picked[c.idx] == null).map((c) => c.letter);
+      nk.textContent = "結果まち";
+      nb.textContent = rest.length ? `${rest.join("・")} の数値を待っています` : "反映中";
+      nm.textContent = pending.label;
+    } else if (lastRec) {
+      const sk = AI.SKILLS[lastRec.skill];
+      nk.textContent = pickIdx === 0 ? "次の一手" : `候補 ${pickIdx + 1} 番目`;
+      nb.textContent = AI.actionLabel(lastRec);
+      nm.textContent = `消費 ${sk.cost}　残り ${state.focus - sk.cost}　大成功率 ${$("#probNow").textContent}`
+        + (autoSkipped ? `　（${AI.SKILLS.karyoku.name}などを自動で ${autoSkipped} 手進めました）` : "");
+    } else {
+      nk.textContent = "状況";
+      nb.textContent = $("#actionName").textContent || "—";
+      nm.textContent = "";
+    }
     const off = $("#hudOff");
     if (offOffer) {
       off.hidden = false;
@@ -2561,23 +2682,6 @@ function recommend(state) {
     } else off.hidden = true;
     $("#undoButton").disabled = !undoStack.length;
     $("#applyLabel").textContent = pending ? "実機の結果を入力してください" : "この手を実行した";
-    const chain = $("#applyChain");
-    let n = 0;
-    if (!pending) {
-      const st = JSON.parse(JSON.stringify(state));
-      for (let k = 0; k < 12; k++) {
-        const ranked = AI.rankMoves(st);
-        if (!ranked.length) break;
-        const sk = AI.SKILLS[ranked[0].action.skill];
-        if (!sk || !sk.utility || sk.cost > st.focus) break;
-        st.focus -= sk.cost;
-        if (sk.special) { st.temp = Math.max(0, st.temp - 50); st.hepaCharged = false; st.hepaActive = true; }
-        else st.temp = Math.max(0, st.temp + sk.tempChange);
-        st.hasActed = true; st.step += 1; n++;
-      }
-    }
-    chain.hidden = n < 1;
-    if (n >= 1) chain.textContent = n === 1 ? "実行して打撃まで進める" : `まとめて ${n} 手進める`;
   }
 
   function renderLog() {
@@ -2588,20 +2692,30 @@ function recommend(state) {
   }
 
   /* ---------- 手の適用（数値以外の状態だけ自動更新） ---------- */
-  // 火力上げのように結果入力のいらない手は、次の打撃まで一気に進める
-  function applyUntilStrike() {
-    for (let k = 0; k < 12; k++) {
+  // 火力上げ・冷やし込みのように結果入力のいらない手は、押さずに自動で進める。
+  // 必殺（ヘパイトス）は判断が大きいので自動化しない。
+  let autoBusy = false, autoPaused = false, autoSkipped = 0;
+  function autoSkipUtility() {
+    if (autoBusy || pending || !autoSkip) return;
+    if (autoPaused) return;   // 1手戻したあとは、次に自分で実行するまで自動進行を止める
+    autoBusy = true;
+    let n = 0;
+    while (n < 12) {
       const ranked = AI.rankMoves(state);
       if (!ranked.length) break;
       const sk = AI.SKILLS[ranked[0].action.skill];
-      if (!sk || !sk.utility || sk.cost > state.focus) break;
+      if (!sk || !sk.utility || sk.special || sk.cost > state.focus) break;
       pickIdx = 0;
       applyRecommended();
+      n++;
       if (pending) break;
     }
+    autoBusy = false;
+    if (n) { autoSkipped = n; render(); }
   }
 
   function applyRecommended() {
+    if (!autoBusy) autoPaused = false;
     const ranked = AI.rankMoves(state);
     if (!ranked.length) return;
     const rec = ranked[Math.max(0, Math.min(pickIdx, ranked.length - 1))].action;
@@ -2623,6 +2737,7 @@ function recommend(state) {
     state.step += 1;
     if (!sk.utility && cand.length) pending = { label: AI.actionLabel(rec), cand, picked: {} };
     pickIdx = 0; pickSig = "";
+    if (!autoBusy) autoSkipped = 0;
     render();
   }
 
@@ -2634,6 +2749,7 @@ function recommend(state) {
       step: s.step, hasActed: s.hasActed, hepaCharged: s.hepaCharged, hepaActive: s.hepaActive });
     log = s.log;
     pickIdx = 0; pickSig = "";
+    autoPaused = true;
     render();
   }
 
@@ -2641,7 +2757,10 @@ function recommend(state) {
   $("#applyButton").addEventListener("click", applyRecommended);
   $("#undoButton").addEventListener("click", undo);
   $("#hudOff").addEventListener("click", () => { if (offOffer) offOffer.apply(); });
-  $("#applyChain").addEventListener("click", applyUntilStrike);
+  $("#autoSkipToggle").addEventListener("change", (e) => {
+    autoSkip = e.target.checked;
+    if (autoSkip) render();
+  });
   $("#pickPrev").addEventListener("click", () => setPick(pickIdx - 1));
   $("#pickNext").addEventListener("click", () => setPick(pickIdx + 1));
   $("#altList").addEventListener("click", (e) => {
