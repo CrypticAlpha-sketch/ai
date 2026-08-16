@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 超あまつゆ Forge  version 2026.08.16-13 -->
+<!-- 超あまつゆ Forge  version 2026.08.16-14 -->
 <html lang="ja">
 <head>
 <meta charset="utf-8">
@@ -294,7 +294,7 @@ body.drawer-open #drawer{transform:none}
 
     <header class="topbar">
       <span class="wordmark">超あまつゆ <em>Forge</em></span>
-      <span class="tag ver" id="appVersion">v2026.08.16-13</span>
+      <span class="tag ver" id="appVersion">v2026.08.16-14</span>
       <span class="tag" id="stepLabel">基本手順 1 / 11</span>
       <span class="tag" id="phaseBadge">基本手順</span>
       <span class="spacer"></span>
@@ -397,8 +397,8 @@ body.drawer-open #drawer{transform:none}
     <h3>動作</h3>
     <label class="autoskip"><input id="autoSkipToggle" type="checkbox" checked>基本手順のなかの火力上げは自動で進める（冷やしこみ・必殺・アドリブ帯は自動化しません）</label>
     <h3>バージョン</h3>
-    <p class="hint">超あまつゆ Forge <b>v2026.08.16-13</b><br>
-      主な変更：OCRを新しい映像フレームへ同期／静止フレームの重複投票を防止／最大30fps。</p>
+    <p class="hint">超あまつゆ Forge <b>v2026.08.16-14</b><br>
+      主な変更：未到達マスを最優先／到達済みだけの中央寄せを抑制／仕上げ用の集中力を温存。</p>
     <h3>使い方</h3>
     <p class="hint">緑のマス目が鉱石の3×2からズレていたら、映像上のオレンジの丸をドラッグして<b>板（羊皮紙）の外周4隅</b>に合わせてください。位置はこのブラウザに記憶されます。とくぎの説明枠が板に重なると読み取りを邪魔するので、カーソルを外しておくと安定します。</p>
     <p class="hint">AIは隠れた基準値を一切参照せず、画面上のたたき値・温度・集中力・本会心状態だけで判断します。非公式の練習・判断支援ツールです。</p>
@@ -1135,11 +1135,38 @@ function hepaReadiness(state) {
   return best;
 }
 
+/* ---------- 未到達マス保護 ---------- */
+// 成功範囲へまだ届いていないマスが1つでもある間は、そのマスを救えない
+// 「到達済みマスだけの中央寄せ」に集中力を使わない。全探索層・固定手順・
+// 必殺の対象選択で同じ判定を使い、局所的な誤差改善より全マス到達を優先する。
+function unreachedIndices(state) {
+  const out = [];
+  for (let i = 0; i < 6; i++) {
+    if (!state.crits[i] && state.values[i] < ZONES[i][0]) out.push(i);
+  }
+  return out;
+}
+function actionReachCount(state, act) {
+  if (!act || !act.targets) return 0;
+  let n = 0;
+  for (const i of act.targets) {
+    if (!state.crits[i] && state.values[i] < ZONES[i][0]) n++;
+  }
+  return n;
+}
+function completedOnlyAdjustment(state, act) {
+  const skill = act && SKILLS[act.skill];
+  return unreachedIndices(state).length > 0 && skill && !skill.utility
+    && act.targets && act.targets.length > 0 && actionReachCount(state, act) === 0;
+}
+
 /* ---------- 候補評価 ---------- */
 function evalAction(state, act) {
   const skill = SKILLS[act.skill];
   const focusAfter = state.focus - skill.cost;
   if (focusAfter < 0) return -Infinity;
+  // 未到達が残る間の「到達済みだけを叩く手」は、誤差が改善しても候補外。
+  if (completedOnlyAdjustment(state, act)) return -Infinity;
   // ヘパイトス直後は会心が確定しているので、ねらい系に払う上乗せ分が丸損になる。
   // 基準値は通常版と同じ（ねらい打ち＝たたく、上下ねらい打ち＝上下打ち）ため常に劣る。
   if (state.hepaActive && skill.aimed) return -Infinity;
@@ -1185,6 +1212,12 @@ function evalAction(state, act) {
 
   if (skill.utility) {
     const temp2 = skill.special ? Math.max(0, state.temp - 50) : Math.max(0, state.temp + skill.tempChange);
+    // 温度調整後に、未到達マスを成功範囲へ運ぶ推定集中力すら残らない手は使わない。
+    // 火力上げで必要集中力そのものが下がる場合は、上げた後の温度で再計算する。
+    if (unreachedIndices(state).length && skill.cost > 0) {
+      const reserve = needFocusFor(state.values, state.crits, temp2);
+      if (isFinite(reserve) && focusAfter < Math.ceil(reserve)) return -Infinity;
+    }
     let v = boardScore(state.values, state.crits, focusAfter, temp2);
     if (act.skill === "karyoku" && state.hepaCharged && !state.hepaActive && P.hepaBoost) {
       const fu = fireTempAtOrBelow(temp2), fn = fireTempAtOrBelow(state.temp);
@@ -1283,11 +1316,13 @@ function evalAction(state, act) {
 /* ---------- 候補列挙 ---------- */
 function enumerate(state) {
   const out = [];
+  const protectUnreached = unreachedIndices(state).length > 0;
   const free = (i) => (!state.crits[i] && state.values[i] <= ZONES[i][1]) || state.hepaActive;
   const add = (id, targets, reason) => {
     const s = SKILLS[id];
     if (!s || s.cost > state.focus) return;
     if (targets.some((i) => !free(i))) return;
+    if (protectUnreached && !s.utility && targets.length && !targets.some((i) => state.values[i] < ZONES[i][0] && !state.crits[i])) return;
     out.push(C.action(id, targets, reason));
   };
   for (let i = 0; i < 6; i++) {
@@ -1311,9 +1346,22 @@ function enumerate(state) {
   return out;
 }
 
+function protectFixedAction(state, act) {
+  if (!completedOnlyAdjustment(state, act)) return act;
+  let best = null, fallback = null, bestScore = -Infinity;
+  for (const candidate of enumerate(state)) {
+    if (actionReachCount(state, candidate) <= 0) continue;
+    if (!fallback) fallback = candidate;
+    const score = evalAction(state, candidate);
+    if (score > bestScore) { bestScore = score; best = candidate; }
+  }
+  const replacement = best || fallback;
+  return replacement ? { ...replacement, reason: "固定手順の対象は到達済みのため、未到達マスを優先" } : act;
+}
+
 function fixedStep(state) {
   const a = fixedFor(state)[state.step];
-  if (a.skill !== "netsu") return a;
+  if (a.skill !== "netsu") return protectFixedAction(state, a);
   let tgt;
   if (a.targets.length) tgt = a.targets;
   else if (P.smartHeatTarget) {
@@ -1329,11 +1377,12 @@ function fixedStep(state) {
   const effect = C.turnEffect(state.temp, state.hasActed);
   const rmax = Math.max(...rawList(SKILLS.netsu, state.temp, effect.multiplier));
   const safe = tgt.filter((i) => state.values[i] + rmax <= ZONES[i][1] && !state.crits[i]);
-  if (safe.length) return { ...a, targets: safe };
+  if (safe.length) return protectFixedAction(state, { ...a, targets: safe });
   const alt = enumerate(state).filter((c) => c.skill !== "netsu" && c.skill !== "hepa");
   let best = null, bs = -Infinity;
   for (const c of alt) { const s = evalAction(state, c); if (s > bs) { bs = s; best = c; } }
-  return best ? { ...best, reason: "倍熱風では必ずはみ出すため、安全な代替手に変更" } : { ...a, targets: tgt };
+  const chosen = best ? { ...best, reason: "倍熱風では必ずはみ出すため、安全な代替手に変更" } : { ...a, targets: tgt };
+  return protectFixedAction(state, chosen);
 }
 
 function recommend(state) {
@@ -1352,6 +1401,7 @@ function recommend(state) {
       if (!bb) {
         let bn = -1;
         for (const blk of QUAD_BLOCKS) {
+          if (unreachedIndices(state).length && !blk.some((i) => !state.crits[i] && state.values[i] < ZONES[i][0])) continue;
           const n = blk.filter((i) => !state.crits[i] && state.values[i] <= ZONES[i][1]).length;
           if (n > bn) { bn = n; bb = blk; }
         }
@@ -2865,7 +2915,7 @@ function recommend(state) {
 </script>
 <script>(function () {
   "use strict";
-  const APP_VERSION = "2026.08.16-13";
+  const APP_VERSION = "2026.08.16-14";
   const AI = window.AmatsuyuAI;
   const $ = (s) => document.querySelector(s);
   const L = AI.LETTERS, Z = AI.ZONES;
