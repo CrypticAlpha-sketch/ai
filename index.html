@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 超あまつゆ Forge  version 2026.08.16-11 -->
+<!-- 超あまつゆ Forge  version 2026.08.16-13 -->
 <html lang="ja">
 <head>
 <meta charset="utf-8">
@@ -294,7 +294,7 @@ body.drawer-open #drawer{transform:none}
 
     <header class="topbar">
       <span class="wordmark">超あまつゆ <em>Forge</em></span>
-      <span class="tag ver" id="appVersion">v2026.08.16-11</span>
+      <span class="tag ver" id="appVersion">v2026.08.16-13</span>
       <span class="tag" id="stepLabel">基本手順 1 / 11</span>
       <span class="tag" id="phaseBadge">基本手順</span>
       <span class="spacer"></span>
@@ -397,8 +397,8 @@ body.drawer-open #drawer{transform:none}
     <h3>動作</h3>
     <label class="autoskip"><input id="autoSkipToggle" type="checkbox" checked>基本手順のなかの火力上げは自動で進める（冷やしこみ・必殺・アドリブ帯は自動化しません）</label>
     <h3>バージョン</h3>
-    <p class="hint">超あまつゆ Forge <b>v2026.08.16-11</b><br>
-      主な変更：確認済みスクショによる教師あり学習／学習データの保存・移行／無反応理由の表示。</p>
+    <p class="hint">超あまつゆ Forge <b>v2026.08.16-13</b><br>
+      主な変更：OCRを新しい映像フレームへ同期／静止フレームの重複投票を防止／最大30fps。</p>
     <h3>使い方</h3>
     <p class="hint">緑のマス目が鉱石の3×2からズレていたら、映像上のオレンジの丸をドラッグして<b>板（羊皮紙）の外周4隅</b>に合わせてください。位置はこのブラウザに記憶されます。とくぎの説明枠が板に重なると読み取りを邪魔するので、カーソルを外しておくと安定します。</p>
     <p class="hint">AIは隠れた基準値を一切参照せず、画面上のたたき値・温度・集中力・本会心状態だけで判断します。非公式の練習・判断支援ツールです。</p>
@@ -1627,7 +1627,7 @@ function recommend(state) {
   }
 
   // パネル画像（RGBA ImageData 相当）から、あるマスの数字グループを探す
-  function scanCell(panel, i, minDigits) {
+  function scanCell(panel, i, minDigits, relaxed) {
     const W = panel.width, H = panel.height, d = panel.data;
     const b0 = cellBox(i, W, H, !!panel.isGrid);
     // 走査だけ左右に広げ、隣のマスの数字は中心位置で除外する
@@ -1646,9 +1646,12 @@ function recommend(state) {
     // 高温だと板全体が発光して明るくなる。絶対差でしきい値を切ると、
     // 明るい場面ほど数字を取りこぼす。局所平均に対する「割合」で切ると
     // 明るさに自動で追従する（実測：検出率90.9%→95.5%、誤検出は0のまま）。
-    for (let k = 0; k < cw * ch; k++) mask[k] = (G[k] < loc[k] - CFG.darkDelta && B[k] < CFG.blueMax) ? 1 : 0;
+    // 通常条件で見つからないときだけ使う緩和モード。候補値との照合と複数フレーム投票を
+    // 後段で必ず通すため、ここでは薄い数字や演出中の欠けた輪郭も拾う。
+    const darkDelta = relaxed ? 21 : CFG.darkDelta, blueMax = relaxed ? 165 : CFG.blueMax;
+    for (let k = 0; k < cw * ch; k++) mask[k] = (G[k] < loc[k] - darkDelta && B[k] < blueMax) ? 1 : 0;
     const chBase = b0.y1 - b0.y0;
-    const hMin = chBase * CFG.hMinRatio, hMax = chBase * CFG.hMaxRatio;
+    const hMin = chBase * (relaxed ? 0.13 : CFG.hMinRatio), hMax = chBase * (relaxed ? 0.46 : CFG.hMaxRatio);
     // 走査範囲の左右端に接している塊は、板の外にあるゲージ棒が切れて写ったもの。
     // 数字がここまではみ出すことはないので落とす。
     const atEdge = (o) => (b.x0 === 0 && o.x <= 1) || (b.x1 === W && o.x + o.w >= cw - 1);
@@ -1684,7 +1687,8 @@ function recommend(state) {
       for (const q of splitWide(o, 0)) raw.push(q);
     }
     const digits = raw
-      .filter((o) => o.h > hMin && o.h < hMax && o.w > 6 && o.w < o.h * 1.25 && o.n / (o.w * o.h) > 0.28 && !atEdge(o))
+      .filter((o) => o.h > hMin && o.h < hMax && o.w > (relaxed ? 4 : 6) && o.w < o.h * (relaxed ? 1.38 : 1.25)
+        && o.n / (o.w * o.h) > (relaxed ? 0.20 : 0.28) && !atEdge(o))
       .sort((p, q) => p.x - q.x);
     const groups = [];
     for (const o of digits) {
@@ -1693,8 +1697,8 @@ function recommend(state) {
         const l = g[g.length - 1];
         // 同じ数字を構成する桁は、高さも上端もほぼ揃う。ここを緩くすると
         // 鉱石の光の塊が桁として混ざり、2桁の数字が3桁に化ける。
-        if (Math.abs(o.y - l.y) < l.h * 0.22 && Math.abs(o.h - l.h) < l.h * 0.18
-            && o.x - (l.x + l.w) > -l.h * 0.15 && o.x - (l.x + l.w) < l.h * 0.55) { g.push(o); placed = true; break; }
+        if (Math.abs(o.y - l.y) < l.h * (relaxed ? 0.30 : 0.22) && Math.abs(o.h - l.h) < l.h * (relaxed ? 0.28 : 0.18)
+            && o.x - (l.x + l.w) > -l.h * 0.15 && o.x - (l.x + l.w) < l.h * (relaxed ? 0.72 : 0.55)) { g.push(o); placed = true; break; }
       }
       if (!placed) groups.push([o]);
     }
@@ -1712,7 +1716,7 @@ function recommend(state) {
           edge += Math.sqrt(gx * gx + gy * gy) / 2; cnt++;
         }
       edge = cnt ? edge / cnt : 0;
-      if (edge < CFG.minEdge) continue;
+      if (edge < (relaxed ? 7.0 : CFG.minEdge)) continue;
       // 数字のかたまりの中心がどのマスに属するかで振り分ける。
       // 端の列からはみ出した数字は、いちばん近い端のマスのものとして扱う。
       const cxp = b.x0 + x + wdt / 2, cyp = b.y0 + y + hgt / 2;
@@ -2062,10 +2066,11 @@ function recommend(state) {
   const $ = (s) => document.querySelector(s);
 
   const cam = {
-    stream: null, video: null, canvas: null, ctx: null, timer: null,
+    stream: null, video: null, canvas: null, ctx: null, timer: null, frameRequest: null, frameMode: "timer",
     corners: null, store: null, votes: {}, active: false,
     onRead: null, onOff: null, targets: [], fps: 30, measuredFps: 0, fpsFrames: 0, fpsStarted: 0,
-    lastGroups: [], shots: [], raw: null, seen: {}, missSeen: {}, learned: [], learningReady: false, dbPromise: null,
+    lastGroups: [], shots: [], raw: null, seen: {}, lowStreak: {}, executedAt: 0, missReported: false,
+    learned: [], learningReady: false, dbPromise: null,
     readIdx: {}, off: {}, lock: {}
   };
   window.ForgeCam = cam;
@@ -2154,6 +2159,31 @@ function recommend(state) {
     loadLearning();
   };
 
+  function stopFrameLoop() {
+    if (cam.frameRequest != null && cam.video && typeof cam.video.cancelVideoFrameCallback === "function") {
+      try { cam.video.cancelVideoFrameCallback(cam.frameRequest); } catch (e) {}
+    }
+    cam.frameRequest = null;
+    if (cam.timer) { clearInterval(cam.timer); cam.timer = null; }
+  }
+  function startFrameLoop() {
+    stopFrameLoop();
+    if (cam.video && typeof cam.video.requestVideoFrameCallback === "function") {
+      cam.frameMode = "video-frame";
+      const next = () => {
+        if (!cam.stream) { cam.frameRequest = null; return; }
+        // コールバックは新しい映像フレームが届いたときだけ発火する。
+        // 同じ静止フレームを複数票として数えず、処理後に次の1枚を要求する。
+        tick();
+        if (cam.stream) cam.frameRequest = cam.video.requestVideoFrameCallback(next);
+      };
+      cam.frameRequest = cam.video.requestVideoFrameCallback(next);
+    } else {
+      cam.frameMode = "timer-fallback";
+      cam.timer = setInterval(tick, Math.round(1000 / cam.fps));
+    }
+  }
+
   cam.start = async function () {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
       notice("このブラウザは画面の取り込みに対応していません。PCのChromeまたはEdgeで開いてください。"); return false;
@@ -2183,10 +2213,9 @@ function recommend(state) {
       draw();
       // 記憶がない初回だけ、板を探して自動で合わせる
       if (!hadSaved) setTimeout(() => { if (cam.stream) cam.autoAlign(true); }, 500);
-      if (cam.timer) clearInterval(cam.timer);
       cam.measuredFps = 0; cam.fpsFrames = 0; cam.fpsStarted = performance.now();
-      cam.timer = setInterval(tick, Math.round(1000 / cam.fps));
-      status("OCR 30fpsで処理中。板の四隅にオレンジの丸を合わせてください。");
+      startFrameLoop();
+      status("OCRを映像フレーム同期（最大30fps）で処理中。板の四隅にオレンジの丸を合わせてください。");
       reason("waiting", "OCR待機", "とくぎ実行後、対象マスを30fpsで監視します。");
       return true;
     } catch (e) {
@@ -2203,7 +2232,7 @@ function recommend(state) {
     cam.targets = [];
     cam.lock = {}; cam.off = {}; cam.readIdx = {};
     cam.measuredFps = 0; cam.fpsFrames = 0; cam.fpsStarted = 0;
-    if (cam.timer) { clearInterval(cam.timer); cam.timer = null; }
+    stopFrameLoop();
     if (cam.stream) { cam.stream.getTracks().forEach((t) => t.stop()); cam.stream = null; }
     $("#camPanel").hidden = true;
     const btn = $("#camOpen");
@@ -2408,18 +2437,23 @@ function recommend(state) {
       const keep = {};
       for (const t of list) if (cam.votes[t.idx]) keep[t.idx] = cam.votes[t.idx];
       cam.votes = keep; cam.sig = sig;
-      cam.readIdx = {}; cam.off = {};
+      cam.readIdx = {}; cam.off = {}; cam.seen = {}; cam.lowStreak = {}; cam.executedAt = 0; cam.missReported = false;
     }
     cam.targets = list;
     cam.active = list.length > 0;
     if (cam.active) {
       const letters = list.map((t) => t.letter).join("・");
       status(`${letters} のダメージ表示を待っています`);
-      reason("waiting", "数字待ち", `${letters} を30fpsで監視中です。`);
+      reason("waiting", "監視準備", `${letters} を監視します。「この手を実行した」後から読み取り時間を判定します。`);
     }
     draw();
   };
-  cam.unwatch = function () { cam.active = false; cam.targets = []; cam.votes = {}; cam.sig = ""; cam.readIdx = {}; cam.off = {}; reason("waiting", "OCR待機", "次の数値入力が必要なときに自動で監視します。"); draw(); };
+  cam.unwatch = function () { cam.active = false; cam.targets = []; cam.votes = {}; cam.sig = ""; cam.readIdx = {}; cam.off = {}; cam.executedAt = 0; reason("waiting", "OCR待機", "次の数値入力が必要なときに自動で監視します。"); draw(); };
+  cam.markExecuted = function () {
+    cam.executedAt = Date.now(); cam.missReported = false; cam.seen = {}; cam.lowStreak = {}; cam.votes = {};
+    const letters = cam.targets.map((t) => t.letter).join("・");
+    if (letters) reason("waiting", "表示待ち", `${letters} の数字表示を30fpsで待っています。`);
+  };
 
   // 画面取り込みは再取得のたびに共有ダイアログが出るので、自動では取り直さない
   let stalls = 0;
@@ -2583,7 +2617,8 @@ function recommend(state) {
     const testStore = V.loadStore(window.FORGE_TEMPLATES || {});
     const r = V.evaluateStore(testStore), pct = (x) => (x * 100).toFixed(1) + "%";
     const live = cam.stream ? (cam.measuredFps ? cam.measuredFps.toFixed(1) + "fps" : "計測中") : "未接続";
-    $("#ocrSummary").innerHTML = `<strong>${pct(r.accuracy)}</strong><span>${r.correct} / ${r.total}枚 正解・判定不能 ${r.rejected}枚<br>処理設定 ${cam.fps}fps／実測 <i id="ocrLiveFps">${live}</i></span>`;
+    const mode = cam.frameMode === "video-frame" ? "映像フレーム同期" : "タイマー互換";
+    $("#ocrSummary").innerHTML = `<strong>${pct(r.accuracy)}</strong><span>${r.correct} / ${r.total}枚 正解・判定不能 ${r.rejected}枚<br>${mode}・最大${cam.fps}fps／実測 <i id="ocrLiveFps">${live}</i></span>`;
     $("#ocrRows").innerHTML = r.perDigit.map((d) => {
       const misses = d.errors.length ? d.errors.slice(0, 3).map((e) => `${e.as}（${e.count}）`).join("、") : "なし";
       return `<tr><td><b>${d.digit}</b></td><td>${d.samples}</td><td>${pct(d.accuracy)}</td><td class="${d.errorRate ? "warn" : ""}">${pct(d.errorRate)}</td><td>${misses}</td></tr>`;
@@ -2637,7 +2672,12 @@ function recommend(state) {
       // ねらい打ちや半減ターンではダメージが1桁になる。
       // 候補に1桁の値があるときだけ、1桁のまとまりも読み取り対象にする。
       const minD = tg && tg.candidates.some((c) => c < 10) ? 1 : 2;
-      const gs = V.scanCell(grid, i, minD);
+      let gs = V.scanCell(grid, i, minD, false);
+      const strictFound = gs.length > 0;
+      // 演出で数字が薄い・欠けている瞬間は通常条件で拾えないため、監視対象だけ
+      // 緩和条件でもう一度探す。採用は後段の候補照合と投票を必ず通す。
+      if (!gs.length && tg && cam.executedAt) gs = V.scanCell(grid, i, minD, true);
+      if (strictFound && tg && !cam.executedAt) cam.executedAt = now0;
       // 実機のダメージ表示は数秒残るため、次の手が始まった直後に同じ数字を
       // もう一度読んでしまう。いちど読んだマスは「表示が消えた」のを確認するまで封じる。
       const lk = cam.lock[i];
@@ -2650,15 +2690,7 @@ function recommend(state) {
         }
       }
       if (!gs.length) {
-        if (tg) {
-          causes.miss.push(tg.letter);
-          if (!cam.missSeen[i] || now0 - cam.missSeen[i] > 3000) {
-            cam.missSeen[i] = now0;
-            const b = V.cellBox(i, grid.width, grid.height, true);
-            addShot(cropShot(grid, { x: b.x0, y: b.y0, w: b.x1 - b.x0, h: b.y1 - b.y0 }), tg.letter, "数字未検出", false,
-              { idx: i, reason: "not-detected", candidates: tg.candidates.slice(), onApply: cam.onRead, onCorrect: cam.onCorrect });
-          }
-        }
+        if (tg) { causes.miss.push(tg.letter); cam.lowStreak[i] = 0; }
         continue;
       }
       const g = gs.reduce((a, b) => (b.edge > a.edge ? b : a));
@@ -2667,6 +2699,8 @@ function recommend(state) {
       if (t) {
         const r = V.readAll(cam.store, g, t.candidates);
         if (r && Object.keys(r.scores).length) {
+          if (!cam.executedAt) cam.executedAt = now0;
+          cam.lowStreak[i] = 0;
           // フレームごとに勝者を決めず、候補ごとの一致度を足し込んでいく。
           // 1枚だと「2」と「3」が0.001差で入れ替わるので、数枚ぶんならすと安定する。
           const v = (cam.votes[i] = cam.votes[i] || { n: 0, acc: {}, cnt: {}, freeAcc: {}, freeN: {}, vecs: null });
@@ -2691,6 +2725,8 @@ function recommend(state) {
           const meanBest = mean(best);
           const meanSecond = second === null ? -9 : mean(second);
           const lead = meanBest - meanSecond;
+          const frameBest = r.scores[best] == null ? -9 : r.scores[best];
+          if (v.bestFrameScore == null || frameBest > v.bestFrameScore) { v.bestFrameScore = frameBest; v.bestVecs = r.vecs; }
           label = `${best}（${v.cnt[best]}枚 ${meanBest.toFixed(2)}）`;
 
           // 候補に縛らない読みのほうが明らかに良く、候補側の一致度も低いときは
@@ -2724,17 +2760,20 @@ function recommend(state) {
             const risky = second !== null && meanBest < 0.88 && V.confusable(+best, +second);
             const need = risky ? 0.04 : 0.012;
             const sure = (nb >= 3 && meanBest >= floor && lead >= need)
-              || (nb >= 2 && meanBest >= 0.84 && lead >= Math.max(0.04, need));
+              || (nb >= 2 && meanBest >= 0.84 && lead >= Math.max(0.04, need))
+              // 数字表示が極端に短くても、自由読みと候補読みが一致する非常に鮮明な1枚は採用する。
+              || (nb >= 1 && meanBest >= 0.91 && lead >= 0.08 && r.free && String(+r.free.text) === String(+best) && r.free.score >= 0.91);
             if (!sure && risky && nb >= 5) label = `${best}? ${second}? 判別中`;
-            if (sure) done.push({ idx: i, letter: g.letter, val: +best, vecs: v.vecs, box: g.box, lead: lead,
+            if (sure) done.push({ idx: i, letter: g.letter, val: +best, vecs: v.bestVecs || v.vecs, box: g.box, lead: lead,
               confidence: meanBest, candidates: t.candidates.slice(), onCorrect: cam.onCorrect });
             else causes.reading.push(g.letter);
           }
         } else {
           // 候補のどれとも一致しなかった → 画像を残して原因を追えるようにする
-          const now = Date.now();
-          if (!cam.seen[i] || now - cam.seen[i] > 2000) {
-            cam.seen[i] = now;
+          cam.lowStreak[i] = (cam.lowStreak[i] || 0) + 1;
+          // 単発の鉱石模様は保存しない。とくぎ実行後に数字らしい輪郭が2フレーム続いた場合だけ1枚残す。
+          if (cam.executedAt && cam.lowStreak[i] >= 2 && !cam.seen[i]) {
+            cam.seen[i] = true;
             const pr = V.probe(cam.store, g);
             addShot(cropShot(grid, g.box), g.letter,
               pr && pr.min >= 0.60 ? `候補外 ${+pr.text}` : "数字と判定できず", false,
@@ -2750,11 +2789,17 @@ function recommend(state) {
     cam.lastGroups = found;
     drawPreview(grid);
     if (cam.active) {
-      if (causes.outside.length) reason("error", "候補外", `${causes.outside.join("・")} は温度から計算した候補と一致しません。スクショで正解を指定できます。`);
-      else if (causes.low.length) reason("error", "低信頼度", `${causes.low.join("・")} の数字は見つかりましたが、桁または形を確定できません。`);
+      const elapsed = cam.executedAt ? now0 - cam.executedAt : 0;
+      if (!cam.executedAt) reason("waiting", "監視準備", `${cam.targets.map((t) => t.letter).join("・")} を監視中。「この手を実行した」後に判定します。`);
+      else if (causes.outside.length) reason("error", "候補外", `${causes.outside.join("・")} は温度から計算した候補と一致しません。スクショで正解を指定できます。`);
+      else if (causes.low.length) reason("error", "低信頼度", `${causes.low.join("・")} の数字らしい輪郭は見つかりましたが、桁または形を確定できません。`);
       else if (causes.locked.length) reason("warning", "前の表示待ち", `${causes.locked.join("・")} は前回の数字が消えるのを待っています。`);
       else if (causes.reading.length) reason("warning", "判別中", `${causes.reading.join("・")} の複数フレームを比較しています。`);
-      else if (causes.miss.length) reason("waiting", "数字未検出", `${causes.miss.join("・")} を30fpsで監視中。枠ずれ・エフェクト・カーソル重なりを確認してください。`);
+      else if (causes.miss.length && elapsed < 4500) reason("waiting", "表示待ち", `${causes.miss.join("・")} の数字表示を30fpsで待っています。通常画面は失敗画像として保存しません。`);
+      else if (causes.miss.length && !cam.missReported) {
+        cam.missReported = true;
+        reason("error", "読み取りなし", `${causes.miss.join("・")} で数字表示を確認できませんでした。枠位置を確認し、数値は手動入力してください。`);
+      }
     }
     // 読み取れたマスをまとめて反映（1フレームに複数マスでも取りこぼさない）
     for (const dn of done) {
@@ -2820,7 +2865,7 @@ function recommend(state) {
 </script>
 <script>(function () {
   "use strict";
-  const APP_VERSION = "2026.08.16-11";
+  const APP_VERSION = "2026.08.16-13";
   const AI = window.AmatsuyuAI;
   const $ = (s) => document.querySelector(s);
   const L = AI.LETTERS, Z = AI.ZONES;
@@ -3340,7 +3385,10 @@ function recommend(state) {
     state.hasActed = true;
     state.step += 1;
     log[log.length - 1].after = serialState(state);
-    if (!sk.utility && cand.length) pending = { label: AI.actionLabel(rec), cand, picked: {}, logIndex: log.length - 1 };
+    if (!sk.utility && cand.length) {
+      pending = { label: AI.actionLabel(rec), cand, picked: {}, logIndex: log.length - 1 };
+      const C = window.ForgeCam; if (C && C.stream && C.markExecuted) C.markExecuted();
+    }
     pickIdx = 0; pickSig = "";
     if (!autoBusy) autoSkipped = 0;
     render();
