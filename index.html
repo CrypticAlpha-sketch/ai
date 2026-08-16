@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 超あまつゆ Forge  version 2026.08.16-8 -->
+<!-- 超あまつゆ Forge  version 2026.08.16-11 -->
 <html lang="ja">
 <head>
 <meta charset="utf-8">
@@ -73,6 +73,16 @@ button,input{font-family:inherit}
 #camShots figcaption{font-size:9.5px;color:var(--slate);margin-top:1px;white-space:nowrap}
 #camShots figure.ok figcaption b{color:var(--jade)}
 #camShots figure.ng figcaption b{color:var(--crimson)}
+#camShots .shot-actions{display:flex;justify-content:center;gap:3px;margin-top:3px}
+#camShots .shot-actions button{min-height:23px;padding:2px 6px;border:1px solid var(--rule);border-radius:5px;background:#fff;color:var(--ink);font-size:9px;font-weight:700}
+#camShots figure.confirmed{opacity:.7}
+#camShots figure.confirmed img{border-color:var(--azure)}
+.ocr-state{display:flex;align-items:center;gap:7px;padding:5px 10px;border-bottom:1px solid var(--rule);background:#fff;font-size:10.5px;color:var(--slate)}
+.ocr-state[hidden]{display:none}
+.ocr-state b{flex:none;border-radius:99px;padding:2px 7px;background:var(--mist);color:var(--ink)}
+.ocr-state[data-kind="success"] b{background:#e6f6ef;color:#147a5d}
+.ocr-state[data-kind="warning"] b{background:#fff2db;color:#9a5c00}
+.ocr-state[data-kind="error"] b{background:#ffebed;color:var(--crimson)}
 
 /* ---------- 次の一手 ---------- */
 .rec{padding:8px 10px;border-bottom:1px solid var(--rule);overflow:auto;max-height:34dvh;min-width:0}
@@ -196,6 +206,9 @@ body.drawer-open #drawer{transform:none}
 .history li b{display:block;color:var(--ink);margin-bottom:1px}
 .history li small{color:var(--slate)}
 .history .empty{color:var(--slate);text-align:center;padding:14px;border-style:dashed}
+.drawer-actions{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.drawer-actions .wide{grid-column:1/-1}
+.saved-note{font-size:10px;color:var(--slate);line-height:1.55;margin:5px 0 0}
 .alt-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
 .alt-list li{display:flex;justify-content:space-between;gap:8px;align-items:center;border:1px solid var(--rule);
   border-radius:7px;padding:6px 9px;font-size:11.5px;cursor:pointer}
@@ -228,10 +241,37 @@ body.drawer-open #drawer{transform:none}
 .benchmark-scale i b{display:block;height:100%;width:0;border-radius:6px;background:var(--jade);transition:width .6s}
 .benchmark-scale i em{position:absolute;left:70%;top:-4px;width:2px;height:15px;background:var(--ember)}
 .threshold-note{font-size:9.5px;color:var(--slate)}
+.benchmark-progress{height:5px;background:var(--sink);border-radius:5px;overflow:hidden;margin:8px 0}
+.benchmark-progress i{display:block;height:100%;width:0;background:var(--azure);transition:width .15s}
+.fail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;margin-top:10px}
+.fail-grid div{border:1px solid var(--rule);border-radius:7px;padding:7px;font-size:9.5px;color:var(--slate)}
+.fail-grid b{display:block;color:var(--ink);font-size:15px}
+.route-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:10px}
+.route-table th,.route-table td{padding:5px 3px;border-bottom:1px solid var(--rule);text-align:right}
+.route-table th:first-child,.route-table td:first-child{text-align:left}
+.route-table tr.best{color:var(--jade);font-weight:800}
+.bench-actions{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:10px}
 .result-grade{font-size:38px}
 .result-details{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
 .result-details div{border:1px solid var(--rule);border-radius:7px;padding:7px;text-align:center;font-size:10px}
 .result-details b{display:block;font-size:14px}
+.ocr-modal{width:min(620px,calc(100% - 24px))}
+.ocr-summary{display:flex;align-items:baseline;gap:9px;margin:12px 0}
+.ocr-summary strong{font-size:36px;font-variant-numeric:tabular-nums;color:var(--jade)}
+.ocr-summary span{font-size:10.5px;color:var(--slate);line-height:1.55}
+.ocr-samples{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:8px 0 12px}
+.ocr-sample{border:1px solid var(--rule);border-radius:6px;padding:3px;text-align:center;background:var(--mist)}
+.ocr-sample canvas{display:block;width:100%;height:auto;image-rendering:pixelated;background:#fff;border-radius:3px}
+.ocr-sample b{font-size:10px}
+.ocr-table{width:100%;border-collapse:collapse;font-size:10px}
+.ocr-table th,.ocr-table td{padding:5px 4px;border-bottom:1px solid var(--rule);text-align:right}
+.ocr-table th:first-child,.ocr-table td:first-child{text-align:left}
+.ocr-table .warn{color:var(--crimson);font-weight:700}
+.learn-panel{margin-top:12px;padding:10px;border:1px solid var(--rule);border-radius:8px;background:var(--mist)}
+.learn-panel h3{margin:0 0 4px;font-size:13px}
+.learn-panel p{margin:3px 0;color:var(--slate);font-size:10.5px;line-height:1.55}
+.learn-actions{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.learn-actions button{min-height:30px;border:1px solid var(--rule);border-radius:6px;background:#fff;color:var(--ink);font-size:10px;font-weight:700;padding:5px 9px}
 
 /* ---------- 横に広い窓では左右に振り分ける ---------- */
 @media(min-width:900px) and (orientation:landscape){
@@ -254,7 +294,7 @@ body.drawer-open #drawer{transform:none}
 
     <header class="topbar">
       <span class="wordmark">超あまつゆ <em>Forge</em></span>
-      <span class="tag ver" id="appVersion">v2026.08.16-8</span>
+      <span class="tag ver" id="appVersion">v2026.08.16-11</span>
       <span class="tag" id="stepLabel">基本手順 1 / 11</span>
       <span class="tag" id="phaseBadge">基本手順</span>
       <span class="spacer"></span>
@@ -278,6 +318,7 @@ body.drawer-open #drawer{transform:none}
       <button id="camOpen" type="button">画面を取り込む</button>
       <button id="camAuto" type="button">枠を自動調整</button>
       <button id="camReset" type="button">枠リセット</button>
+      <button id="openOcrTest" type="button">OCR診断</button>
       <canvas id="camPreview"></canvas>
       <span id="camStatus">待機中</span>
       <span class="spacer"></span>
@@ -285,6 +326,7 @@ body.drawer-open #drawer{transform:none}
     </div>
 
     <p id="camNotice" hidden></p>
+    <div id="ocrState" class="ocr-state" data-kind="waiting"><b>OCR待機</b><span>とくぎ実行後、対象マスを30fpsで監視します。</span></div>
     <div id="camShots" hidden></div>
 
     <section class="rec">
@@ -346,13 +388,17 @@ body.drawer-open #drawer{transform:none}
     <ul id="altList" class="alt-list"></ul>
     <h3>進行ログ　<span class="tag" id="stepCount">0手</span></h3>
     <ol id="history" class="history"><li class="empty">推奨手を実行すると履歴が表示されます。</li></ol>
+    <div class="drawer-actions">
+      <button id="exportJson" class="ghost-button" type="button">ログをJSON保存</button>
+      <button id="exportCsv" class="ghost-button" type="button">ログをCSV保存</button>
+      <button id="clearSavedRuns" class="ghost-button wide" type="button">保存済みログを消去</button>
+    </div>
+    <p id="savedLogNote" class="saved-note">現在の進行は自動保存されます。</p>
     <h3>動作</h3>
     <label class="autoskip"><input id="autoSkipToggle" type="checkbox" checked>基本手順のなかの火力上げは自動で進める（冷やしこみ・必殺・アドリブ帯は自動化しません）</label>
     <h3>バージョン</h3>
-    <p class="hint">超あまつゆ Forge <b>v2026.08.16-8</b><br>
-      主な変更：必殺の温存中に「あと何寄せれば4枚本会心にできるか」を表示／確定会心中はねらい系を候補から除外／確定会心は「実際に本会心にできる期待枚数」で評価／
-      本会心が100%にならない理由を見込み欄に表示／
-      数字が演出の光とくっついた塊を切り分け／走査を毎秒15回に／枠の自動調整を傾きなしに。</p>
+    <p class="hint">超あまつゆ Forge <b>v2026.08.16-11</b><br>
+      主な変更：確認済みスクショによる教師あり学習／学習データの保存・移行／無反応理由の表示。</p>
     <h3>使い方</h3>
     <p class="hint">緑のマス目が鉱石の3×2からズレていたら、映像上のオレンジの丸をドラッグして<b>板（羊皮紙）の外周4隅</b>に合わせてください。位置はこのブラウザに記憶されます。とくぎの説明枠が板に重なると読み取りを邪魔するので、カーソルを外しておくと安定します。</p>
     <p class="hint">AIは隠れた基準値を一切参照せず、画面上のたたき値・温度・集中力・本会心状態だけで判断します。非公式の練習・判断支援ツールです。</p>
@@ -366,10 +412,40 @@ body.drawer-open #drawer{transform:none}
       <h2>1,000回の大成功率を実測</h2>
       <p class="modal-lead">同じ基本手順＋AIアドリブを、隠れ基準値・威力乱数・会心・必殺チャージを変えて再現します。固定シードなので結果は再現可能です。</p>
       <label class="bench-input"><span>開始集中力</span><input id="benchmarkFocus" type="number" value="253" min="150" max="400"></label>
-      <button id="runBenchmark" type="button" class="primary-button">1,000回を実行</button>
+      <div class="bench-actions">
+        <button id="runBenchmark" type="button" class="primary-button">1,000回を実行</button>
+        <button id="optimizeRoutes" type="button" class="ghost-button">固定ルートを比較</button>
+      </div>
+      <div class="benchmark-progress"><i id="benchmarkProgress"></i></div>
       <div id="benchmarkResult" class="benchmark-result idle"><strong>—</strong><span>まだ実行していません</span></div>
       <div class="benchmark-scale"><span>0%</span><i><b id="benchmarkBar"></b><em></em></i><span>100%</span></div>
       <p class="threshold-note">金色の線が目標の70%。</p>
+      <div id="failureBreakdown" class="fail-grid" hidden></div>
+      <div id="routeResults"></div>
+    </form>
+  </dialog>
+
+  <dialog id="ocrDialog" class="modal ocr-modal">
+    <form method="dialog" class="modal-card">
+      <button class="modal-close" value="close" aria-label="閉じる">×</button>
+      <p class="eyebrow">OCR QUALITY CHECK</p>
+      <h2>OCR精度診断</h2>
+      <p class="modal-lead">内蔵している実機由来の数字切り抜きを1枚ずつテスト対象にし、その画像を学習用から外して再判定します。全体正解率と数字別の誤認率を確認できます。</p>
+      <div id="ocrSummary" class="ocr-summary"><strong>—</strong><span>診断を準備しています</span></div>
+      <div id="ocrSamples" class="ocr-samples"></div>
+      <table class="ocr-table"><thead><tr><th>数字</th><th>画像数</th><th>正解率</th><th>誤認率</th><th>主な誤認先</th></tr></thead><tbody id="ocrRows"></tbody></table>
+      <p id="ocrCoverage" class="threshold-note"></p>
+      <section class="learn-panel">
+        <h3>実戦スクショ学習</h3>
+        <p id="ocrLearnSummary">確認済み画像を読み込んでいます。</p>
+        <p>画面下のスクショで「正解」または「訂正」を押した画像だけを学習します。OCR自身の予測を自動では正解扱いしません。</p>
+        <div class="learn-actions">
+          <button id="exportOcrLearning" type="button">学習データを書き出す</button>
+          <button id="importOcrLearning" type="button">学習データを読み込む</button>
+          <button id="clearOcrLearning" type="button">学習データを消去</button>
+          <input id="ocrLearningFile" type="file" accept="application/json,.json" hidden>
+        </div>
+      </section>
     </form>
   </dialog>
 
@@ -467,7 +543,8 @@ function createState(options) {
     history: [],
     crits: [false, false, false, false, false, false],
     hepaCharged: rng() < cfg.openingCharge,
-    hepaActive: false
+    hepaActive: false,
+    fixedRoute: o.fixedRoute || "auto"
   };
 }
 function cloneState(s) {
@@ -596,6 +673,22 @@ function grade(state) {
   const FIXED_M = FIXED.slice(0, 9);
   // 案L：10手目までは従来どおり
   const FIXED_L = FIXED.slice(0, 10);
+
+  // 固定手順も単一案に決め打ちせず、同一乱数・同一集中力で比較できるようにする。
+  // auto はベンチマークで選ばれた既定ルートを使い、UIから再最適化できる。
+  const FIXED_ROUTES = [
+    { id: "standard", name: "標準11手", steps: FIXED },
+    { id: "early9", name: "9手でAI移行", steps: FIXED_M },
+    { id: "early10", name: "10手でAI移行", steps: FIXED_L },
+    { id: "split-af", name: "A・F分散9手", steps: FIXED_N }
+  ];
+  const DEFAULT_AUTO_ROUTE = "standard";
+  function routeById(id) {
+    const key = id === "auto" || !id ? DEFAULT_AUTO_ROUTE : id;
+    return FIXED_ROUTES.find((r) => r.id === key) || FIXED_ROUTES[0];
+  }
+  function fixedFor(state) { return routeById(state && state.fixedRoute).steps; }
+  function fixedLength(state) { return fixedFor(state).length; }
 
 // 新AI（V3）: 隠れ基準値を参照せず、表示盤面のみで
 //  (1) 倍ターン(400の倍数)を狙う温度スケジュール
@@ -852,6 +945,129 @@ function boardScore(values, crits, focus, temp) {
   return sc + bandScoreOf(values, crits, temp);
 }
 
+/* ---------- 3～5手先の確率探索 ---------- */
+// ここでは温度ボーナス等の恣意的な点数を混ぜず、最終的に大成功へ届く推定確率だけを返す。
+function futureGreatProb(state) {
+  const exact = greatChance(state.values, state.crits);
+  if (exact != null) return exact;
+  const need = needFocusFor(state.values, state.crits, state.temp);
+  const needT = needTempFor(state.values, state.crits, state.temp);
+  if (!isFinite(need) || !isFinite(needT)) return 0;
+  const slack = state.focus - need, tempSlack = state.temp - needT;
+  if (state.focus < 5 || state.temp <= 0) return 0;
+  const plan = snapPlan(state.values, state.crits, slack, state.temp, tempSlack);
+  const dists = [];
+  for (let i = 0; i < 6; i++) {
+    if (state.crits[i]) { dists.push(SNAP_DIST); continue; }
+    const [lo, hi] = ZONES[i], v = state.values[i];
+    if (v > hi) return 0;
+    dists.push(predLater(i, v, slack, state.temp, plan[i]));
+  }
+  return Math.max(0, Math.min(1, convolve(dists)));
+}
+
+// 乱数結果を代表盤面へ圧縮する。はみ出し確率は survival に残し、探索値へ必ず反映する。
+function projectAction(state, act) {
+  const skill = SKILLS[act.skill];
+  if (!skill || skill.cost > state.focus) return null;
+  const s = C.cloneState(state);
+  s.focus -= skill.cost;
+  let survival = 1;
+  if (skill.utility) {
+    if (skill.special) { s.temp = Math.max(0, s.temp - 50); s.hepaCharged = false; s.hepaActive = true; }
+    else s.temp = Math.max(0, s.temp + skill.tempChange);
+  } else {
+    const eff = C.turnEffect(state.temp, state.hasActed);
+    const pc = state.hepaActive ? 1 : C.critRate(skill, state.cfg);
+    for (const i of act.targets) {
+      const o = hitOutcome(act.skill, state.temp, eff.multiplier, i, state.values[i], pc);
+      survival *= Math.max(0, 1 - o.failP);
+      const inP = o.err.reduce((a, b) => a + b, 0);
+      if (o.snapP > 0.50) {
+        s.values[i] = Math.round((ZONES[i][0] + ZONES[i][1]) / 2);
+        s.crits[i] = true;
+      } else if (o.belowP >= inP) s.values[i] = Math.max(state.values[i], Math.round(o.belowAvg));
+      else {
+        let bestErr = 0;
+        for (let e = 1; e < o.err.length; e++) if (o.err[e] > o.err[bestErr]) bestErr = e;
+        s.values[i] = Math.max(ZONES[i][0], Math.min(ZONES[i][1], Math.round((ZONES[i][0] + ZONES[i][1]) / 2) - bestErr));
+      }
+    }
+    s.temp = Math.max(0, s.temp - 50 + (skill.tempAfter || 0));
+    s.hepaActive = false;
+  }
+  s.hasActed = true; s.step += 1;
+  return { state: s, survival };
+}
+
+function searchDepthFor(state) {
+  if (state.focus >= 150 && state.temp >= 1000) return 5;
+  if (state.focus >= 65 && state.temp >= 400) return 4;
+  return 3;
+}
+// 深い層では全候補の重い評価を繰り返さず、温度調整・ねらい・微調整に絞って確率順に展開する。
+function rolloutPool(state, limit) {
+  const fixed = fixedFor(state);
+  if (state.step < fixed.length) {
+    const action = fixedStep(state), projected = projectAction(state, action);
+    return projected ? [{ action, projected, q: projected.survival * futureGreatProb(projected.state) }] : [];
+  }
+  const keep = new Set(["tataku", "tekagen", "nerai", "jakunerai", "jonerai", "netsu", "hiyashi", "hepa", "cho4"]);
+  const rows = [];
+  for (const action of enumerate(state)) {
+    if (!keep.has(action.skill)) continue;
+    const projected = projectAction(state, action); if (!projected) continue;
+    rows.push({ action, projected, q: projected.survival * futureGreatProb(projected.state) });
+  }
+  rows.sort((a, b) => b.q - a.q);
+  return rows.slice(0, limit || 2);
+}
+function beamProbability(afterRoot, depth) {
+  if (!afterRoot) return 0;
+  let frontier = [{ state: afterRoot.state, survival: afterRoot.survival }];
+  let best = 0;
+  for (let ply = 1; ply < depth && frontier.length; ply++) {
+    const next = [];
+    for (const node of frontier) {
+      const stop = greatChance(node.state.values, node.state.crits);
+      if (stop != null) best = Math.max(best, node.survival * stop);
+      for (const row of rolloutPool(node.state, 2)) {
+        const p = row.projected;
+        if (!p) continue;
+        const survival = node.survival * p.survival;
+        const q = survival * futureGreatProb(p.state);
+        next.push({ state: p.state, survival, q });
+        if (q > best) best = q;
+      }
+    }
+    next.sort((a, b) => b.q - a.q);
+    frontier = next.slice(0, 2);
+  }
+  for (const node of frontier) best = Math.max(best, node.survival * futureGreatProb(node.state));
+  return Math.max(0, Math.min(1, best));
+}
+function searchedMoves(state) {
+  const fixed = fixedFor(state), depth = searchDepthFor(state);
+  let roots;
+  if (state.step < fixed.length) roots = [{ a: fixedStep(state), h: 0 }];
+  else roots = enumerate(state).map((a) => ({ a, h: evalAction(state, a) }))
+    .filter((x) => isFinite(x.h)).sort((x, y) => y.h - x.h).slice(0, 7);
+  const out = roots.map((root, i) => {
+    const a = root.a;
+    const projected = projectAction(state, a);
+    const prob = i < 3 || roots.length === 1 ? beamProbability(projected, depth)
+      : (projected ? projected.survival * futureGreatProb(projected.state) : 0);
+    // 手の選択には従来の安全性・温度スケジュールも補助的に残す。
+    // しあげるかどうかの比較には planScore を使わず、prob だけを使う。
+    return { action: a, prob, heuristic: root.h, score: prob * 1000, depth, fixed: state.step < fixed.length };
+  });
+  // 従来評価が明確に離れている安全手は維持し、5点以内の近接候補だけを先読み確率で入れ替える。
+  // これにより温度スケジュールを壊さず、複数手の組み合わせが本当に有利な局面だけ探索を効かせる。
+  out.sort((a, b) => Math.abs((a.heuristic || 0) - (b.heuristic || 0)) > 5
+    ? (b.heuristic || 0) - (a.heuristic || 0) : b.prob - a.prob);
+  return out;
+}
+
 // 次のターンに「上下ねらいの組」または「単体ねらい」がどれだけ成立するか。
 // 倍ターンだけでなく半減ターン（範囲内マスの誤差圧縮に最適）も評価する。
 function aimReadyAt(values, crits, temp) {
@@ -1096,7 +1312,7 @@ function enumerate(state) {
 }
 
 function fixedStep(state) {
-  const a = FIXED[state.step];
+  const a = fixedFor(state)[state.step];
   if (a.skill !== "netsu") return a;
   let tgt;
   if (a.targets.length) tgt = a.targets;
@@ -1122,7 +1338,8 @@ function fixedStep(state) {
 
 function recommend(state) {
   if (state.finished) return { skill: "finish", targets: [], reason: "終了" };
-  if (state.step < FIXED.length) return fixedStep(state);
+  const fixed = fixedFor(state);
+  if (state.step < fixed.length) return fixedStep(state);
   if (state.hepaActive && P.forceCho4) {
     // 確定会心中はダメージが基準値で頭打ちになるため、はみ出しが起こらない。
     // よって打撃数が最大の技（超4連）を最も会心が乗るブロックへ撃つのが常に有利。
@@ -1142,13 +1359,14 @@ function recommend(state) {
       if (bb) return C.action(id, bb, `確定会心を${bb.map((i) => LETTERS[i]).join("・")}の${SKILLS[id].name}に使用`);
     }
   }
-  const cands = enumerate(state);
-  let best = null, bs = -Infinity;
-  for (const c of cands) { const s = evalAction(state, c); if (s > bs) { bs = s; best = c; } }
-  const allIn = state.values.every((v, i) => v >= ZONES[i][0] && v <= ZONES[i][1]);
-  const stopVal = allIn ? 1000 * convolve(state.values.map((v, i) => (state.crits[i] ? SNAP_DIST : errAt(i, v)))) : -2000;
-  if (!best || stopVal >= bs) return { skill: "finish", targets: [], reason: "全マスが成功範囲。これ以上は誤差が悪化するためしあげる" };
-  return best;
+  const ranked = searchedMoves(state), best = ranked[0];
+  const stopP = greatChance(state.values, state.crits);
+  const forcedStop = state.focus < SKILLS.tataku.cost || state.temp <= 0;
+  const confidentStop = best && stopP != null && stopP >= best.prob
+    && (stopP >= 0.70 || state.focus < SKILLS.nerai.cost || state.temp <= 200);
+  if (!best || forcedStop || confidentStop)
+    return { skill: "finish", targets: [], reason: "現在の大成功確率が、3～5手探索で見つかった続行ルート以上のためしあげる" };
+  return best.action;
 }
 
 
@@ -1158,7 +1376,7 @@ function recommend(state) {
   function simulateOne(options) {
     const o = options || {};
     const rng = o.rng || mulberry32(o.seed == null ? 1 : o.seed);
-    let state = createState({ focus: o.focus, cfg: o.cfg, rng });
+    let state = createState({ focus: o.focus, cfg: o.cfg, rng, fixedRoute: o.fixedRoute || o.routeId || "auto" });
     let safety = 0;
     while (!state.finished && safety++ < 90) {
       let rec = recommend(state);
@@ -1175,18 +1393,39 @@ function recommend(state) {
   function benchmark(count, options) {
     const n = count || 1000, o = options || {};
     let great = 0, allIn = 0, focusSum = 0, critSum = 0;
+    const failures = { errorOver: 0, below: 0, over: 0, focusOut: 0, tempOut: 0, noMove: 0 };
     const skills = {};
     for (let i = 0; i < n; i++) {
       const one = simulateOne({ ...o, seed: (o.seed || 20260814) + i * 9973 });
       if (one.result.great) great++;
       if (one.result.allIn) allIn++;
+      if (!one.result.great) {
+        const over = one.result.detail.some((d) => d.value > ZONES[LETTERS.indexOf(d.letter)][1]);
+        const below = one.result.detail.some((d) => d.value < ZONES[LETTERS.indexOf(d.letter)][0]);
+        if (over) failures.over++;
+        else if (one.result.allIn) failures.errorOver++;
+        else if (one.state.focus < 5) failures.focusOut++;
+        else if (one.state.temp <= 0) failures.tempOut++;
+        else if (below) failures.below++;
+        else failures.noMove++;
+      }
       focusSum += one.state.maxFocus - one.state.focus;
       critSum += one.state.crits.filter(Boolean).length;
       for (const h of one.state.history) skills[h.name] = (skills[h.name] || 0) + 1;
     }
     const avg = {}; Object.keys(skills).sort().forEach((k) => { avg[k] = skills[k] / n; });
     return { trials: n, great, rate: great / n, allIn, allInRate: allIn / n,
-      averageFocusUsed: focusSum / n, averageCrits: critSum / n, skills: avg };
+      averageFocusUsed: focusSum / n, averageCrits: critSum / n, skills: avg, failures,
+      routeId: routeById(o.fixedRoute || o.routeId || "auto").id };
+  }
+
+  function benchmarkRoutes(count, options) {
+    const n = Math.max(20, count || 200), o = options || {};
+    const rows = FIXED_ROUTES.map((route, ri) => {
+      const b = benchmark(n, { ...o, fixedRoute: route.id, seed: (o.seed || 20260814) });
+      return { id: route.id, name: route.name, steps: route.steps.length, ...b };
+    }).sort((a, b) => b.rate - a.rate || b.allInRate - a.allInRate);
+    return { trialsPerRoute: n, best: rows[0], rows };
   }
 
   // ---- 実機サポート用API ----
@@ -1203,11 +1442,7 @@ function recommend(state) {
   }
   // 候補手を評価順に並べる（固定手順中は固定手順を返す）
   function rankMoves(state) {
-    if (state.step < FIXED.length) return [{ action: fixedStep(state), score: null, fixed: true }];
-    const scored = enumerate(state).map((c) => ({ action: c, score: evalAction(state, c) }))
-      .filter((x) => isFinite(x.score));
-    scored.sort((a, b) => b.score - a.score);
-    return scored;
+    return searchedMoves(state);
   }
   // 推奨手を実機で撃ったときの、対象マスごとの上昇量と本会心確率
   // 本会心が100%にならない理由（目標値を通り過ぎている／2倍でも届かない）
@@ -1296,8 +1531,10 @@ function recommend(state) {
     return name + t;
   }
   return { LETTERS, ZONES, GREAT_TOLERANCE, PRIORITY, SKILLS, DEFAULT_CFG,
-    VERTICAL_PAIRS, FIXED, calcDamage, turnEffect, createState, cloneState,
+    VERTICAL_PAIRS, FIXED, FIXED_ROUTES, DEFAULT_AUTO_ROUTE, routeById, fixedFor, fixedLength,
+    calcDamage, turnEffect, createState, cloneState,
     applyAction, recommend, resolveTargets, grade, simulateOne, benchmark, snapLimit, hepaPlan,
+    benchmarkRoutes, futureGreatProb, searchDepthFor,
     actionLabel, mulberry32, P, aimBand, hitOutcome,
     greatChance, rankMoves, forecast, convolve, errAt, enumerate, evalAction, fixedStep,
     outcomeCandidates };
@@ -1617,7 +1854,8 @@ function recommend(state) {
       if (!vecs[i]) continue;
       const arr = store[text[i]];
       if (!arr) continue;
-      if (arr.length >= 8) arr.shift();
+      // 内蔵8枚に加えて、利用者が正解確認した実戦画像を最大40枚/数字保持する。
+      if (arr.length >= 48) arr.shift();
       arr.push(Array.from(vecs[i])); n++;
     }
     return n;
@@ -1708,7 +1946,7 @@ function recommend(state) {
     const t = trimNoise(store, group.vecs);
     if (!t.vecs.length) return null;
     const free = bestFree(store, t.vecs);
-    return free ? { text: free.text, min: t.min } : null;
+    return free ? { text: free.text, min: t.min, vecs: t.vecs } : null;
   }
 
   /* ---------- 射影変換：カメラ画像の四隅 → 正規化パネル ---------- */
@@ -1782,8 +2020,38 @@ function recommend(state) {
     return store;
   }
 
-  return { GRID, EGRID, confusable, LETTERS, CFG, PW, PH, GW, GH, cellBox, scanCell, createStore, learn, readGroup, scoreText,
-    normalize, dot, bestFree, digitScore, readAll, probe, rectifyGrid, homography, loadStore,
+  // 内蔵の実機切り抜きを1枚ずつ学習集合から外す、leave-one-out交差検証。
+  // 同じ画像そのものを正解テンプレートとして使わないため、単純な自己一致より厳しい。
+  function evaluateStore(store) {
+    const matrix = Array.from({ length: 10 }, () => new Array(11).fill(0)); // 10列目は判定不能
+    const perDigit = []; let total = 0, correct = 0, rejected = 0;
+    for (let truth = 0; truth <= 9; truth++) {
+      const arr = store[truth] || []; let ok = 0;
+      for (let si = 0; si < arr.length; si++) {
+        const sample = arr[si], scores = new Array(10).fill(-9);
+        for (let d = 0; d <= 9; d++) {
+          const train = d === truth ? (store[d] || []).filter((_, k) => k !== si) : (store[d] || []);
+          scores[d] = matchDigit([sample], train);
+        }
+        let pred = 0;
+        for (let d = 1; d <= 9; d++) if (scores[d] > scores[pred]) pred = d;
+        if (scores[pred] < MIN_DIGIT) { matrix[truth][10]++; rejected++; }
+        else { matrix[truth][pred]++; if (pred === truth) { ok++; correct++; } }
+        total++;
+      }
+      const errors = [];
+      for (let d = 0; d <= 10; d++) if (d !== truth && matrix[truth][d])
+        errors.push({ as: d === 10 ? "判定不能" : String(d), count: matrix[truth][d] });
+      errors.sort((a, b) => b.count - a.count);
+      perDigit.push({ digit: truth, samples: arr.length, correct: ok,
+        accuracy: arr.length ? ok / arr.length : 0, errorRate: arr.length ? 1 - ok / arr.length : 0, errors });
+    }
+    return { total, correct, rejected, accuracy: total ? correct / total : 0, matrix, perDigit,
+      method: "leave-one-out", threshold: MIN_DIGIT };
+  }
+
+  return { GRID, EGRID, confusable, LETTERS, CFG, PW, PH, GW, GH, CW, CH, cellBox, scanCell, createStore, learn, readGroup, scoreText,
+    normalize, dot, bestFree, digitScore, readAll, probe, rectifyGrid, homography, loadStore, evaluateStore,
     MIN_GROUP, MIN_GROUP_ONE };
 });
 </script>
@@ -1796,22 +2064,94 @@ function recommend(state) {
   const cam = {
     stream: null, video: null, canvas: null, ctx: null, timer: null,
     corners: null, store: null, votes: {}, active: false,
-    onRead: null, onOff: null, targets: [], fps: 15, lastGroups: [], shots: [], raw: null, seen: {},
+    onRead: null, onOff: null, targets: [], fps: 30, measuredFps: 0, fpsFrames: 0, fpsStarted: 0,
+    lastGroups: [], shots: [], raw: null, seen: {}, missSeen: {}, learned: [], learningReady: false, dbPromise: null,
     readIdx: {}, off: {}, lock: {}
   };
   window.ForgeCam = cam;
 
+  const LEARN_DB = "forge.ocr.learning.v1", LEARN_STORE = "samples", MAX_ACTIVE_PER_DIGIT = 40;
+
   function status(t) { const el = $("#camStatus"); if (el) el.textContent = t; }
+  function reason(kind, title, detail) {
+    const el = $("#ocrState"); if (!el) return;
+    el.hidden = false; el.dataset.kind = kind || "waiting";
+    el.innerHTML = `<b>${title}</b><span>${detail}</span>`;
+  }
   // パネル非表示のときでも見える通知行（取り込み停止・エラー用）
   function notice(t) { const el = $("#camNotice"); if (!el) return; el.textContent = t || ""; el.hidden = !t; }
   function vw() { return cam.video.videoWidth || 1280; }
   function vh() { return cam.video.videoHeight || 720; }
+
+  function openLearningDb() {
+    if (cam.dbPromise) return cam.dbPromise;
+    cam.dbPromise = new Promise((resolve, reject) => {
+      if (!window.indexedDB) { reject(new Error("IndexedDB非対応")); return; }
+      const req = indexedDB.open(LEARN_DB, 1);
+      req.onupgradeneeded = () => {
+        if (!req.result.objectStoreNames.contains(LEARN_STORE)) req.result.createObjectStore(LEARN_STORE, { keyPath: "id" });
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error || new Error("学習データを開けません"));
+    });
+    return cam.dbPromise;
+  }
+  async function dbRecords() {
+    const db = await openLearningDb();
+    return new Promise((resolve, reject) => {
+      const req = db.transaction(LEARN_STORE, "readonly").objectStore(LEARN_STORE).getAll();
+      req.onsuccess = () => resolve(req.result || []); req.onerror = () => reject(req.error);
+    });
+  }
+  async function dbPutMany(records) {
+    const db = await openLearningDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(LEARN_STORE, "readwrite"), store = tx.objectStore(LEARN_STORE);
+      records.forEach((r) => store.put(r));
+      tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); tx.onabort = () => reject(tx.error);
+    });
+  }
+  async function dbClear() {
+    const db = await openLearningDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(LEARN_STORE, "readwrite"); tx.objectStore(LEARN_STORE).clear();
+      tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
+    });
+  }
+  function rebuildLearnedStore() {
+    cam.store = V.loadStore(window.FORGE_TEMPLATES || {});
+    const perDigit = Array.from({ length: 10 }, () => []);
+    const ordered = cam.learned.slice().sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
+    for (const r of ordered) {
+      const truth = String(r.truth || ""), vecs = r.vecs || [];
+      if (!/^\d+$/.test(truth) || truth.length !== vecs.length) continue;
+      for (let i = 0; i < truth.length; i++) if (Array.isArray(vecs[i]) && vecs[i].length === V.CW * V.CH)
+        perDigit[+truth[i]].push(vecs[i]);
+    }
+    for (let d = 0; d <= 9; d++) for (const v of perDigit[d].slice(-MAX_ACTIVE_PER_DIGIT)) cam.store[d].push(v);
+    cam.votes = {};
+  }
+  function updateLearnSummary() {
+    const el = $("#ocrLearnSummary"); if (!el) return;
+    const usable = cam.learned.filter((r) => r.trainable).length;
+    const counts = Array.from({ length: 10 }, (_, d) => cam.learned.filter((r) => String(r.truth || "").includes(String(d)) && r.trainable).length);
+    el.textContent = `確認済み ${cam.learned.length}枚（識別学習に使用可能 ${usable}枚）・数字別 ${counts.map((n, d) => d + ":" + n).join(" / ")}。判定には各数字の新しい40例まで使用します。`;
+  }
+  async function loadLearning() {
+    try {
+      cam.learned = await dbRecords(); rebuildLearnedStore(); cam.learningReady = true; updateLearnSummary();
+    } catch (e) {
+      cam.learningReady = false; updateLearnSummary();
+      notice("学習データの保存領域を開けませんでした。OCR自体は利用できます。");
+    }
+  }
 
   cam.init = function () {
     cam.store = V.loadStore(window.FORGE_TEMPLATES || {});
     cam.video = $("#camVideo");
     cam.canvas = document.createElement("canvas");
     cam.ctx = cam.canvas.getContext("2d", { willReadFrequently: true });
+    loadLearning();
   };
 
   cam.start = async function () {
@@ -1820,7 +2160,7 @@ function recommend(state) {
     }
     try {
       cam.stream = await navigator.mediaDevices.getDisplayMedia({
-        video: { frameRate: { ideal: 15 }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+        video: { frameRate: { ideal: 30, max: 30 }, width: { ideal: 1920 }, height: { ideal: 1080 } },
         audio: false,
         // 自分のタブを選ばせない・ウィンドウ選択を促す
         preferCurrentTab: false,
@@ -1844,8 +2184,10 @@ function recommend(state) {
       // 記憶がない初回だけ、板を探して自動で合わせる
       if (!hadSaved) setTimeout(() => { if (cam.stream) cam.autoAlign(true); }, 500);
       if (cam.timer) clearInterval(cam.timer);
+      cam.measuredFps = 0; cam.fpsFrames = 0; cam.fpsStarted = performance.now();
       cam.timer = setInterval(tick, Math.round(1000 / cam.fps));
-      status("板の四隅にオレンジの丸を合わせてください。緑の枠が鉱石の3×2に重なればOKです。");
+      status("OCR 30fpsで処理中。板の四隅にオレンジの丸を合わせてください。");
+      reason("waiting", "OCR待機", "とくぎ実行後、対象マスを30fpsで監視します。");
       return true;
     } catch (e) {
       const name = e && e.name ? e.name : "不明";
@@ -1860,11 +2202,13 @@ function recommend(state) {
     cam.active = false;
     cam.targets = [];
     cam.lock = {}; cam.off = {}; cam.readIdx = {};
+    cam.measuredFps = 0; cam.fpsFrames = 0; cam.fpsStarted = 0;
     if (cam.timer) { clearInterval(cam.timer); cam.timer = null; }
     if (cam.stream) { cam.stream.getTracks().forEach((t) => t.stop()); cam.stream = null; }
     $("#camPanel").hidden = true;
     const btn = $("#camOpen");
     if (btn) btn.textContent = "画面を取り込む";
+    reason("error", "取り込み停止", "画面を取り込むとOCR監視を再開します。");
   };
 
   function defaultCorners() {
@@ -2068,10 +2412,14 @@ function recommend(state) {
     }
     cam.targets = list;
     cam.active = list.length > 0;
-    if (cam.active) status(`${list.map((t) => t.letter).join("・")} のダメージ表示を待っています`);
+    if (cam.active) {
+      const letters = list.map((t) => t.letter).join("・");
+      status(`${letters} のダメージ表示を待っています`);
+      reason("waiting", "数字待ち", `${letters} を30fpsで監視中です。`);
+    }
     draw();
   };
-  cam.unwatch = function () { cam.active = false; cam.targets = []; cam.votes = {}; cam.sig = ""; cam.readIdx = {}; cam.off = {}; draw(); };
+  cam.unwatch = function () { cam.active = false; cam.targets = []; cam.votes = {}; cam.sig = ""; cam.readIdx = {}; cam.off = {}; reason("waiting", "OCR待機", "次の数値入力が必要なときに自動で監視します。"); draw(); };
 
   // 画面取り込みは再取得のたびに共有ダイアログが出るので、自動では取り直さない
   let stalls = 0;
@@ -2132,21 +2480,121 @@ function recommend(state) {
     g.drawImage(cam.raw, sx, sy, sw, sh, 0, 0, out.width, out.height);
     try { return out.toDataURL("image/png"); } catch (e) { return null; }
   }
-  function addShot(url, letter, label, ok) {
-    if (!url) return;
-    cam.shots.unshift({ url, letter, label, ok, t: Date.now() });
+  function addShot(url, letter, label, ok, meta) {
+    if (!url) return null;
+    const shot = Object.assign({ id: "ocr-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8),
+      url, letter, label, ok, t: Date.now(), predicted: null, vecs: [], reason: ok ? "accepted" : "unknown", idx: -1 }, meta || {});
+    cam.shots.unshift(shot);
     if (cam.shots.length > 8) cam.shots.pop();
     renderShots();
+    return shot;
   }
   function renderShots() {
     const host = $("#camShots");
     if (!host) return;
     host.hidden = !cam.shots.length;
-    host.innerHTML = cam.shots.map((s) =>
-      `<figure class="${s.ok ? "ok" : "ng"}"><img src="${s.url}" alt=""><figcaption>${s.letter} <b>${s.label}</b></figcaption></figure>`
-    ).join("");
+    host.innerHTML = cam.shots.map((s) => {
+      const confirmButton = s.predicted != null ? `<button type="button" data-act="confirm">正解</button>` : "";
+      const editLabel = s.predicted != null ? "訂正" : "数値入力";
+      return `<figure data-shot="${s.id}" class="${s.ok ? "ok" : "ng"}${s.confirmed ? " confirmed" : ""}"><img src="${s.url}" alt="${s.letter}のOCR画像"><figcaption>${s.letter} <b>${s.label}</b></figcaption>`
+        + `<div class="shot-actions">${s.confirmed ? `<button type="button" data-act="edit">正解 ${s.truth}・変更</button>` : `${confirmButton}<button type="button" data-act="edit">${editLabel}</button>`}</div></figure>`;
+    }).join("");
   }
   cam.clearShots = function () { cam.shots = []; renderShots(); };
+
+  async function confirmShot(shot, truth) {
+    truth = String(truth == null ? "" : truth).trim();
+    if (!/^\d+$/.test(truth)) { notice("正解の数値を半角数字で入力してください。"); return; }
+    const vecs = (shot.vecs || []).map((v) => Array.from(v || []));
+    const trainable = truth.length === vecs.length && vecs.every((v) => v.length === V.CW * V.CH);
+    const previousApplied = shot.appliedTruth != null ? String(shot.appliedTruth) : (shot.ok && shot.predicted != null ? String(shot.predicted) : null);
+    const record = { id: shot.id, schema: 1, createdAt: new Date(shot.t).toISOString(), confirmedAt: new Date().toISOString(),
+      image: shot.url, letter: shot.letter, index: shot.idx, predicted: shot.predicted == null ? null : String(shot.predicted),
+      truth, reason: shot.reason, candidates: shot.candidates || [], confidence: shot.confidence == null ? null : shot.confidence,
+      fps: cam.measuredFps || null, vecs, trainable };
+    try {
+      await dbPutMany([record]);
+      cam.learned = await dbRecords(); rebuildLearnedStore(); updateLearnSummary();
+      shot.confirmed = true; shot.truth = truth;
+      if (previousApplied == null && shot.onApply) { shot.onApply(shot.idx, +truth); shot.appliedTruth = truth; }
+      else if (previousApplied !== null && previousApplied !== truth && shot.onCorrect) {
+        shot.onCorrect(shot.idx, +previousApplied, +truth); shot.appliedTruth = truth;
+      }
+      shot.label = `正解 ${truth}`; renderShots();
+      reason("success", trainable ? "学習しました" : "画像を保存しました",
+        trainable ? `${shot.letter}=${truth} を確認済みテンプレートに追加しました。` : `${shot.letter}=${truth} を原因分析用に保存しました。桁を切り出せなかったため識別学習には使いません。`);
+    } catch (e) { notice("学習データを保存できませんでした。ブラウザの保存領域を確認してください。"); }
+  }
+
+  function downloadLearning(name, payload) {
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  cam.exportLearning = async function () {
+    try {
+      cam.learned = await dbRecords();
+      downloadLearning(`amatsuyu-ocr-learning-${new Date().toISOString().slice(0, 10)}.json`,
+        { app: "超あまつゆ Forge", type: "ocr-supervised-learning", schema: 1, exportedAt: new Date().toISOString(), samples: cam.learned });
+    } catch (e) { notice("学習データを書き出せませんでした。"); }
+  };
+  cam.importLearning = async function (file) {
+    try {
+      const payload = JSON.parse(await file.text()), src = Array.isArray(payload) ? payload : payload.samples;
+      if (!Array.isArray(src)) throw new Error("samplesなし");
+      const records = src.filter((r) => r && /^\d+$/.test(String(r.truth || ""))).map((r, n) => {
+        const vecs = Array.isArray(r.vecs) ? r.vecs.map((v) => Array.isArray(v) ? v.map(Number) : []) : [];
+        const truth = String(r.truth), trainable = truth.length === vecs.length && vecs.every((v) => v.length === V.CW * V.CH);
+        return { id: String(r.id || ("import-" + Date.now().toString(36) + "-" + n)), schema: 1,
+          createdAt: r.createdAt || new Date().toISOString(), confirmedAt: r.confirmedAt || new Date().toISOString(),
+          image: typeof r.image === "string" ? r.image : "", letter: String(r.letter || "?"), index: Number.isInteger(r.index) ? r.index : -1,
+          predicted: r.predicted == null ? null : String(r.predicted), truth, reason: String(r.reason || "imported"),
+          candidates: Array.isArray(r.candidates) ? r.candidates.map(Number) : [], confidence: Number.isFinite(+r.confidence) ? +r.confidence : null,
+          fps: Number.isFinite(+r.fps) ? +r.fps : null, vecs, trainable };
+      });
+      await dbPutMany(records); cam.learned = await dbRecords(); rebuildLearnedStore(); updateLearnSummary();
+      reason("success", "読み込み完了", `${records.length}枚を取り込み、確認済み学習データを再構築しました。`);
+    } catch (e) { notice("学習JSONを読み込めませんでした。書き出したファイルを選んでください。"); }
+  };
+  cam.clearLearning = async function () {
+    if (!confirm("確認済みのOCR学習画像をすべて消去しますか？内蔵79枚は消えません。")) return;
+    try { await dbClear(); cam.learned = []; rebuildLearnedStore(); updateLearnSummary(); reason("waiting", "学習データ消去", "内蔵テンプレートだけに戻しました。"); }
+    catch (e) { notice("学習データを消去できませんでした。"); }
+  };
+
+  function drawTemplate(canvas, vec) {
+    if (!canvas || !vec || !vec.length) return;
+    canvas.width = V.CW; canvas.height = V.CH;
+    const g = canvas.getContext("2d"), img = g.createImageData(V.CW, V.CH);
+    let lo = Infinity, hi = -Infinity;
+    for (const x of vec) { if (x < lo) lo = x; if (x > hi) hi = x; }
+    const span = Math.max(1e-6, hi - lo);
+    for (let i = 0; i < vec.length; i++) {
+      const shade = 255 - Math.round((vec[i] - lo) / span * 255), o = i * 4;
+      img.data[o] = shade; img.data[o + 1] = shade; img.data[o + 2] = shade; img.data[o + 3] = 255;
+    }
+    g.putImageData(img, 0, 0);
+  }
+
+  cam.showOcrTest = function () {
+    if (!cam.store) cam.init();
+    // 実戦中の追加学習に左右されないよう、固定の内蔵サンプルだけで毎回再計測する。
+    const testStore = V.loadStore(window.FORGE_TEMPLATES || {});
+    const r = V.evaluateStore(testStore), pct = (x) => (x * 100).toFixed(1) + "%";
+    const live = cam.stream ? (cam.measuredFps ? cam.measuredFps.toFixed(1) + "fps" : "計測中") : "未接続";
+    $("#ocrSummary").innerHTML = `<strong>${pct(r.accuracy)}</strong><span>${r.correct} / ${r.total}枚 正解・判定不能 ${r.rejected}枚<br>処理設定 ${cam.fps}fps／実測 <i id="ocrLiveFps">${live}</i></span>`;
+    $("#ocrRows").innerHTML = r.perDigit.map((d) => {
+      const misses = d.errors.length ? d.errors.slice(0, 3).map((e) => `${e.as}（${e.count}）`).join("、") : "なし";
+      return `<tr><td><b>${d.digit}</b></td><td>${d.samples}</td><td>${pct(d.accuracy)}</td><td class="${d.errorRate ? "warn" : ""}">${pct(d.errorRate)}</td><td>${misses}</td></tr>`;
+    }).join("");
+    $("#ocrSamples").innerHTML = r.perDigit.map((d) => `<div class="ocr-sample"><canvas data-digit="${d.digit}" aria-label="数字${d.digit}のテスト画像"></canvas><b>${d.digit}・${d.samples}枚</b></div>`).join("");
+    $("#ocrSamples").querySelectorAll("canvas").forEach((cv) => {
+      const d = +cv.dataset.digit; drawTemplate(cv, testStore[d] && testStore[d][0]);
+    });
+    $("#ocrCoverage").textContent = "方式：leave-one-out交差検証。数字の切り抜き後の識別精度です。画面内から数字領域を見つける検出率は、正解ラベル付きの実機画面セットが未収集のため別指標として未計測です。候補外・判定不能の実戦画像は画面下に保存されます。";
+    $("#ocrDialog").showModal();
+  };
 
   function drawPreview(grid) {
     const cv = $("#camPreview");
@@ -2169,7 +2617,16 @@ function recommend(state) {
     let grid;
     try { grid = grabGrid(); } catch (e) { return; }
     if (!grid) return;
-    const found = [], done = [];
+    const fpsNow = performance.now();
+    if (!cam.fpsStarted) cam.fpsStarted = fpsNow;
+    cam.fpsFrames++;
+    if (fpsNow - cam.fpsStarted >= 1000) {
+      cam.measuredFps = cam.fpsFrames * 1000 / (fpsNow - cam.fpsStarted);
+      cam.fpsFrames = 0; cam.fpsStarted = fpsNow;
+      const live = document.getElementById("ocrLiveFps");
+      if (live) live.textContent = cam.measuredFps.toFixed(1) + "fps";
+    }
+    const found = [], done = [], causes = { miss: [], locked: [], low: [], outside: [], reading: [] };
     // 監視中でないときの6マス全走査は重いので3回に1回だけにする
     cam.idleTick = (cam.idleTick || 0) + 1;
     if (!cam.active && cam.idleTick % 3 !== 0) { drawPreview(grid); return; }
@@ -2189,10 +2646,21 @@ function recommend(state) {
         else lk.clear = 0;
         if (cam.lock[i]) {
           if (now0 - lk.t > 8000) delete cam.lock[i];   // 念のための時間切れ
-          else { if (gs.length) found.push({ box: gs[0].box, label: "表示が消えるのを待っています" }); continue; }
+          else { causes.locked.push("ABCDEF"[i]); if (gs.length) found.push({ box: gs[0].box, label: "表示が消えるのを待っています" }); continue; }
         }
       }
-      if (!gs.length) continue;
+      if (!gs.length) {
+        if (tg) {
+          causes.miss.push(tg.letter);
+          if (!cam.missSeen[i] || now0 - cam.missSeen[i] > 3000) {
+            cam.missSeen[i] = now0;
+            const b = V.cellBox(i, grid.width, grid.height, true);
+            addShot(cropShot(grid, { x: b.x0, y: b.y0, w: b.x1 - b.x0, h: b.y1 - b.y0 }), tg.letter, "数字未検出", false,
+              { idx: i, reason: "not-detected", candidates: tg.candidates.slice(), onApply: cam.onRead, onCorrect: cam.onCorrect });
+          }
+        }
+        continue;
+      }
       const g = gs.reduce((a, b) => (b.edge > a.edge ? b : a));
       const t = tg;
       let label = "";
@@ -2236,9 +2704,12 @@ function recommend(state) {
 
           if (offCand) {
             cam.off[i] = (cam.off[i] || 0) + 1;
+            causes.outside.push(g.letter);
             label = "候補外 " + (+freeTop);
             if (cam.off[i] === 3) {
-              addShot(cropShot(grid, g.box), g.letter, "候補外 " + (+freeTop), false);
+              addShot(cropShot(grid, g.box), g.letter, "候補外 " + (+freeTop), false,
+                { idx: i, predicted: String(+freeTop), vecs: v.vecs, reason: "outside-candidates", candidates: t.candidates.slice(),
+                  confidence: freeMean, onApply: cam.onRead, onCorrect: cam.onCorrect });
               notice(`${g.letter} で ${+freeTop} を読み取りましたが、いまの温度から計算した候補に入っていません。`
                 + "実機の温度と「温度（℃）」欄が合っているか確認してください。");
               if (cam.onOff) cam.onOff(i, +freeTop);
@@ -2255,7 +2726,9 @@ function recommend(state) {
             const sure = (nb >= 3 && meanBest >= floor && lead >= need)
               || (nb >= 2 && meanBest >= 0.84 && lead >= Math.max(0.04, need));
             if (!sure && risky && nb >= 5) label = `${best}? ${second}? 判別中`;
-            if (sure) done.push({ idx: i, letter: g.letter, val: +best, vecs: v.vecs, box: g.box, lead: lead });
+            if (sure) done.push({ idx: i, letter: g.letter, val: +best, vecs: v.vecs, box: g.box, lead: lead,
+              confidence: meanBest, candidates: t.candidates.slice(), onCorrect: cam.onCorrect });
+            else causes.reading.push(g.letter);
           }
         } else {
           // 候補のどれとも一致しなかった → 画像を残して原因を追えるようにする
@@ -2264,8 +2737,11 @@ function recommend(state) {
             cam.seen[i] = now;
             const pr = V.probe(cam.store, g);
             addShot(cropShot(grid, g.box), g.letter,
-              pr && pr.min >= 0.60 ? `候補外 ${+pr.text}` : "数字と判定できず", false);
+              pr && pr.min >= 0.60 ? `候補外 ${+pr.text}` : "数字と判定できず", false,
+              { idx: i, predicted: pr ? String(+pr.text) : null, vecs: pr ? pr.vecs : g.vecs, reason: "low-confidence",
+                candidates: t.candidates.slice(), confidence: pr ? pr.min : null, onApply: cam.onRead, onCorrect: cam.onCorrect });
           }
+          causes.low.push(g.letter);
           label = "?";
         }
       }
@@ -2273,20 +2749,29 @@ function recommend(state) {
     }
     cam.lastGroups = found;
     drawPreview(grid);
+    if (cam.active) {
+      if (causes.outside.length) reason("error", "候補外", `${causes.outside.join("・")} は温度から計算した候補と一致しません。スクショで正解を指定できます。`);
+      else if (causes.low.length) reason("error", "低信頼度", `${causes.low.join("・")} の数字は見つかりましたが、桁または形を確定できません。`);
+      else if (causes.locked.length) reason("warning", "前の表示待ち", `${causes.locked.join("・")} は前回の数字が消えるのを待っています。`);
+      else if (causes.reading.length) reason("warning", "判別中", `${causes.reading.join("・")} の複数フレームを比較しています。`);
+      else if (causes.miss.length) reason("waiting", "数字未検出", `${causes.miss.join("・")} を30fpsで監視中。枠ずれ・エフェクト・カーソル重なりを確認してください。`);
+    }
     // 読み取れたマスをまとめて反映（1フレームに複数マスでも取りこぼさない）
     for (const dn of done) {
-      addShot(cropShot(grid, dn.box), dn.letter, dn.val + (dn.snap ? "（本会心）" : ""), true);
+      addShot(cropShot(grid, dn.box), dn.letter, dn.val + (dn.snap ? "（本会心）" : ""), true,
+        { idx: dn.idx, predicted: String(dn.val), vecs: dn.vecs, reason: "accepted", candidates: dn.candidates,
+          confidence: dn.confidence, onCorrect: dn.onCorrect });
       delete cam.votes[dn.idx];
       cam.targets = cam.targets.filter((x) => x.idx !== dn.idx);
       cam.readIdx[dn.idx] = true;
       cam.lock[dn.idx] = { t: Date.now(), clear: 0 };
       delete cam.off[dn.idx];
-      if (dn.lead >= 0.08) { try { V.learn(cam.store, String(dn.val), dn.vecs); } catch (e) {} }
     }
     cam.active = cam.targets.length > 0;
     draw();
     if (done.length) {
       status(done.map((x) => `${x.letter} = ${x.val}`).join(" / ") + " を読み取りました");
+      reason("success", "読み取り成功", done.map((x) => `${x.letter}=${x.val}`).join(" / ") + "。正しければ下のスクショで「正解」を押すと学習します。");
       for (const dn of done) if (cam.onRead) cam.onRead(dn.idx, dn.val);
     }
   }
@@ -2300,6 +2785,24 @@ function recommend(state) {
     });
     $("#camAuto").addEventListener("click", () => cam.autoAlign(false));
     $("#camReset").addEventListener("click", cam.reset);
+    $("#openOcrTest").addEventListener("click", cam.showOcrTest);
+    $("#camShots").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-act]"), fig = e.target.closest("figure[data-shot]");
+      if (!btn || !fig) return;
+      const shot = cam.shots.find((s) => s.id === fig.dataset.shot); if (!shot) return;
+      if (btn.dataset.act === "confirm" && shot.predicted != null) confirmShot(shot, shot.predicted);
+      else {
+        const initial = shot.truth != null ? shot.truth : (shot.predicted == null ? "" : shot.predicted);
+        const truth = prompt(`${shot.letter} に実際に表示された正解の数値`, initial);
+        if (truth != null) confirmShot(shot, truth);
+      }
+    });
+    $("#exportOcrLearning").addEventListener("click", cam.exportLearning);
+    $("#importOcrLearning").addEventListener("click", () => $("#ocrLearningFile").click());
+    $("#ocrLearningFile").addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0]; if (file) cam.importLearning(file); e.target.value = "";
+    });
+    $("#clearOcrLearning").addEventListener("click", cam.clearLearning);
     window.addEventListener("resize", draw);
     // 画面復帰・アプリ切り替え後に自動で再開する
     document.addEventListener("visibilitychange", () => {
@@ -2317,11 +2820,14 @@ function recommend(state) {
 </script>
 <script>(function () {
   "use strict";
-  const APP_VERSION = "2026.08.16-8";
+  const APP_VERSION = "2026.08.16-11";
   const AI = window.AmatsuyuAI;
   const $ = (s) => document.querySelector(s);
   const L = AI.LETTERS, Z = AI.ZONES;
-  const FIXED_LEN = AI.FIXED.length;
+  const SESSION_KEY = "forge.session.v3", RUNS_KEY = "forge.runs.v3", ROUTE_KEY = "forge.route.v1";
+  function readStore(key, fallback) { try { const v = JSON.parse(localStorage.getItem(key)); return v == null ? fallback : v; } catch (e) { return fallback; } }
+  let activeRoute = readStore(ROUTE_KEY, AI.DEFAULT_AUTO_ROUTE);
+  if (!AI.FIXED_ROUTES.some((r) => r.id === activeRoute)) activeRoute = AI.DEFAULT_AUTO_ROUTE;
 
   let state = fresh();
   let undoStack = [];
@@ -2349,21 +2855,57 @@ function recommend(state) {
   }
 
   function fresh() {
-    const s = AI.createState({ focus: 253, rng: AI.mulberry32(1) });
+    const s = AI.createState({ focus: 253, rng: AI.mulberry32(1), fixedRoute: activeRoute });
     s.ideals = [0, 0, 0, 0, 0, 0]; // 実機モードでは使わない（AIも参照しない）
     s.hepaCharged = false;
     return s;
   }
   function snapshot() {
     undoStack.push(JSON.stringify({ values: state.values, temp: state.temp, focus: state.focus,
-      crits: state.crits, step: state.step, hasActed: state.hasActed,
-      hepaCharged: state.hepaCharged, hepaActive: state.hepaActive, log }));
+      maxFocus: state.maxFocus, crits: state.crits, step: state.step, hasActed: state.hasActed,
+      fixedRoute: state.fixedRoute, hepaCharged: state.hepaCharged, hepaActive: state.hepaActive, log }));
     if (undoStack.length > 60) undoStack.shift();
   }
   let log = [];
+  let runId = "run-" + Date.now().toString(36), startedAt = new Date().toISOString();
+
+  function serialState(s) {
+    return { values: s.values.slice(), temp: s.temp, focus: s.focus, maxFocus: s.maxFocus,
+      crits: s.crits.slice(), step: s.step, hasActed: s.hasActed,
+      hepaCharged: s.hepaCharged, hepaActive: s.hepaActive, fixedRoute: s.fixedRoute };
+  }
+  function saveSession() {
+    try { localStorage.setItem(SESSION_KEY, JSON.stringify({ version: APP_VERSION, runId, startedAt, state: serialState(state), log, pending, activeRoute })); } catch (e) {}
+  }
+  function restoreSession() {
+    const s = readStore(SESSION_KEY, null);
+    if (!s || !s.state || !Array.isArray(s.state.values) || s.state.values.length !== 6) return false;
+    Object.assign(state, s.state); log = Array.isArray(s.log) ? s.log : [];
+    pending = s.pending && Array.isArray(s.pending.cand) ? s.pending : null;
+    runId = s.runId || runId; startedAt = s.startedAt || startedAt;
+    return true;
+  }
+  function archiveSession(reason) {
+    if (!log.length) return;
+    const runs = readStore(RUNS_KEY, []);
+    runs.unshift({ runId, startedAt, endedAt: new Date().toISOString(), reason: reason || "saved",
+      route: state.fixedRoute, final: serialState(state), actions: log });
+    try { localStorage.setItem(RUNS_KEY, JSON.stringify(runs.slice(0, 50))); } catch (e) {}
+  }
+  function recordOutcome(idx, before, after, snap, source) {
+    const li = pending && pending.logIndex != null ? pending.logIndex : log.length - 1;
+    const h = log[li]; if (!h) return;
+    h.results = h.results || [];
+    const row = { idx, letter: L[idx], before, after, damage: after - before, snap: !!snap, source: source || "manual" };
+    const old = h.results.findIndex((x) => x.idx === idx);
+    if (old >= 0) h.results[old] = row; else h.results.push(row);
+    h.after = serialState(state);
+  }
+  restoreSession();
 
   /* ---------- 描画 ---------- */
   function render() {
+    const FIXED_LEN = AI.fixedLength(state);
     const eff = AI.turnEffect(state.temp, state.hasActed);
     $("#tempInput").value = state.temp;
     $("#focusInput").value = state.focus;
@@ -2372,7 +2914,7 @@ function recommend(state) {
     $("#turnEffect").style.color = eff.label === "倍" ? "var(--ember)" : eff.label === "半減" ? "var(--azure)" : "var(--slate)";
     $("#stepLabel").textContent = state.step < FIXED_LEN ? `基本手順 ${state.step + 1} / ${FIXED_LEN}` : `アドリブ ${state.step - FIXED_LEN + 1} 手目`;
     $("#skipFixed").style.display = state.step < FIXED_LEN ? "" : "none";
-    $("#phaseBadge").textContent = state.step < FIXED_LEN ? "基本手順" : "AIアドリブ";
+    $("#phaseBadge").textContent = state.step < FIXED_LEN ? AI.routeById(state.fixedRoute).name : "AIアドリブ";
     renderBoard();
     renderPending();
     renderRecommendation();
@@ -2380,6 +2922,7 @@ function recommend(state) {
     renderLog();
     autoSkipUtility();
     $("#undoButton").disabled = !undoStack.length;
+    saveSession();
   }
 
   function renderBoard() {
@@ -2457,7 +3000,8 @@ function recommend(state) {
       $("#applyButton").disabled = true; $("#quickPlay").hidden = true;
       return;
     }
-    const stopBetter = pickIdx === 0 && done && ranked[0].score != null && ranked[0].score <= 1000 * p;
+    const stopBetter = pickIdx === 0 && done && ranked[0].prob != null && ranked[0].prob <= p
+      && (p >= 0.70 || state.focus < AI.SKILLS.nerai.cost || state.temp <= 200);
     if (stopBetter) {
       $("#actionName").textContent = "しあげる";
       $("#actionReason").textContent = `全6マスが成功範囲内です。これ以上打つと誤差が悪化するため、ここでしあげるのが最善です（推定大成功率 ${(p * 100).toFixed(1)}%）。`;
@@ -2500,7 +3044,7 @@ function recommend(state) {
     }
     $("#altList").innerHTML = ranked.slice(0, 8).map((x, k) =>
       `<li data-rank="${k}" class="${k === pickIdx ? "current" : ""}"><b>${k + 1}. ${AI.actionLabel(x.action)}</b>` +
-      `<small>消費 ${AI.SKILLS[x.action.skill].cost}${x.score != null ? " ・評価 " + x.score.toFixed(0) : ""}</small></li>`
+      `<small>消費 ${AI.SKILLS[x.action.skill].cost}${x.prob != null ? " ・探索 " + (x.prob * 100).toFixed(1) + "% / " + x.depth + "手" : ""}</small></li>`
     ).join("");
     renderPicker(ranked);
   }
@@ -2545,6 +3089,7 @@ function recommend(state) {
       const idx = first.idx;
       state.values[idx] = Math.max(0, first.before + dmg);
       if (snap) state.crits[idx] = true;
+      recordOutcome(idx, first.before, state.values[idx], snap, "quick-tap");
       if (pending) {
         pending.picked[idx] = state.values[idx];
         if (pending.cand.every((c) => pending.picked[c.idx] != null)) pending = null;
@@ -2568,13 +3113,31 @@ function recommend(state) {
       if (!pending) applyRecommended();   // 最初の1マスで手を確定させる
       state.values[idx] = Math.max(0, c.before + dmg);
       markFresh(idx);
-      if (isSnapDamage(c, dmg)) state.crits[idx] = true;
+      const snap = isSnapDamage(c, dmg);
+      if (snap) state.crits[idx] = true;
+      recordOutcome(idx, c.before, state.values[idx], snap, "camera");
       if (pending) {
         pending.picked[idx] = state.values[idx];
         if (pending.cand.every((x) => pending.picked[x.idx] != null)) pending = null;
       }
       offOffer = null;
       render();
+    };
+    // 誤読スクショを訂正したときは、学習だけでなく盤面と実戦ログも差分修正する。
+    C.onCorrect = (idx, oldDmg, newDmg) => {
+      const delta = newDmg - oldDmg; if (!delta) return;
+      state.values[idx] = Math.max(0, state.values[idx] + delta);
+      let hit = -1;
+      for (let j = log.length - 1; j >= 0 && hit < 0; j--) {
+        const rows = log[j].results || [];
+        const row = rows.find((x) => x.idx === idx && x.damage === oldDmg);
+        if (row) { row.damage = newDmg; row.after = Math.max(0, row.after + delta); row.source = "camera-corrected"; hit = j; }
+      }
+      if (hit >= 0) for (let j = hit; j < log.length; j++) {
+        if (j > hit && log[j].before && log[j].before.values) log[j].before.values[idx] = Math.max(0, log[j].before.values[idx] + delta);
+        if (log[j].after && log[j].after.values) log[j].after.values[idx] = Math.max(0, log[j].after.values[idx] + delta);
+      }
+      markFresh(idx); render();
     };
     offOffer = null;
     C.watch(targets, applyRead);
@@ -2612,7 +3175,9 @@ function recommend(state) {
           const c = pending.cand.find((x) => x.idx === idx);
           if (!c) return;
           state.values[idx] = Math.max(0, c.before + dmg);
-          if (isSnapDamage(c, dmg)) state.crits[idx] = true;
+          const snap = isSnapDamage(c, dmg);
+          if (snap) state.crits[idx] = true;
+          recordOutcome(idx, c.before, state.values[idx], snap, "camera");
           pending.picked[idx] = state.values[idx];
           if (pending.cand.every((x) => pending.picked[x.idx] != null)) pending = null;
           render();
@@ -2640,13 +3205,17 @@ function recommend(state) {
         const dmg = prompt(`${c.letter} に出たダメージ（本会心で基準値に止まった分）`, "");
         if (dmg == null || dmg === "") return;
         state.values[idx] = Math.max(0, c.before + (+dmg || 0)); state.crits[idx] = true; pending.picked[idx] = state.values[idx];
+        recordOutcome(idx, c.before, state.values[idx], true, "direct");
       } else if (b.dataset.other) {
         const c = pending.cand.find((x) => x.idx === idx);
         const dmg = prompt(`${c.letter} に出たダメージを入力（0＝変化なし）`, "");
         if (dmg == null || dmg === "") return;
         state.values[idx] = Math.max(0, c.before + (+dmg || 0)); pending.picked[idx] = state.values[idx];
+        recordOutcome(idx, c.before, state.values[idx], false, "direct");
       } else {
+        const c = pending.cand.find((x) => x.idx === idx);
         state.values[idx] = +b.dataset.v; pending.picked[idx] = state.values[idx];
+        recordOutcome(idx, c.before, state.values[idx], false, "candidate");
       }
       if (pending.cand.every((c) => pending.picked[c.idx] != null)) pending = null;
       render();
@@ -2689,6 +3258,37 @@ function recommend(state) {
     $("#history").innerHTML = log.length
       ? log.slice().reverse().map((h, ri) => `<li><b>${log.length - ri}. ${h.name}</b><small>${h.temp}℃ ${h.eff} ・ 消費${h.cost}</small></li>`).join("")
       : '<li class="empty">推奨手を実行すると履歴が表示されます。</li>';
+    const saved = readStore(RUNS_KEY, []);
+    const note = $("#savedLogNote");
+    if (note) note.textContent = `現在 ${log.length}手を自動保存中・完了ログ ${saved.length}件（最大50件）`;
+  }
+
+  function currentRun() {
+    return { runId, version: APP_VERSION, startedAt, exportedAt: new Date().toISOString(),
+      route: state.fixedRoute, final: serialState(state), actions: log };
+  }
+  function downloadFile(name, type, content) {
+    const blob = new Blob([content], { type }), url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  function exportJson() {
+    const payload = { app: "超あまつゆ Forge", version: APP_VERSION, current: currentRun(), archived: readStore(RUNS_KEY, []) };
+    downloadFile(`amatsuyu-forge-log-${new Date().toISOString().slice(0,10)}.json`, "application/json;charset=utf-8", JSON.stringify(payload, null, 2));
+  }
+  function csvCell(v) { const s = v == null ? "" : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; }
+  function exportCsv() {
+    const runs = [currentRun()].concat(readStore(RUNS_KEY, []));
+    const head = ["run_id","開始日時","手数","技","対象","温度前","集中力前","温度後","集中力後",
+      "A前","B前","C前","D前","E前","F前","A後","B後","C後","D後","E後","F後","入力結果","ルート"];
+    const rows = [head];
+    for (const run of runs) for (const h of run.actions || []) {
+      const b = h.before || {}, a = h.after || {}, results = (h.results || []).map((x) => `${x.letter}:+${x.damage}${x.snap ? "本会心" : ""}`).join("/");
+      rows.push([run.runId, h.at || run.startedAt, h.seq, h.name, (h.targets || []).map((i) => L[i]).join("・"),
+        b.temp, b.focus, a.temp, a.focus].concat(b.values || Array(6).fill(""), a.values || Array(6).fill(""), [results, run.route || ""]));
+    }
+    const csv = "\uFEFF" + rows.map((r) => r.map(csvCell).join(",")).join("\r\n");
+    downloadFile(`amatsuyu-forge-log-${new Date().toISOString().slice(0,10)}.csv`, "text/csv;charset=utf-8", csv);
   }
 
   /* ---------- 手の適用（数値以外の状態だけ自動更新） ---------- */
@@ -2703,7 +3303,7 @@ function recommend(state) {
     while (n < 12) {
       const ranked = AI.rankMoves(state);
       if (!ranked.length) break;
-      if (state.step >= FIXED_LEN) break;                       // 基本手順11手のあいだだけ
+      if (state.step >= AI.fixedLength(state)) break;           // 選択中の固定手順のあいだだけ
       if (ranked[0].action.skill !== "karyoku") break;           // 火力上げ以外は自動化しない
       const sk = AI.SKILLS[ranked[0].action.skill];
       if (!sk || sk.cost > state.focus) break;
@@ -2726,7 +3326,9 @@ function recommend(state) {
     snapshot();
     const eff = AI.turnEffect(state.temp, state.hasActed);
     const cand = AI.outcomeCandidates(state, rec);
-    log.push({ name: AI.actionLabel(rec), temp: state.temp, eff: eff.label, cost: sk.cost });
+    const beforeState = serialState(state);
+    log.push({ seq: log.length + 1, at: new Date().toISOString(), name: AI.actionLabel(rec), skill: rec.skill,
+      targets: rec.targets.slice(), temp: state.temp, eff: eff.label, cost: sk.cost, before: beforeState, results: [] });
     state.focus -= sk.cost;
     if (sk.utility) {
       if (sk.special) { state.temp = Math.max(0, state.temp - 50); state.hepaCharged = false; state.hepaActive = true; }
@@ -2737,7 +3339,8 @@ function recommend(state) {
     }
     state.hasActed = true;
     state.step += 1;
-    if (!sk.utility && cand.length) pending = { label: AI.actionLabel(rec), cand, picked: {} };
+    log[log.length - 1].after = serialState(state);
+    if (!sk.utility && cand.length) pending = { label: AI.actionLabel(rec), cand, picked: {}, logIndex: log.length - 1 };
     pickIdx = 0; pickSig = "";
     if (!autoBusy) autoSkipped = 0;
     render();
@@ -2747,8 +3350,9 @@ function recommend(state) {
     if (!undoStack.length) return;
     pending = null;
     const s = JSON.parse(undoStack.pop());
-    Object.assign(state, { values: s.values, temp: s.temp, focus: s.focus, crits: s.crits,
+    Object.assign(state, { values: s.values, temp: s.temp, focus: s.focus, maxFocus: s.maxFocus || state.maxFocus, crits: s.crits,
       step: s.step, hasActed: s.hasActed, hepaCharged: s.hepaCharged, hepaActive: s.hepaActive });
+    if (s.fixedRoute) state.fixedRoute = s.fixedRoute;
     log = s.log;
     pickIdx = 0; pickSig = "";
     autoPaused = true;
@@ -2771,12 +3375,23 @@ function recommend(state) {
   });
   $("#toggleLog").addEventListener("click", () => document.body.classList.toggle("drawer-open"));
   $("#closeDrawer").addEventListener("click", () => document.body.classList.remove("drawer-open"));
+  $("#exportJson").addEventListener("click", exportJson);
+  $("#exportCsv").addEventListener("click", exportCsv);
+  $("#clearSavedRuns").addEventListener("click", () => {
+    if (!confirm("完了済みの実戦ログをすべて消去しますか？現在進行中のログは残ります。")) return;
+    try { localStorage.removeItem(RUNS_KEY); } catch (e) {}
+    renderLog();
+  });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") document.body.classList.remove("drawer-open"); });
+  window.addEventListener("beforeunload", saveSession);
   $("#resetButton").addEventListener("click", () => {
     if (!confirm("最初からやり直しますか？")) return;
-    const mf = state.maxFocus; state = fresh(); state.focus = mf; state.maxFocus = mf; log = []; undoStack = []; pending = null; render();
+    archiveSession("reset");
+    const mf = state.maxFocus; state = fresh(); state.focus = mf; state.maxFocus = mf; log = []; undoStack = []; pending = null;
+    runId = "run-" + Date.now().toString(36); startedAt = new Date().toISOString();
+    render();
   });
-  $("#skipFixed").addEventListener("click", () => { snapshot(); state.step = FIXED_LEN; state.hasActed = true; render(); });
+  $("#skipFixed").addEventListener("click", () => { snapshot(); state.step = AI.fixedLength(state); state.hasActed = true; render(); });
   $("#tempInput").addEventListener("change", (e) => { snapshot(); state.temp = Math.max(0, +e.target.value || 0); render(); });
   $("#focusInput").addEventListener("change", (e) => { snapshot(); state.focus = Math.max(0, +e.target.value || 0); if (state.focus > state.maxFocus) state.maxFocus = state.focus; render(); });
   $("#hepaCharged").addEventListener("change", (e) => { snapshot(); state.hepaCharged = e.target.checked; render(); });
@@ -2785,21 +3400,95 @@ function recommend(state) {
     snapshot(); state.temp = Math.max(0, state.temp + (+b.dataset.temp)); render();
   }));
   document.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => {
-    snapshot(); state.focus = Math.max(0, state.focus + (+b.dataset.focus)); render();
+    snapshot(); state.focus = Math.max(0, state.focus + (+b.dataset.focus));
+    if (state.focus > state.maxFocus) state.maxFocus = state.focus;
+    render();
   }));
 
   $("#openBenchmark").addEventListener("click", () => { $("#benchmarkFocus").value = state.maxFocus; $("#benchmarkDialog").showModal(); });
-  $("#runBenchmark").addEventListener("click", () => {
-    const btn = $("#runBenchmark"), focus = Math.max(150, +$("#benchmarkFocus").value || 253);
-    btn.disabled = true; btn.textContent = "計算中…";
-    setTimeout(() => {
-      const b = AI.benchmark(1000, { focus, seed: 20260814 }), pct = b.rate * 100, res = $("#benchmarkResult");
-      res.className = `benchmark-result ${b.rate >= .7 ? "pass" : "fail"}`;
-      res.innerHTML = `<strong>${pct.toFixed(1)}%</strong><span>${b.great} / 1,000回 大成功<br>全マス成功範囲 ${(b.allInRate * 100).toFixed(1)}%・平均本会心 ${b.averageCrits.toFixed(2)}マス<br>平均消費集中力 ${b.averageFocusUsed.toFixed(1)}</span>`;
-      $("#benchmarkBar").style.width = `${pct}%`;
-      $("#headlineRate").textContent = `${pct.toFixed(1)}%`;
-      btn.disabled = false; btn.textContent = "もう一度1,000回を実行";
-    }, 40);
+  function mergeBench(parts) {
+    const out = { trials: 0, great: 0, allIn: 0, focusTotal: 0, critTotal: 0,
+      failures: { errorOver: 0, below: 0, over: 0, focusOut: 0, tempOut: 0, noMove: 0 } };
+    for (const b of parts) {
+      out.trials += b.trials; out.great += b.great; out.allIn += b.allIn;
+      out.focusTotal += b.averageFocusUsed * b.trials; out.critTotal += b.averageCrits * b.trials;
+      for (const k of Object.keys(out.failures)) out.failures[k] += (b.failures && b.failures[k]) || 0;
+    }
+    out.rate = out.great / out.trials; out.allInRate = out.allIn / out.trials;
+    out.averageFocusUsed = out.focusTotal / out.trials; out.averageCrits = out.critTotal / out.trials;
+    return out;
+  }
+  async function benchmarkBatched(total, options, progress) {
+    const parts = [], batch = 10;
+    // 単一HTMLのAI本体をBlob Workerへ渡し、画面とカメラを止めずに並列計算する。
+    if (window.Worker && window.Blob && window.URL && document.scripts[0]) {
+      try {
+        const workerCode = document.scripts[0].textContent + `\nself.onmessage=function(e){try{self.postMessage({ok:1,result:self.AmatsuyuAI.benchmark(e.data.n,e.data.options)});}catch(err){self.postMessage({ok:0,error:String(err&&err.stack||err)});}};`;
+        const url = URL.createObjectURL(new Blob([workerCode], { type: "text/javascript" }));
+        const tasks = []; for (let done = 0; done < total; done += batch) tasks.push({ n: Math.min(batch, total - done), done });
+        let cursor = 0, finished = 0;
+        const count = Math.min(tasks.length, Math.max(1, Math.min(4, navigator.hardwareConcurrency || 2)));
+        await Promise.all(Array.from({ length: count }, () => new Promise((resolve, reject) => {
+          const w = new Worker(url);
+          const send = () => {
+            if (cursor >= tasks.length) { w.terminate(); resolve(); return; }
+            const t = tasks[cursor++];
+            w.postMessage({ n: t.n, options: { ...options, seed: (options.seed || 20260814) + t.done * 9973 } });
+          };
+          w.onmessage = (e) => {
+            if (!e.data || !e.data.ok) { w.terminate(); reject(new Error(e.data && e.data.error || "worker error")); return; }
+            parts.push(e.data.result); finished += e.data.result.trials;
+            if (progress) progress(Math.min(1, finished / total)); send();
+          };
+          w.onerror = (e) => { w.terminate(); reject(e.error || new Error(e.message)); };
+          send();
+        })));
+        URL.revokeObjectURL(url);
+        return mergeBench(parts);
+      } catch (e) { /* file://等でWorkerが使えない場合は下の分割計算へ */ }
+    }
+    for (let done = 0; done < total; done += batch) {
+      const n = Math.min(batch, total - done);
+      parts.push(AI.benchmark(n, { ...options, seed: (options.seed || 20260814) + done * 9973 }));
+      if (progress) progress(Math.min(1, (done + n) / total));
+      await new Promise((r) => setTimeout(r, 0));
+    }
+    return mergeBench(parts);
+  }
+  function showFailures(b) {
+    const f = b.failures || {}, host = $("#failureBreakdown"); host.hidden = false;
+    const rows = [["誤差合計8以上", f.errorOver], ["成功範囲へ未到達", f.below], ["はみ出し", f.over],
+      ["集中力切れ", f.focusOut], ["温度切れ", f.tempOut], ["候補なし", f.noMove]];
+    host.innerHTML = rows.map(([n, v]) => `<div><b>${v || 0}</b>${n}</div>`).join("");
+  }
+  $("#runBenchmark").addEventListener("click", async () => {
+    const btn = $("#runBenchmark"), other = $("#optimizeRoutes"), focus = Math.max(150, +$("#benchmarkFocus").value || 253);
+    btn.disabled = other.disabled = true; btn.textContent = "計算中 0%"; $("#routeResults").innerHTML = "";
+    const b = await benchmarkBatched(1000, { focus, seed: 20260814, fixedRoute: activeRoute }, (p) => {
+      $("#benchmarkProgress").style.width = `${p * 100}%`; btn.textContent = `計算中 ${Math.round(p * 100)}%`;
+    });
+    const pct = b.rate * 100, res = $("#benchmarkResult"), route = AI.routeById(activeRoute);
+    res.className = `benchmark-result ${b.rate >= .7 ? "pass" : "fail"}`;
+    res.innerHTML = `<strong>${pct.toFixed(1)}%</strong><span>${b.great} / ${b.trials.toLocaleString()}回 大成功<br>${route.name}・全マス成功範囲 ${(b.allInRate * 100).toFixed(1)}%<br>平均本会心 ${b.averageCrits.toFixed(2)}マス・平均消費集中力 ${b.averageFocusUsed.toFixed(1)}</span>`;
+    $("#benchmarkBar").style.width = `${pct}%`; $("#headlineRate").textContent = `${pct.toFixed(1)}%`; showFailures(b);
+    btn.disabled = other.disabled = false; btn.textContent = "もう一度1,000回を実行";
+  });
+  $("#optimizeRoutes").addEventListener("click", async () => {
+    const btn = $("#optimizeRoutes"), other = $("#runBenchmark"), focus = Math.max(150, +$("#benchmarkFocus").value || 253), rows = [];
+    btn.disabled = other.disabled = true; btn.textContent = "比較中 0%"; $("#routeResults").innerHTML = "";
+    for (let i = 0; i < AI.FIXED_ROUTES.length; i++) {
+      const route = AI.FIXED_ROUTES[i];
+      const b = await benchmarkBatched(200, { focus, seed: 20260814, fixedRoute: route.id }, (p) => {
+        const q = (i + p) / AI.FIXED_ROUTES.length; $("#benchmarkProgress").style.width = `${q * 100}%`; btn.textContent = `比較中 ${Math.round(q * 100)}%`;
+      });
+      rows.push({ route, b });
+    }
+    rows.sort((a, b) => b.b.rate - a.b.rate || b.b.allInRate - a.b.allInRate);
+    activeRoute = rows[0].route.id; try { localStorage.setItem(ROUTE_KEY, JSON.stringify(activeRoute)); } catch (e) {}
+    if (!log.length) { state.fixedRoute = activeRoute; state.step = 0; }
+    $("#routeResults").innerHTML = `<table class="route-table"><thead><tr><th>固定ルート</th><th>大成功</th><th>範囲内</th></tr></thead><tbody>${rows.map((x, i) =>
+      `<tr class="${i === 0 ? "best" : ""}"><td>${i === 0 ? "✓ " : ""}${x.route.name}</td><td>${(x.b.rate * 100).toFixed(1)}%</td><td>${(x.b.allInRate * 100).toFixed(1)}%</td></tr>`).join("")}</tbody></table><p class="threshold-note">${rows[0].route.name}を選択しました。${log.length ? "次回「最初から」で適用します。" : "現在の手順にも適用しました。"}</p>`;
+    btn.disabled = other.disabled = false; btn.textContent = "固定ルートを再比較"; render();
   });
 
   if (window.ForgeCam) { window.ForgeCam.bind(); window.onCamReady = render; }
