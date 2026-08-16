@@ -10,105 +10,130 @@
 :root{
   color-scheme:light;
   --paper:#fff;--mist:#f2f4f6;--sink:#e9edf1;--ink:#111519;--slate:#6b7682;--rule:#dfe4e9;
-  --ember:#dd5220;--jade:#0d8659;--crimson:#c53129;--azure:#1a72c4;--amber:#b87407;
+  --ember:#dd5220;--jade:#0d8659;--crimson:#c53129;--azure:#1a72c4;
   font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;
   font-feature-settings:"palt";
 }
 *{box-sizing:border-box}
 body{margin:0;height:100dvh;overflow:hidden;background:var(--paper);color:var(--ink);font-size:13px;line-height:1.45}
-button{font-family:inherit}
-input{font-family:inherit}
+button,input{font-family:inherit}
 :focus-visible{outline:2px solid var(--azure);outline-offset:1px}
-.app{height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto}
+.app{height:100dvh;display:grid;grid-template-rows:auto minmax(90px,1fr) auto auto auto auto auto}
 
 /* ---------- 上部バー ---------- */
-.topbar{display:flex;align-items:center;gap:12px;padding:7px 14px;border-bottom:1px solid var(--rule)}
-.wordmark{font-size:13px;font-weight:800;letter-spacing:.01em;white-space:nowrap}
+.topbar{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid var(--rule);
+  overflow-x:auto;scrollbar-width:none}
+.topbar::-webkit-scrollbar{display:none}
+.wordmark{font-size:12.5px;font-weight:800;white-space:nowrap}
 .wordmark em{font-style:normal;color:var(--ember)}
 .tag{font-size:11px;color:var(--slate);white-space:nowrap}
 .tag b{color:var(--ink);font-weight:700}
-.topbar .spacer{margin-left:auto}
-.chip{border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:8px;
-  padding:6px 10px;font-size:11px;cursor:pointer;white-space:nowrap}
+.spacer{margin-left:auto}
+.chip{border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:7px;
+  padding:5px 9px;font-size:11px;cursor:pointer;white-space:nowrap}
 .chip:hover{background:var(--mist)}
 .chip b{color:var(--ember);font-weight:800}
 
-/* ---------- 映像認識エリア ---------- */
-.capture{display:grid;grid-template-columns:minmax(0,1fr) 296px;min-height:0;border-bottom:1px solid var(--rule)}
+/* ---------- 映像 ---------- */
 .stage{position:relative;min-height:0;overflow:hidden;background:var(--sink)}
 #camPanel{width:100%;height:100%}
 #camStage{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;line-height:0}
 #camVideo{display:block;max-width:100%;max-height:100%;width:auto;height:auto}
 #camOverlay{position:absolute;left:0;top:0;touch-action:none;display:block}
-.stage-empty{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:6px;
-  text-align:center;color:var(--slate);padding:20px;pointer-events:none}
-.stage-empty b{font-size:14px;color:var(--ink)}
-.stage-empty span{font-size:11px;max-width:34ch;line-height:1.7}
+.stage-empty{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:5px;
+  text-align:center;color:var(--slate);padding:16px;pointer-events:none}
+.stage-empty b{font-size:13px;color:var(--ink)}
+.stage-empty span{font-size:11px;max-width:36ch;line-height:1.7}
 #camPanel:not([hidden])~.stage-empty{display:none}
 
-.side{border-left:1px solid var(--rule);padding:10px 12px;overflow:auto;display:flex;flex-direction:column;gap:9px}
-.side-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.side-actions button{border:1px solid var(--rule);background:var(--paper);color:var(--ink);
-  border-radius:8px;padding:8px 6px;font-size:11.5px;font-weight:700;cursor:pointer}
-.side-actions button:hover{background:var(--mist)}
-.side-actions button#camOpen{grid-column:1/-1;border-color:var(--ink);background:var(--ink);color:#fff}
-#camPreviewWrap{display:flex;gap:9px;align-items:flex-start}
-#camPreview{width:104px;height:auto;border:1px solid var(--rule);border-radius:6px;background:var(--sink);flex:none}
-#camStatus{font-size:11px;color:var(--slate);line-height:1.6}
-#camNotice{margin:0;font-size:11px;line-height:1.6;color:var(--ember);
-  border:1px solid #f2cdbd;background:#fdf2ee;border-radius:8px;padding:8px 10px}
-.hint{color:var(--slate);font-size:10.5px;line-height:1.7;margin:0}
-.hint b{color:var(--ink)}
-.swatch{display:inline-flex;align-items:center;gap:4px;margin-right:8px;white-space:nowrap}
-.swatch i{width:8px;height:8px;border-radius:2px;display:inline-block}
+/* ---------- カメラ操作バー ---------- */
+.cambar{display:flex;align-items:center;gap:6px;padding:6px 10px;border-bottom:1px solid var(--rule);
+  overflow-x:auto;scrollbar-width:none}
+.cambar::-webkit-scrollbar{display:none}
+.cambar button{border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:7px;
+  padding:6px 10px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap;flex:none}
+.cambar button:hover{background:var(--mist)}
+.cambar button#camOpen{border-color:var(--ink);background:var(--ink);color:#fff}
+#camPreview{width:52px;height:auto;border:1px solid var(--rule);border-radius:5px;background:var(--sink);flex:none}
+#camStatus{font-size:10.5px;color:var(--slate);line-height:1.5;min-width:0}
+.legend{display:flex;gap:8px;flex:none;font-size:10px;color:var(--slate)}
+.legend i{width:7px;height:7px;border-radius:2px;display:inline-block;margin-right:3px}
+#camNotice{margin:0;font-size:11px;line-height:1.6;color:var(--ember);background:#fdf2ee;
+  border-bottom:1px solid #f2cdbd;padding:7px 10px}
+#camNotice[hidden]{display:none}
 
-/* ---------- 読み取り結果のフィルムストリップ ---------- */
+/* ---------- 読み取りストリップ ---------- */
 #camShots[hidden]{display:none}
-#camShots{display:flex;gap:8px;overflow-x:auto;padding:8px 12px;background:var(--mist);border-bottom:1px solid var(--rule)}
+#camShots{display:flex;gap:7px;overflow-x:auto;padding:6px 10px;background:var(--mist);border-bottom:1px solid var(--rule)}
 #camShots figure{margin:0;flex:none;text-align:center}
-#camShots img{display:block;height:44px;width:auto;border-radius:5px;border:2px solid var(--jade);background:#000}
+#camShots img{display:block;height:38px;width:auto;border-radius:5px;border:2px solid var(--jade);background:#000}
 #camShots figure.ng img{border-color:var(--crimson)}
-#camShots figcaption{font-size:10px;color:var(--slate);margin-top:2px;white-space:nowrap}
+#camShots figcaption{font-size:9.5px;color:var(--slate);margin-top:1px;white-space:nowrap}
 #camShots figure.ok figcaption b{color:var(--jade)}
 #camShots figure.ng figcaption b{color:var(--crimson)}
 
-/* ---------- 下部：数値と操作 ---------- */
-.controls{display:grid;grid-template-rows:auto minmax(0,1fr);max-height:48dvh}
-.numbers{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 14px;border-bottom:1px solid var(--rule)}
-.meter{display:flex;align-items:center;gap:8px}
-.meter>span{font-size:10px;letter-spacing:.1em;color:var(--slate);white-space:nowrap}
-.meter .io-row{display:flex;align-items:center;gap:3px}
-.meter input{width:66px;border:1px solid var(--rule);border-radius:7px;background:var(--paper);
-  font-size:17px;font-weight:800;text-align:right;padding:3px 7px;outline:0;color:inherit;
-  font-variant-numeric:tabular-nums}
-.nudge{border:1px solid var(--rule);background:var(--paper);color:var(--slate);border-radius:7px;
-  width:27px;height:27px;font-size:15px;line-height:1;cursor:pointer;flex:none}
-.nudge:hover{background:var(--mist);color:var(--ink)}
-.divider{width:1px;height:26px;background:var(--rule)}
-.flag{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--slate);cursor:pointer;white-space:nowrap}
-.flag input{accent-color:var(--ember);width:14px;height:14px}
-.effect{font-size:12px;font-weight:700}
+/* ---------- 次の一手 ---------- */
+.rec{padding:8px 10px;border-bottom:1px solid var(--rule);overflow:auto;max-height:34dvh}
+.rec-head{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.rec-kicker{font-size:10px;letter-spacing:.12em;color:var(--slate);margin:0}
+.picker{display:flex;align-items:center;gap:2px;border:1px solid var(--rule);border-radius:7px;padding:1px}
+.picker button{border:0;background:transparent;color:var(--ink);cursor:pointer;font-size:11px;
+  width:22px;height:21px;border-radius:5px;line-height:1}
+.picker button:hover:not(:disabled){background:var(--mist)}
+.picker button:disabled{color:#c3cad1;cursor:default}
+#pickLabel{font-size:10.5px;color:var(--slate);min-width:44px;text-align:center;font-variant-numeric:tabular-nums}
+.rec-head .prob{margin-left:auto;display:flex;align-items:baseline;gap:4px;white-space:nowrap}
+.rec-head .prob span{font-size:9.5px;color:var(--slate)}
+.rec-head .prob b{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
+#recommendation h2{font-family:"Hiragino Mincho ProN","Yu Mincho",serif;font-size:23px;line-height:1.2;
+  margin:0 0 4px;font-weight:600}
+#actionReason{margin:0;font-size:11.5px;line-height:1.7;color:#414a52}
+#probNote{display:block;font-size:10px;color:var(--slate);margin-top:4px}
+.action-meta{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.action-meta span{border:1px solid var(--rule);border-radius:20px;padding:2px 8px;font-size:10px;color:var(--slate)}
+.forecast{display:grid;gap:2px;margin-top:6px;font-size:10.5px;color:var(--slate)}
+.forecast div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dotted var(--rule);padding-bottom:2px}
+.forecast em{font-style:normal;color:var(--jade)}
+.picked-note{font-size:10px;color:var(--ember);margin:4px 0 0}
 
-.panes{display:grid;grid-template-columns:318px minmax(0,1fr) 186px;min-height:0}
-.pane{padding:10px 12px;overflow:auto;min-height:0}
-.pane+.pane{border-left:1px solid var(--rule)}
-.pane-label{font-size:10px;letter-spacing:.12em;color:var(--slate);margin:0 0 7px}
+/* 1タップ入力 */
+#quickPlay{margin-top:8px;border-top:1px solid var(--rule);padding-top:7px}
+.cand-head{display:flex;align-items:baseline;gap:7px;margin:0 0 5px}
+.cand-head b{font-size:15px}
+.cand-head span{font-size:10.5px;color:var(--slate)}
+.cand-list{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:4px}
+.cand{border:1px solid var(--rule);background:var(--paper);border-radius:7px;padding:3px 8px;cursor:pointer;
+  display:grid;justify-items:center;line-height:1.15;color:inherit}
+.cand:hover{border-color:var(--ink);background:var(--mist)}
+.cand b{font-size:13px;font-variant-numeric:tabular-nums}
+.cand i{font-style:normal;font-size:9px;color:var(--slate);font-variant-numeric:tabular-nums}
+.cand.crit b{color:var(--ember)}
+.cand.snapbtn,.cand.other{font-size:11px;padding:5px 9px}
+.cand-sub{font-size:10px;color:var(--slate);margin:1px 0 3px}
+.hint{color:var(--slate);font-size:10px;line-height:1.6;margin:5px 0 0}
+.hint b{color:var(--ink)}
 
-/* 盤面：実機と同じ2列×3段 */
-.forge-board{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.mass{border:1px solid var(--rule);border-radius:9px;padding:6px 8px 7px;background:var(--paper)}
-.mass-top{display:flex;align-items:baseline;gap:5px}
-.mass-letter{font-size:13px;font-weight:800;line-height:1}
+/* ---------- 下部固定バー ---------- */
+.bottombar{display:grid;grid-template-columns:minmax(0,1fr) 172px;gap:8px;padding:8px 10px;
+  background:var(--paper);box-shadow:0 -6px 18px #0f172a0d;border-top:1px solid var(--rule)}
+.forge-board{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.mass{border:1px solid var(--rule);border-radius:8px;padding:4px 6px 5px;background:var(--paper)}
+.mass-top{display:flex;align-items:baseline;gap:4px}
+.mass-letter{font-size:12px;font-weight:800;line-height:1}
 .mass.priority-mass .mass-letter:after{content:"";display:inline-block;width:4px;height:4px;border-radius:50%;
   background:var(--ember);margin-left:3px;vertical-align:middle}
-.mass-zone{font-size:10px;color:var(--slate);font-variant-numeric:tabular-nums}
-.mass .crit-toggle{margin-left:auto;display:flex;align-items:center;gap:3px;font-size:10px;color:var(--slate);cursor:pointer}
-.mass .crit-toggle input{accent-color:var(--jade);width:12px;height:12px;margin:0}
-.mass .io-row{display:flex;align-items:center;gap:3px;margin-top:4px}
+.mass-zone{font-size:9.5px;color:var(--slate);font-variant-numeric:tabular-nums}
+.mass .crit-toggle{margin-left:auto;display:flex;align-items:center;gap:2px;font-size:9.5px;color:var(--slate);cursor:pointer}
+.mass .crit-toggle input{accent-color:var(--jade);width:11px;height:11px;margin:0}
+.mass .io-row{display:flex;align-items:center;gap:3px;margin-top:3px}
 .mass .io-row input{flex:1;min-width:0;border:1px solid var(--rule);border-radius:6px;background:var(--paper);
-  font-size:18px;font-weight:800;text-align:center;padding:1px 2px;outline:0;color:inherit;
-  font-variant-numeric:tabular-nums}
-.mass-bar{height:3px;background:var(--sink);border-radius:3px;overflow:hidden;margin-top:5px}
+  font-size:17px;font-weight:800;text-align:center;padding:1px;outline:0;color:inherit;
+  font-variant-numeric:tabular-nums;-moz-appearance:textfield}
+.mass .io-row input::-webkit-outer-spin-button,.mass .io-row input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.nudge{border:1px solid var(--rule);background:var(--paper);color:var(--slate);border-radius:6px;
+  width:24px;height:24px;font-size:14px;line-height:1;cursor:pointer;flex:none;padding:0}
+.nudge:hover{background:var(--mist);color:var(--ink)}
+.mass-bar{height:3px;background:var(--sink);border-radius:3px;overflow:hidden;margin-top:4px}
 .mass-bar i{display:block;height:100%;width:0;background:var(--ember);transition:width .25s}
 .mass.in-zone{border-color:#a8dcc6;background:#f3fbf7}
 .mass.in-zone .mass-bar i{background:var(--jade)}
@@ -118,90 +143,70 @@ input{font-family:inherit}
 .mass.over .io-row input{color:var(--crimson)}
 .mass.critical{box-shadow:inset 0 0 0 2px #bfe4d5}
 .mass.waiting{border-color:var(--ember);box-shadow:0 0 0 2px #fbe2d7}
-.mass.waiting .mass-zone:after{content:" 読み取り中";color:var(--ember);font-weight:700}
+.mass.waiting .mass-zone:after{content:" 読取中";color:var(--ember);font-weight:700}
 .mass.fresh{border-color:var(--azure)}
-.mass.fresh .mass-zone:after{content:" 読み取り済み";color:var(--azure);font-weight:700}
+.mass.fresh .mass-zone:after{content:" 読取済";color:var(--azure);font-weight:700}
 
-/* 推奨手 */
-.rec-kicker{font-size:10px;letter-spacing:.12em;color:var(--slate);margin:0 0 4px}
-#recommendation h2{font-family:"Hiragino Mincho ProN","Yu Mincho",serif;font-size:25px;line-height:1.2;
-  margin:0 0 6px;font-weight:600}
-#actionReason{margin:0;font-size:11.5px;line-height:1.75;color:#414a52}
-.action-meta{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
-.action-meta span{border:1px solid var(--rule);border-radius:20px;padding:2px 8px;font-size:10px;color:var(--slate)}
-.forecast{display:grid;gap:3px;margin-top:8px;font-size:10.5px;color:var(--slate)}
-.forecast div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dotted var(--rule);padding-bottom:2px}
-.forecast em{font-style:normal;color:var(--jade)}
-
-/* 1タップ入力 */
-#quickPlay{margin-top:10px;border-top:1px solid var(--rule);padding-top:9px}
-.cand-head{display:flex;align-items:baseline;gap:7px;margin:0 0 6px}
-.cand-head b{font-size:16px}
-.cand-head span{font-size:10.5px;color:var(--slate)}
-.cand-list{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px}
-.cand{border:1px solid var(--rule);background:var(--paper);border-radius:8px;padding:4px 9px;cursor:pointer;
-  display:grid;justify-items:center;line-height:1.15;color:inherit}
-.cand:hover{border-color:var(--ink);background:var(--mist)}
-.cand b{font-size:13px;font-variant-numeric:tabular-nums}
-.cand i{font-style:normal;font-size:9.5px;color:var(--slate);font-variant-numeric:tabular-nums}
-.cand.crit b{color:var(--ember)}
-.cand.snapbtn,.cand.other{font-size:11px;padding:6px 10px}
-.cand-sub{font-size:10px;color:var(--slate);margin:2px 0 4px}
-
-/* 実行列 */
-.prob{border:1px solid var(--rule);border-radius:9px;padding:8px 10px;margin-bottom:9px}
-.prob span{display:block;font-size:10px;color:var(--slate);letter-spacing:.06em}
-.prob b{display:block;font-size:26px;font-weight:800;line-height:1.15;font-variant-numeric:tabular-nums}
-.prob small{display:block;font-size:10px;color:var(--slate);line-height:1.5;margin-top:2px}
-.act-stack{display:grid;gap:6px}
-.primary-button{border:1px solid var(--ember);background:var(--ember);color:#fff;border-radius:9px;
-  padding:12px 10px;font-weight:800;font-size:13.5px;cursor:pointer;width:100%}
+.sidestack{display:grid;gap:5px;align-content:start}
+.meter{display:grid;gap:2px}
+.meter>span{font-size:9.5px;letter-spacing:.06em;color:var(--slate)}
+.meter .io-row{display:flex;align-items:center;gap:3px}
+.meter input{flex:1;min-width:0;border:1px solid var(--rule);border-radius:6px;background:var(--paper);
+  font-size:15px;font-weight:800;text-align:center;padding:2px;outline:0;color:inherit;
+  font-variant-numeric:tabular-nums;-moz-appearance:textfield}
+.meter input::-webkit-outer-spin-button,.meter input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.effect{font-size:11px;font-weight:700;text-align:center;border:1px solid var(--rule);border-radius:6px;padding:3px}
+.flag{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--slate);cursor:pointer}
+.flag input{accent-color:var(--ember);width:12px;height:12px;margin:0}
+.primary-button{border:1px solid var(--ember);background:var(--ember);color:#fff;border-radius:8px;
+  padding:9px 6px;font-weight:800;font-size:12.5px;cursor:pointer;width:100%}
 .primary-button:hover{background:#c74716}
-.primary-button small{display:block;font-size:9.5px;font-weight:400;opacity:.85;margin-top:2px}
+.primary-button small{display:block;font-size:9px;font-weight:400;opacity:.85}
 .primary-button:disabled{opacity:.4;cursor:default}
-.ghost-button{border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:9px;
-  padding:9px 10px;font-size:12px;cursor:pointer;width:100%}
+.ghost-button{border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:8px;
+  padding:7px 6px;font-size:11.5px;cursor:pointer;width:100%}
 .ghost-button:hover{background:var(--mist)}
 .ghost-button:disabled{opacity:.4;cursor:default}
 #hudOff{border-color:var(--azure);background:#eef6fd;color:var(--azure);font-weight:700}
 
-/* ---------- 引き出し（ログ・他の候補） ---------- */
-#drawer{position:fixed;top:0;right:0;bottom:0;width:min(390px,88vw);background:var(--paper);
-  border-left:1px solid var(--rule);box-shadow:-16px 0 40px #0f172a14;padding:16px 18px;overflow:auto;
-  transform:translateX(101%);transition:transform .22s ease;z-index:40}
+/* ---------- 引き出し ---------- */
+#drawer{position:fixed;top:0;right:0;bottom:0;width:min(370px,90vw);background:var(--paper);
+  border-left:1px solid var(--rule);box-shadow:-16px 0 40px #0f172a1f;padding:14px 16px;overflow:auto;
+  transform:translateX(101%);transition:transform .2s ease;z-index:40}
 body.drawer-open #drawer{transform:none}
-#drawer h3{font-size:13px;margin:18px 0 8px}
-#drawer h3:first-of-type{margin-top:14px}
+#drawer h3{font-size:12.5px;margin:16px 0 7px}
 .drawer-head{display:flex;align-items:center;justify-content:space-between}
 .drawer-head b{font-size:13px}
 .drawer-head button{border:0;background:transparent;font-size:20px;color:var(--slate);cursor:pointer;line-height:1}
-.history{list-style:none;margin:0;padding:0;display:grid;gap:5px}
-.history li{border:1px solid var(--rule);border-radius:8px;padding:7px 9px;font-size:11px;color:#414a52}
-.history li b{display:block;color:var(--ink);margin-bottom:2px}
+.history{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.history li{border:1px solid var(--rule);border-radius:7px;padding:6px 8px;font-size:11px;color:#414a52}
+.history li b{display:block;color:var(--ink);margin-bottom:1px}
 .history li small{color:var(--slate)}
-.history .empty{color:var(--slate);text-align:center;padding:16px;border-style:dashed}
-.alt-list{list-style:none;margin:0;padding:0;display:grid;gap:5px}
-.alt-list li{display:flex;justify-content:space-between;gap:8px;border:1px solid var(--rule);
-  border-radius:8px;padding:7px 9px;font-size:11.5px}
+.history .empty{color:var(--slate);text-align:center;padding:14px;border-style:dashed}
+.alt-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.alt-list li{display:flex;justify-content:space-between;gap:8px;align-items:center;border:1px solid var(--rule);
+  border-radius:7px;padding:6px 9px;font-size:11.5px;cursor:pointer}
+.alt-list li:hover{background:var(--mist)}
+.alt-list li.current{border-color:var(--ember);background:#fdf2ee}
 .alt-list li b{font-weight:700}
 .alt-list li small{color:var(--slate);flex:none}
 
 /* ---------- 検証ダイアログ ---------- */
-.modal{border:0;padding:0;background:transparent;color:var(--ink);width:min(460px,calc(100% - 28px))}
+.modal{border:0;padding:0;background:transparent;color:var(--ink);width:min(440px,calc(100% - 24px))}
 .modal::backdrop{background:#0f172a55}
-.modal-card{position:relative;border:1px solid var(--rule);border-radius:14px;padding:22px;background:var(--paper);
+.modal-card{position:relative;border:1px solid var(--rule);border-radius:13px;padding:20px;background:var(--paper);
   box-shadow:0 30px 70px #0f172a2e}
-.modal-close{position:absolute;right:12px;top:9px;border:0;background:transparent;color:var(--slate);font-size:21px;cursor:pointer}
-.modal h2{font-size:19px;margin:4px 0 8px}
+.modal-close{position:absolute;right:11px;top:8px;border:0;background:transparent;color:var(--slate);font-size:20px;cursor:pointer}
+.modal h2{font-size:18px;margin:4px 0 7px}
 .eyebrow{font-size:10px;letter-spacing:.12em;color:var(--slate);margin:0}
 .modal-lead{font-size:11.5px;line-height:1.75;color:var(--slate);margin:0}
 .bench-input{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--rule);
-  border-radius:9px;padding:8px 11px;margin:14px 0 8px}
+  border-radius:8px;padding:8px 10px;margin:13px 0 8px}
 .bench-input span{font-size:11px;color:var(--slate)}
-.bench-input input{width:96px;border:0;background:transparent;font-size:19px;font-weight:800;text-align:right;
+.bench-input input{width:92px;border:0;background:transparent;font-size:18px;font-weight:800;text-align:right;
   outline:0;color:inherit;font-variant-numeric:tabular-nums}
-.benchmark-result{display:flex;align-items:baseline;gap:9px;margin:16px 0 10px}
-.benchmark-result strong{font-size:40px;font-variant-numeric:tabular-nums}
+.benchmark-result{display:flex;align-items:baseline;gap:9px;margin:15px 0 9px}
+.benchmark-result strong{font-size:37px;font-variant-numeric:tabular-nums}
 .benchmark-result span{font-size:11px;color:var(--slate);line-height:1.6}
 .benchmark-result.fail strong{color:var(--crimson)}
 .benchmark-result.pass strong{color:var(--jade)}
@@ -210,25 +215,23 @@ body.drawer-open #drawer{transform:none}
 .benchmark-scale i b{display:block;height:100%;width:0;border-radius:6px;background:var(--jade);transition:width .6s}
 .benchmark-scale i em{position:absolute;left:70%;top:-4px;width:2px;height:15px;background:var(--ember)}
 .threshold-note{font-size:9.5px;color:var(--slate)}
-.result-grade{font-size:40px}
-.result-details{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.result-details div{border:1px solid var(--rule);border-radius:8px;padding:8px;text-align:center;font-size:10px}
-.result-details b{display:block;font-size:15px}
+.result-grade{font-size:38px}
+.result-details{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.result-details div{border:1px solid var(--rule);border-radius:7px;padding:7px;text-align:center;font-size:10px}
+.result-details b{display:block;font-size:14px}
 
-/* ---------- 狭い画面 ---------- */
-@media(max-width:1080px){
-  .capture{grid-template-columns:minmax(0,1fr) 244px}
-  .panes{grid-template-columns:280px minmax(0,1fr) 168px}
+/* ---------- 横に広い窓では左右に振り分ける ---------- */
+@media(min-width:900px) and (orientation:landscape){
+  .bottombar{grid-template-columns:minmax(0,1fr) 200px}
+  .rec{max-height:30dvh}
 }
-@media(max-width:860px){
-  body{overflow:auto;height:auto}
-  .app{height:auto;grid-template-rows:none}
-  .capture{grid-template-columns:1fr}
-  .stage{aspect-ratio:16/9}
-  .side{border-left:0;border-top:1px solid var(--rule)}
-  .controls{max-height:none}
-  .panes{grid-template-columns:1fr}
-  .pane+.pane{border-left:0;border-top:1px solid var(--rule)}
+@media(max-width:430px){
+  .bottombar{grid-template-columns:1fr;gap:6px}
+  .sidestack{grid-template-columns:1fr 1fr 1fr;display:grid;gap:5px;align-items:end}
+  .sidestack .effect{grid-column:1/-1}
+  .sidestack .flag{grid-column:span 3}
+  .sidestack .primary-button{grid-column:1/-1}
+  .rec{max-height:30dvh}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -239,106 +242,94 @@ body.drawer-open #drawer{transform:none}
     <header class="topbar">
       <span class="wordmark">超あまつゆ <em>Forge</em></span>
       <span class="tag" id="stepLabel">基本手順 1 / 11</span>
-      <span class="tag">局面 <b id="phaseBadge">基本手順</b></span>
+      <span class="tag" id="phaseBadge">基本手順</span>
       <span class="spacer"></span>
       <button id="skipFixed" class="chip" type="button">基本手順を抜ける</button>
-      <button id="toggleLog" class="chip" type="button">ログと他の候補</button>
+      <button id="toggleLog" class="chip" type="button">ログ</button>
       <button id="openBenchmark" class="chip" type="button">検証 <b id="headlineRate">—</b></button>
       <button id="resetButton" class="chip" type="button">最初から</button>
     </header>
 
-    <section class="capture">
-      <div class="stage">
-        <div id="camPanel" hidden>
-          <div id="camStage"><video id="camVideo" playsinline muted></video><svg id="camOverlay"></svg></div>
-        </div>
-        <div class="stage-empty">
-          <b>ドラクエ10の画面を取り込みます</b>
-          <span>右の「画面を取り込む」から、共有ダイアログでドラクエ10のウィンドウを選んでください。板の四隅は自動で合わせます。</span>
-        </div>
+    <div class="stage">
+      <div id="camPanel" hidden>
+        <div id="camStage"><video id="camVideo" playsinline muted></video><svg id="camOverlay"></svg></div>
       </div>
+      <div class="stage-empty">
+        <b>ドラクエ10の画面を取り込みます</b>
+        <span>「画面を取り込む」から、共有ダイアログでドラクエ10のウィンドウを選んでください。板の四隅は自動で合わせます。</span>
+      </div>
+    </div>
 
-      <aside class="side">
-        <div class="side-actions">
-          <button id="camOpen" type="button">画面を取り込む</button>
-          <button id="camAuto" type="button">枠を自動調整</button>
-          <button id="camReset" type="button">枠をリセット</button>
-        </div>
-        <p id="camNotice" hidden></p>
-        <div id="camPreviewWrap"><canvas id="camPreview"></canvas><span id="camStatus">待機中</span></div>
-        <p class="hint">
-          <span class="swatch"><i style="background:#3ecf9a"></i>待機</span>
-          <span class="swatch"><i style="background:#f0aa46"></i>読み取り中</span>
-          <span class="swatch"><i style="background:#6fd7ff"></i>読み取り済み</span>
-        </p>
-        <p class="hint cam-help">緑のマス目が鉱石の3×2からズレていたら、オレンジの丸をドラッグして<b>板（羊皮紙）の外周4隅</b>に合わせてください。位置はこのブラウザに記憶され、次回は合わせ直す必要はありません。</p>
-        <p class="hint">とくぎの説明枠が板に重なると読み取りを邪魔します。カーソルを動かして、説明枠が板に重ならない位置にしておくと安定します。</p>
-      </aside>
-    </section>
+    <div class="cambar">
+      <button id="camOpen" type="button">画面を取り込む</button>
+      <button id="camAuto" type="button">枠を自動調整</button>
+      <button id="camReset" type="button">枠リセット</button>
+      <canvas id="camPreview"></canvas>
+      <span id="camStatus">待機中</span>
+      <span class="spacer"></span>
+      <span class="legend"><span><i style="background:#3ecf9a"></i>待機</span><span><i style="background:#f0aa46"></i>読取中</span><span><i style="background:#6fd7ff"></i>読取済</span></span>
+    </div>
 
+    <p id="camNotice" hidden></p>
     <div id="camShots" hidden></div>
 
-    <section class="controls">
-      <div class="numbers">
+    <section class="rec">
+      <div class="rec-head">
+        <span class="rec-kicker">次の一手</span>
+        <div class="picker">
+          <button id="pickPrev" type="button" aria-label="前の候補">◀</button>
+          <span id="pickLabel">1 / 1</span>
+          <button id="pickNext" type="button" aria-label="次の候補">▶</button>
+        </div>
+        <span class="prob"><span>大成功率</span><b id="probNow">—</b></span>
+      </div>
+      <div id="recommendation">
+        <h2 id="actionName">火力上げ</h2>
+        <p id="actionReason"></p>
+        <p class="picked-note" id="pickedNote" hidden>AIの一番手ではなく、選び直した候補を表示しています。</p>
+        <div id="actionMeta" class="action-meta"></div>
+        <div id="forecast" class="forecast"></div>
+      </div>
+      <small id="probNote"></small>
+      <div id="quickPlay" hidden></div>
+      <div id="resultEntry" hidden></div>
+    </section>
+
+    <section class="bottombar">
+      <div id="board" class="forge-board" aria-label="AからFの鍛冶マス"></div>
+      <div class="sidestack">
         <div class="meter"><span>温度 ℃</span>
           <span class="io-row">
             <button class="nudge" data-temp="-50" type="button">−</button>
             <input id="tempInput" type="number" inputmode="numeric" step="50" value="1000">
             <button class="nudge" data-temp="50" type="button">＋</button>
           </span></div>
-        <div class="divider"></div>
         <div class="meter"><span>集中力 <b id="focusMax">/ 253</b></span>
           <span class="io-row">
             <button class="nudge" data-focus="-1" type="button">−</button>
             <input id="focusInput" type="number" inputmode="numeric" value="253">
             <button class="nudge" data-focus="1" type="button">＋</button>
           </span></div>
-        <div class="divider"></div>
-        <span class="effect" id="turnEffect">初手・効果なし</span>
-        <div class="divider"></div>
+        <div class="effect" id="turnEffect">初手・効果なし</div>
         <label class="flag"><input id="hepaCharged" type="checkbox">必殺チャージ中</label>
-        <label class="flag"><input id="hepaActive" type="checkbox">ヘパイトス直後（次が確定会心）</label>
-      </div>
-
-      <div class="panes">
-        <div class="pane">
-          <p class="pane-label">実機のたたき値　●は会心優先（11幅）</p>
-          <div id="board" class="forge-board" aria-label="AからFの鍛冶マス"></div>
-        </div>
-
-        <div class="pane">
-          <p class="rec-kicker">次の一手</p>
-          <div id="recommendation">
-            <h2 id="actionName">火力上げ</h2>
-            <p id="actionReason"></p>
-            <div id="actionMeta" class="action-meta"></div>
-            <div id="forecast" class="forecast"></div>
-          </div>
-          <div id="quickPlay" hidden></div>
-          <div id="resultEntry" hidden></div>
-        </div>
-
-        <div class="pane">
-          <div class="prob"><span>いま しあげた場合の大成功率</span><b id="probNow">—</b><small id="probNote"></small></div>
-          <div class="act-stack">
-            <button id="hudOff" class="ghost-button" type="button" hidden></button>
-            <button id="applyButton" class="primary-button" type="button"><span id="applyLabel">この手を実行した</span><small>温度・集中力・手数が進みます</small></button>
-            <button id="undoButton" class="ghost-button" type="button">1手戻す</button>
-          </div>
-        </div>
+        <label class="flag"><input id="hepaActive" type="checkbox">ヘパイトス直後</label>
+        <button id="hudOff" class="ghost-button" type="button" hidden></button>
+        <button id="applyButton" class="primary-button" type="button"><span id="applyLabel">この手を実行した</span></button>
+        <button id="undoButton" class="ghost-button" type="button">1手戻す</button>
       </div>
     </section>
 
   </div>
 
-  <aside id="drawer" aria-label="ログと他の候補">
-    <div class="drawer-head"><b>進行ログと他の候補</b><button id="closeDrawer" type="button" aria-label="閉じる">×</button></div>
-    <h3>他の候補</h3>
+  <aside id="drawer" aria-label="候補とログ">
+    <div class="drawer-head"><b>候補と進行ログ</b><button id="closeDrawer" type="button" aria-label="閉じる">×</button></div>
+    <h3>手の候補（タップで切り替え）</h3>
     <ul id="altList" class="alt-list"></ul>
     <h3>進行ログ　<span class="tag" id="stepCount">0手</span></h3>
     <ol id="history" class="history"><li class="empty">推奨手を実行すると履歴が表示されます。</li></ol>
-    <h3>このツールについて</h3>
-    <p class="hint">AIは隠れた基準値を一切参照せず、画面上のたたき値・温度・集中力・本会心状態だけで判断します。非公式の練習・判断支援ツールです。ゲーム内の結果を保証するものではありません。</p>
+    <h3>使い方</h3>
+    <p class="hint">緑のマス目が鉱石の3×2からズレていたら、映像上のオレンジの丸をドラッグして<b>板（羊皮紙）の外周4隅</b>に合わせてください。位置はこのブラウザに記憶されます。とくぎの説明枠が板に重なると読み取りを邪魔するので、カーソルを外しておくと安定します。</p>
+    <p class="hint">AIは隠れた基準値を一切参照せず、画面上のたたき値・温度・集中力・本会心状態だけで判断します。非公式の練習・判断支援ツールです。</p>
   </aside>
 
 
@@ -2082,6 +2073,17 @@ function recommend(state) {
   let undoStack = [];
   let pending = null; // 直前の一手の結果入力待ち
   let lastRec = null;   // 固定バー用に、いま表示している推奨手を控えておく
+  // 何番目の候補を採用するか。盤面が変わったら先頭に戻す
+  let pickIdx = 0, pickSig = "", rankedNow = [];
+  function stateSig() {
+    return state.values.join(",") + "|" + state.temp + "|" + state.focus + "|" + state.step
+      + "|" + state.crits.map((c) => (c ? 1 : 0)).join("") + "|" + (state.hepaCharged ? 1 : 0) + (state.hepaActive ? 1 : 0);
+  }
+  function setPick(i) {
+    if (!rankedNow.length) return;
+    pickIdx = Math.max(0, Math.min(rankedNow.length - 1, i));
+    render();
+  }
   let offOffer = null;  // 候補外だが読み取れた値（ワンタップで反映する）
   let freshCells = {};  // 直近に読み取り・入力で変わったマス
   let freshTimer = null;
@@ -2112,7 +2114,7 @@ function recommend(state) {
     $("#focusInput").value = state.focus;
     $("#focusMax").textContent = "/ " + state.maxFocus;
     $("#turnEffect").textContent = !state.hasActed && state.temp === 1000 ? "初手・効果なし" : eff.label + "ターン";
-    $("#turnEffect").style.color = eff.label === "倍" ? "var(--gold)" : eff.label === "半減" ? "var(--blue)" : "var(--amber)";
+    $("#turnEffect").style.color = eff.label === "倍" ? "var(--ember)" : eff.label === "半減" ? "var(--azure)" : "var(--slate)";
     $("#stepLabel").textContent = state.step < FIXED_LEN ? `基本手順 ${state.step + 1} / ${FIXED_LEN}` : `アドリブ ${state.step - FIXED_LEN + 1} 手目`;
     $("#skipFixed").style.display = state.step < FIXED_LEN ? "" : "none";
     $("#phaseBadge").textContent = state.step < FIXED_LEN ? "基本手順" : "AIアドリブ";
@@ -2165,11 +2167,16 @@ function recommend(state) {
       $("#actionMeta").innerHTML = ""; $("#forecast").innerHTML = ""; $("#altList").innerHTML = "";
       $("#applyButton").disabled = true; $("#quickPlay").hidden = true;
       $("#probNow").textContent = "—"; $("#probNote").textContent = "結果入力待ち";
+      renderPicker(null);
       return;
     }
     const bad = state.values.some((v, i) => v > Z[i][1]);
     const ranked = AI.rankMoves(state);
-    const rec = ranked.length ? ranked[0].action : null;
+    rankedNow = ranked;
+    const sig = stateSig();
+    if (sig !== pickSig) { pickSig = sig; pickIdx = 0; }
+    if (pickIdx >= ranked.length) pickIdx = 0;
+    const rec = ranked.length ? ranked[pickIdx].action : null;
     const done = state.values.every((v, i) => v >= Z[i][0] && v <= Z[i][1]);
     const p = AI.greatChance(state.values, state.crits);
 
@@ -2194,7 +2201,7 @@ function recommend(state) {
       $("#applyButton").disabled = true; $("#quickPlay").hidden = true;
       return;
     }
-    const stopBetter = done && ranked[0].score != null && ranked[0].score <= 1000 * p;
+    const stopBetter = pickIdx === 0 && done && ranked[0].score != null && ranked[0].score <= 1000 * p;
     if (stopBetter) {
       $("#actionName").textContent = "しあげる";
       $("#actionReason").textContent = `全6マスが成功範囲内です。これ以上打つと誤差が悪化するため、ここでしあげるのが最善です（推定大成功率 ${(p * 100).toFixed(1)}%）。`;
@@ -2228,9 +2235,21 @@ function recommend(state) {
       $("#applyButton").disabled = false;
       $("#applyLabel").textContent = `${AI.actionLabel(rec)} を実行した`;
     }
-    $("#altList").innerHTML = ranked.slice(1, 5).map((x) =>
-      `<li><b>${AI.actionLabel(x.action)}</b><small>消費 ${AI.SKILLS[x.action.skill].cost}${x.score != null ? " ・評価 " + x.score.toFixed(0) : ""}</small></li>`
+    $("#altList").innerHTML = ranked.slice(0, 8).map((x, k) =>
+      `<li data-rank="${k}" class="${k === pickIdx ? "current" : ""}"><b>${k + 1}. ${AI.actionLabel(x.action)}</b>` +
+      `<small>消費 ${AI.SKILLS[x.action.skill].cost}${x.score != null ? " ・評価 " + x.score.toFixed(0) : ""}</small></li>`
     ).join("");
+    renderPicker(ranked);
+  }
+
+  // 候補の切り替え表示。1件しかないときは操作を伏せる
+  function renderPicker(ranked) {
+    const n = ranked ? ranked.length : 0;
+    $("#pickLabel").textContent = n ? `${pickIdx + 1} / ${n}` : "—";
+    $("#pickPrev").disabled = !n || pickIdx <= 0;
+    $("#pickNext").disabled = !n || pickIdx >= n - 1;
+    const note = $("#pickedNote");
+    if (note) note.hidden = !n || pickIdx === 0;
   }
 
   // 打つ前にダメージ候補を出しておき、1タップで「実行＋結果入力」を済ませる
@@ -2395,7 +2414,7 @@ function recommend(state) {
   function applyRecommended() {
     const ranked = AI.rankMoves(state);
     if (!ranked.length) return;
-    const rec = ranked[0].action;
+    const rec = ranked[Math.max(0, Math.min(pickIdx, ranked.length - 1))].action;
     const sk = AI.SKILLS[rec.skill];
     if (!sk || sk.cost > state.focus) return;
     snapshot();
@@ -2413,6 +2432,7 @@ function recommend(state) {
     state.hasActed = true;
     state.step += 1;
     if (!sk.utility && cand.length) pending = { label: AI.actionLabel(rec), cand, picked: {} };
+    pickIdx = 0; pickSig = "";
     render();
   }
 
@@ -2423,14 +2443,20 @@ function recommend(state) {
     Object.assign(state, { values: s.values, temp: s.temp, focus: s.focus, crits: s.crits,
       step: s.step, hasActed: s.hasActed, hepaCharged: s.hepaCharged, hepaActive: s.hepaActive });
     log = s.log;
+    pickIdx = 0; pickSig = "";
     render();
   }
 
   /* ---------- 配線 ---------- */
   $("#applyButton").addEventListener("click", applyRecommended);
-  $("#applyLabel").parentElement.querySelector("small").textContent = "結果はあとで入力する場合はこちら";
   $("#undoButton").addEventListener("click", undo);
   $("#hudOff").addEventListener("click", () => { if (offOffer) offOffer.apply(); });
+  $("#pickPrev").addEventListener("click", () => setPick(pickIdx - 1));
+  $("#pickNext").addEventListener("click", () => setPick(pickIdx + 1));
+  $("#altList").addEventListener("click", (e) => {
+    const li = e.target.closest("li[data-rank]");
+    if (li) { setPick(+li.dataset.rank); document.body.classList.remove("drawer-open"); }
+  });
   $("#toggleLog").addEventListener("click", () => document.body.classList.toggle("drawer-open"));
   $("#closeDrawer").addEventListener("click", () => document.body.classList.remove("drawer-open"));
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") document.body.classList.remove("drawer-open"); });
