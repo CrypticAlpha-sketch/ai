@@ -2120,6 +2120,7 @@ function recommend(state) {
     corners: null, store: null, votes: {}, active: false,
     onRead: null, onOff: null, targets: [], fps: 30, measuredFps: 0, fpsFrames: 0, fpsStarted: 0,
     lastGroups: [], shots: [], raw: null, seen: {}, lowStreak: {}, executedAt: 0, missReported: false,
+    reader: null, lastTickAt: 0, lastMediaTime: -1, gapMax: 0, gapSince: 0, hiddenMs: 0,
     learned: [], learningReady: false, dbPromise: null,
     readIdx: {}, off: {}, lock: {}
   };
@@ -2214,11 +2215,42 @@ function recommend(state) {
       try { cam.video.cancelVideoFrameCallback(cam.frameRequest); } catch (e) {}
     }
     cam.frameRequest = null;
+    if (cam.reader) { try { cam.reader.cancel(); } catch (e) {} cam.reader = null; }
     if (cam.timer) { clearInterval(cam.timer); cam.timer = null; }
   }
+
+  // requestVideoFrameCallback は「映像が画面に描かれるとき」しか発火しない。
+  // ドラクエ10を全画面にしてブラウザが完全に隠れると、Chrome はそのタブを
+  // 非表示とみなして描画を止めるため、コールバックも一緒に止まる（=無反応の主因）。
+  // MediaStreamTrackProcessor はトラックから直接フレームを受け取るので、
+  // ブラウザが裏に回っていても届いたぶんだけ処理できる。こちらを優先して使う。
+  function runProcessorLoop(track) {
+    let proc;
+    try { proc = new MediaStreamTrackProcessor({ track: track, maxBufferSize: 1 }); } catch (e) { return false; }
+    let reader;
+    try { reader = proc.readable.getReader(); } catch (e) { return false; }
+    cam.reader = reader; cam.frameMode = "track-processor";
+    (async () => {
+      while (cam.stream && cam.reader === reader) {
+        let res;
+        try { res = await reader.read(); } catch (e) { break; }
+        if (res.done) break;
+        const frame = res.value;
+        try { tick(frame); } catch (e) {} finally { try { frame.close(); } catch (e) {} }
+      }
+      try { reader.releaseLock(); } catch (e) {}
+      if (cam.reader === reader) cam.reader = null;
+    })();
+    return true;
+  }
+
   function startFrameLoop() {
     stopFrameLoop();
-    if (cam.video && typeof cam.video.requestVideoFrameCallback === "function") {
+    cam.lastTickAt = performance.now(); cam.lastMediaTime = -1;
+    const track = cam.stream ? cam.stream.getVideoTracks()[0] : null;
+    let started = false;
+    if (track && typeof window.MediaStreamTrackProcessor === "function") started = runProcessorLoop(track);
+    if (!started && cam.video && typeof cam.video.requestVideoFrameCallback === "function") {
       cam.frameMode = "video-frame";
       const next = () => {
         if (!cam.stream) { cam.frameRequest = null; return; }
@@ -2228,9 +2260,17 @@ function recommend(state) {
         if (cam.stream) cam.frameRequest = cam.video.requestVideoFrameCallback(next);
       };
       cam.frameRequest = cam.video.requestVideoFrameCallback(next);
-    } else {
-      cam.frameMode = "timer-fallback";
-      cam.timer = setInterval(tick, Math.round(1000 / cam.fps));
+    }
+    // 保険のタイマー。上の経路が止まったときだけ動く。
+    // 同じ静止フレームを二重に票へ数えないよう currentTime で重複を弾く。
+    if (cam.frameMode !== "track-processor") {
+      cam.timer = setInterval(() => {
+        if (!cam.stream || !cam.video) return;
+        if (performance.now() - cam.lastTickAt < 40) return;
+        const mt = cam.video.currentTime;
+        if (mt === cam.lastMediaTime) return;
+        tick();
+      }, 16);
     }
   }
 
@@ -2501,13 +2541,14 @@ function recommend(state) {
   cam.unwatch = function () { cam.active = false; cam.targets = []; cam.votes = {}; cam.sig = ""; cam.readIdx = {}; cam.off = {}; cam.executedAt = 0; reason("waiting", "OCR待機", "次の数値入力が必要なときに自動で監視します。"); draw(); };
   cam.markExecuted = function () {
     cam.executedAt = Date.now(); cam.missReported = false; cam.seen = {}; cam.lowStreak = {}; cam.votes = {};
+    cam.gapMax = 0;
     const letters = cam.targets.map((t) => t.letter).join("・");
     if (letters) reason("waiting", "表示待ち", `${letters} の数字表示を30fpsで待っています。`);
   };
 
   // 画面取り込みは再取得のたびに共有ダイアログが出るので、自動では取り直さない
   let stalls = 0;
-  function ensureAlive() {
+  function ensureAlive(fromFrame) {
     const v = cam.video;
     if (!cam.stream) return false;
     const tr = cam.stream.getVideoTracks()[0];
@@ -2516,6 +2557,9 @@ function recommend(state) {
       notice("画面の取り込みが終了しました。もう一度「画面を取り込む」を押してください。");
       return false;
     }
+    // トラックから直接フレームが届いている場合は、
+    // ブラウザが裏に回って <video> の再生が止まっていても処理を続ける。
+    if (fromFrame) { if (stalls) { stalls = 0; draw(); } return true; }
     if (v.paused || v.ended || v.readyState < 2 || !v.videoWidth) {
       stalls++;
       if (v.paused || v.ended) v.play().catch(() => {});
@@ -2535,14 +2579,27 @@ function recommend(state) {
     return ok;
   };
 
-  function grabGrid() {
-    const w = vw(), h = vh();
-    if (!w || !h) return null;
+  // 毎フレーム画面全体を取り込むと 1600×900 ぶんの画素コピーが発生して重い。
+  // 実際に使うのは四隅で囲んだ板の内側だけなので、その範囲だけ切り出す。
+  // 画素の細かさ（scale）は従来と同じなので読み取り精度は変わらない。
+  function grabGrid(src) {
+    const source = src || cam.video;
+    const w = (src && src.displayWidth) || vw(), h = (src && src.displayHeight) || vh();
+    if (!w || !h || !cam.corners) return null;
     const scale = Math.min(1, 1600 / w);
-    cam.canvas.width = Math.round(w * scale); cam.canvas.height = Math.round(h * scale);
-    cam.ctx.drawImage(cam.video, 0, 0, cam.canvas.width, cam.canvas.height);
-    const img = cam.ctx.getImageData(0, 0, cam.canvas.width, cam.canvas.height);
-    return V.rectifyGrid(img, cam.corners.map((p) => ({ x: p.x * scale, y: p.y * scale })));
+    const xs = cam.corners.map((p) => p.x), ys = cam.corners.map((p) => p.y), pad = 8;
+    const x0 = Math.max(0, Math.floor(Math.min.apply(null, xs) - pad));
+    const y0 = Math.max(0, Math.floor(Math.min.apply(null, ys) - pad));
+    const x1 = Math.min(w, Math.ceil(Math.max.apply(null, xs) + pad));
+    const y1 = Math.min(h, Math.ceil(Math.max.apply(null, ys) + pad));
+    const rw = x1 - x0, rh = y1 - y0;
+    if (rw < 24 || rh < 24) return null;
+    const cw = Math.max(1, Math.round(rw * scale)), chh = Math.max(1, Math.round(rh * scale));
+    if (cam.canvas.width !== cw || cam.canvas.height !== chh) { cam.canvas.width = cw; cam.canvas.height = chh; }
+    cam.ctx.drawImage(source, x0, y0, rw, rh, 0, 0, cw, chh);
+    const img = cam.ctx.getImageData(0, 0, cw, chh);
+    const sx = cw / rw, sy = chh / rh;
+    return V.rectifyGrid(img, cam.corners.map((p) => ({ x: (p.x - x0) * sx, y: (p.y - y0) * sy })));
   }
 
   // 検出部分の切り抜き画像を作る（実機表示と読み取り結果の突き合わせ用）
@@ -2667,7 +2724,8 @@ function recommend(state) {
     const testStore = V.loadStore(window.FORGE_TEMPLATES || {});
     const r = V.evaluateStore(testStore), pct = (x) => (x * 100).toFixed(1) + "%";
     const live = cam.stream ? (cam.measuredFps ? cam.measuredFps.toFixed(1) + "fps" : "計測中") : "未接続";
-    const mode = cam.frameMode === "video-frame" ? "映像フレーム同期" : "タイマー互換";
+    const mode = cam.frameMode === "track-processor" ? "トラック直結（裏でも動作）"
+      : cam.frameMode === "video-frame" ? "映像フレーム同期（ブラウザが隠れると停止）" : "タイマー互換";
     $("#ocrSummary").innerHTML = `<strong>${pct(r.accuracy)}</strong><span>${r.correct} / ${r.total}枚 正解・判定不能 ${r.rejected}枚<br>${mode}・最大${cam.fps}fps／実測 <i id="ocrLiveFps">${live}</i></span>`;
     $("#ocrRows").innerHTML = r.perDigit.map((d) => {
       const misses = d.errors.length ? d.errors.slice(0, 3).map((e) => `${e.as}（${e.count}）`).join("、") : "なし";
@@ -2697,12 +2755,20 @@ function recommend(state) {
     for (const d of cam.lastGroups) g.strokeRect(d.box.x - 4, d.box.y - 4, d.box.w + 8, d.box.h + 8);
   }
 
-  function tick() {
-    if (!ensureAlive()) return;
+  function tick(frame) {
+    if (!ensureAlive(!!frame)) return;
     let grid;
-    try { grid = grabGrid(); } catch (e) { return; }
+    try { grid = grabGrid(frame); } catch (e) { return; }
     if (!grid) return;
     const fpsNow = performance.now();
+    // フレームがどれだけ途切れたかを記録する。「30fpsで見ているはずなのに
+    // 反応しない」ときは、ここが数百msに跳ねているかどうかで原因が切り分けられる。
+    if (cam.lastTickAt) {
+      const gap = fpsNow - cam.lastTickAt;
+      if (cam.executedAt && gap > cam.gapMax) cam.gapMax = gap;
+    }
+    cam.lastTickAt = fpsNow;
+    if (cam.video) cam.lastMediaTime = cam.video.currentTime;
     if (!cam.fpsStarted) cam.fpsStarted = fpsNow;
     cam.fpsFrames++;
     if (fpsNow - cam.fpsStarted >= 1000) {
@@ -2711,10 +2777,16 @@ function recommend(state) {
       const live = document.getElementById("ocrLiveFps");
       if (live) live.textContent = cam.measuredFps.toFixed(1) + "fps";
     }
+    // 枠の描き直しは毎フレームやると（SVGの組み直しとレイアウト再計算で）
+    // 読み取り本体より重くなる。見た目には十分な12fps程度に間引く。
+    const paint = (g, force) => {
+      if (!force && fpsNow - (cam.paintedAt || 0) < 80) return;
+      cam.paintedAt = fpsNow; drawPreview(g); draw();
+    };
     const found = [], done = [], causes = { miss: [], locked: [], low: [], outside: [], reading: [] };
     // 監視中でないときの6マス全走査は重いので3回に1回だけにする
     cam.idleTick = (cam.idleTick || 0) + 1;
-    if (!cam.active && cam.idleTick % 3 !== 0) { drawPreview(grid); return; }
+    if (!cam.active && cam.idleTick % 3 !== 0) { paint(grid); return; }
     const scanIdx = cam.active ? cam.targets.map((t) => t.idx) : [0, 1, 2, 3, 4, 5];
     const now0 = Date.now();
     for (const i of scanIdx) {
@@ -2734,8 +2806,13 @@ function recommend(state) {
       if (lk) {
         if (!gs.length) { lk.clear++; if (lk.clear >= 2) delete cam.lock[i]; }
         else lk.clear = 0;
+        // 「数字が消えたフレームを2枚見る」条件は、フレームが飛んだときに
+        // いつまでも満たされず、次のとくぎのダメージを丸ごと取りこぼしていた。
+        // 新しく手を実行したあとに出る数字は必ず新しいものなので、
+        // 実行から少し待った時点で封じを解く。
+        if (cam.lock[i] && cam.executedAt > lk.t && now0 - cam.executedAt > 600) delete cam.lock[i];
         if (cam.lock[i]) {
-          if (now0 - lk.t > 8000) delete cam.lock[i];   // 念のための時間切れ
+          if (now0 - lk.t > 3000) delete cam.lock[i];   // 念のための時間切れ
           else { causes.locked.push("ABCDEF"[i]); if (gs.length) found.push({ box: gs[0].box, label: "表示が消えるのを待っています" }); continue; }
         }
       }
@@ -2753,7 +2830,7 @@ function recommend(state) {
           cam.lowStreak[i] = 0;
           // フレームごとに勝者を決めず、候補ごとの一致度を足し込んでいく。
           // 1枚だと「2」と「3」が0.001差で入れ替わるので、数枚ぶんならすと安定する。
-          const v = (cam.votes[i] = cam.votes[i] || { n: 0, acc: {}, cnt: {}, freeAcc: {}, freeN: {}, vecs: null });
+          const v = (cam.votes[i] = cam.votes[i] || { n: 0, acc: {}, cnt: {}, freeAcc: {}, freeN: {}, vecs: null, t0: now0 });
           v.n++; v.vecs = r.vecs;
           // 桁数が合わなかったフレームでは、その候補は採点されない。
           // 全フレーム数で割ると、演出の光でブレた数コマのせいで平均が落ちて
@@ -2809,8 +2886,12 @@ function recommend(state) {
             // 一致度がそこそこ止まりのときだけ厳しくする。はっきり読めているなら待たない。
             const risky = second !== null && meanBest < 0.88 && V.confusable(+best, +second);
             const need = risky ? 0.04 : 0.012;
+            const shown = now0 - (v.t0 || now0);
             const sure = (nb >= 3 && meanBest >= floor && lead >= need)
               || (nb >= 2 && meanBest >= 0.84 && lead >= Math.max(0.04, need))
+              // フレームが飛んで3枚そろわない環境でも、同じ数字が0.5秒以上
+              // 出続けているなら十分な根拠がある。ここで待ち続けると無反応になる。
+              || (nb >= 2 && shown >= 500 && meanBest >= floor && lead >= need)
               // 数字表示が極端に短くても、自由読みと候補読みが一致する非常に鮮明な1枚は採用する。
               || (nb >= 1 && meanBest >= 0.91 && lead >= 0.08 && r.free && String(+r.free.text) === String(+best) && r.free.score >= 0.91);
             if (!sure && risky && nb >= 5) label = `${best}? ${second}? 判別中`;
@@ -2837,7 +2918,7 @@ function recommend(state) {
       found.push({ box: g.box, label: label });
     }
     cam.lastGroups = found;
-    drawPreview(grid);
+    paint(grid, done.length > 0);
     if (cam.active) {
       const elapsed = cam.executedAt ? now0 - cam.executedAt : 0;
       if (!cam.executedAt) reason("waiting", "監視準備", `${cam.targets.map((t) => t.letter).join("・")} を監視中。「この手を実行した」後に判定します。`);
@@ -2848,7 +2929,13 @@ function recommend(state) {
       else if (causes.miss.length && elapsed < 4500) reason("waiting", "表示待ち", `${causes.miss.join("・")} の数字表示を30fpsで待っています。通常画面は失敗画像として保存しません。`);
       else if (causes.miss.length && !cam.missReported) {
         cam.missReported = true;
-        reason("error", "読み取りなし", `${causes.miss.join("・")} で数字表示を確認できませんでした。枠位置を確認し、数値は手動入力してください。`);
+        const fpsTxt = cam.measuredFps ? cam.measuredFps.toFixed(1) : "計測中";
+        const gapTxt = cam.gapMax ? Math.round(cam.gapMax) + "ms" : "-";
+        const slow = cam.gapMax > 300;
+        reason("error", "読み取りなし",
+          `${causes.miss.join("・")} で数字表示を確認できませんでした（実測 ${fpsTxt}fps・最大フレーム間隔 ${gapTxt}）。`
+          + (slow ? "映像が途切れています。ドラクエ10をウィンドウ／ボーダレスにして、このブラウザが完全に隠れないように置いてください。"
+                  : "枠位置を確認し、数値は手動入力してください。"));
       }
     }
     // 読み取れたマスをまとめて反映（1フレームに複数マスでも取りこぼさない）
@@ -2863,7 +2950,7 @@ function recommend(state) {
       delete cam.off[dn.idx];
     }
     cam.active = cam.targets.length > 0;
-    draw();
+    if (done.length) draw();
     if (done.length) {
       status(done.map((x) => `${x.letter} = ${x.val}`).join(" / ") + " を読み取りました");
       reason("success", "読み取り成功", done.map((x) => `${x.letter}=${x.val}`).join(" / ") + "。正しければ下のスクショで「正解」を押すと学習します。");
@@ -2915,7 +3002,7 @@ function recommend(state) {
 </script>
 <script>(function () {
   "use strict";
-  const APP_VERSION = "2026.08.16-14";
+  const APP_VERSION = "2026.08.16-15";
   const AI = window.AmatsuyuAI;
   const $ = (s) => document.querySelector(s);
   const L = AI.LETTERS, Z = AI.ZONES;
