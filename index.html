@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 超あまつゆ Forge  version 2026.08.16-7 -->
+<!-- 超あまつゆ Forge  version 2026.08.16-8 -->
 <html lang="ja">
 <head>
 <meta charset="utf-8">
@@ -254,7 +254,7 @@ body.drawer-open #drawer{transform:none}
 
     <header class="topbar">
       <span class="wordmark">超あまつゆ <em>Forge</em></span>
-      <span class="tag ver" id="appVersion">v2026.08.16-7</span>
+      <span class="tag ver" id="appVersion">v2026.08.16-8</span>
       <span class="tag" id="stepLabel">基本手順 1 / 11</span>
       <span class="tag" id="phaseBadge">基本手順</span>
       <span class="spacer"></span>
@@ -347,9 +347,9 @@ body.drawer-open #drawer{transform:none}
     <h3>進行ログ　<span class="tag" id="stepCount">0手</span></h3>
     <ol id="history" class="history"><li class="empty">推奨手を実行すると履歴が表示されます。</li></ol>
     <h3>動作</h3>
-    <label class="autoskip"><input id="autoSkipToggle" type="checkbox" checked>火力上げなど、結果入力のいらない手は自動で進める</label>
+    <label class="autoskip"><input id="autoSkipToggle" type="checkbox" checked>基本手順のなかの火力上げは自動で進める（冷やしこみ・必殺・アドリブ帯は自動化しません）</label>
     <h3>バージョン</h3>
-    <p class="hint">超あまつゆ Forge <b>v2026.08.16-7</b><br>
+    <p class="hint">超あまつゆ Forge <b>v2026.08.16-8</b><br>
       主な変更：必殺の温存中に「あと何寄せれば4枚本会心にできるか」を表示／確定会心中はねらい系を候補から除外／確定会心は「実際に本会心にできる期待枚数」で評価／
       本会心が100%にならない理由を見込み欄に表示／
       数字が演出の光とくっついた塊を切り分け／走査を毎秒15回に／枠の自動調整を傾きなしに。</p>
@@ -2317,7 +2317,7 @@ function recommend(state) {
 </script>
 <script>(function () {
   "use strict";
-  const APP_VERSION = "2026.08.16-7";
+  const APP_VERSION = "2026.08.16-8";
   const AI = window.AmatsuyuAI;
   const $ = (s) => document.querySelector(s);
   const L = AI.LETTERS, Z = AI.ZONES;
@@ -2669,7 +2669,7 @@ function recommend(state) {
       nk.textContent = pickIdx === 0 ? "次の一手" : `候補 ${pickIdx + 1} 番目`;
       nb.textContent = AI.actionLabel(lastRec);
       nm.textContent = `消費 ${sk.cost}　残り ${state.focus - sk.cost}　大成功率 ${$("#probNow").textContent}`
-        + (autoSkipped ? `　（${AI.SKILLS.karyoku.name}などを自動で ${autoSkipped} 手進めました）` : "");
+        + (autoSkipped ? `　（${AI.SKILLS.karyoku.name}を自動で ${autoSkipped} 手進めました）` : "");
     } else {
       nk.textContent = "状況";
       nb.textContent = $("#actionName").textContent || "—";
@@ -2692,8 +2692,8 @@ function recommend(state) {
   }
 
   /* ---------- 手の適用（数値以外の状態だけ自動更新） ---------- */
-  // 火力上げ・冷やし込みのように結果入力のいらない手は、押さずに自動で進める。
-  // 必殺（ヘパイトス）は判断が大きいので自動化しない。
+  // 自動で進めるのは「基本手順のなかの火力上げ」だけにする。
+  // 冷やしこみや必殺、アドリブ帯の判断は、こちらで勝手に決めない。
   let autoBusy = false, autoPaused = false, autoSkipped = 0;
   function autoSkipUtility() {
     if (autoBusy || pending || !autoSkip) return;
@@ -2703,8 +2703,10 @@ function recommend(state) {
     while (n < 12) {
       const ranked = AI.rankMoves(state);
       if (!ranked.length) break;
+      if (state.step >= FIXED_LEN) break;                       // 基本手順11手のあいだだけ
+      if (ranked[0].action.skill !== "karyoku") break;           // 火力上げ以外は自動化しない
       const sk = AI.SKILLS[ranked[0].action.skill];
-      if (!sk || !sk.utility || sk.special || sk.cost > state.focus) break;
+      if (!sk || sk.cost > state.focus) break;
       pickIdx = 0;
       applyRecommended();
       n++;
