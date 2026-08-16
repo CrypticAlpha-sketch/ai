@@ -1091,6 +1091,10 @@ function recommend(state) {
 
   // 鉱石グリッドのパネル内相対位置（実機映像から実測）
   const GRID = [0.353, 0.204, 0.663, 0.842];
+  // 3桁のダメージはマスの幅より広く、右端の列では枠の外へはみ出す。
+  // 切り出しはひとまわり大きく取り、どのマスの数字かは中心位置で決める。
+  const PAD_U = 0.050, PAD_V = 0.026;
+  const EGRID = [GRID[0] - PAD_U, GRID[1] - PAD_V, GRID[2] + PAD_U, GRID[3] + PAD_V];
   const LETTERS = ["A", "B", "C", "D", "E", "F"];
   const CW = 16, CH = 24;
 
@@ -1103,8 +1107,11 @@ function recommend(state) {
   };
 
   function cellBox(i, W, H, isGrid) {
-    const gx0 = isGrid ? 0 : GRID[0] * W, gy0 = isGrid ? 0 : GRID[1] * H;
-    const gw = isGrid ? W : (GRID[2] - GRID[0]) * W, gh = isGrid ? H : (GRID[3] - GRID[1]) * H;
+    // isGrid のときは余白ぶんだけ内側が本来の6マス
+    const fx = PAD_U / (EGRID[2] - EGRID[0]), fy = PAD_V / (EGRID[3] - EGRID[1]);
+    const gx0 = isGrid ? fx * W : GRID[0] * W, gy0 = isGrid ? fy * H : GRID[1] * H;
+    const gw = isGrid ? W * (1 - 2 * fx) : (GRID[2] - GRID[0]) * W;
+    const gh = isGrid ? H * (1 - 2 * fy) : (GRID[3] - GRID[1]) * H;
     const c = i % 2, r = (i / 2) | 0;
     return { x0: Math.round(gx0 + gw * c / 2), y0: Math.round(gy0 + gh * r / 3),
              x1: Math.round(gx0 + gw * (c + 1) / 2), y1: Math.round(gy0 + gh * (r + 1) / 3) };
@@ -1162,7 +1169,11 @@ function recommend(state) {
   // パネル画像（RGBA ImageData 相当）から、あるマスの数字グループを探す
   function scanCell(panel, i, minDigits) {
     const W = panel.width, H = panel.height, d = panel.data;
-    const b = cellBox(i, W, H, !!panel.isGrid);
+    const b0 = cellBox(i, W, H, !!panel.isGrid);
+    // 走査だけ左右に広げ、隣のマスの数字は中心位置で除外する
+    const exX = (b0.x1 - b0.x0) * 0.34, exY = (b0.y1 - b0.y0) * 0.12;
+    const b = { x0: Math.max(0, Math.round(b0.x0 - exX)), y0: Math.max(0, Math.round(b0.y0 - exY)),
+                x1: Math.min(W, Math.round(b0.x1 + exX)), y1: Math.min(H, Math.round(b0.y1 + exY)) };
     const cw = b.x1 - b.x0, ch = b.y1 - b.y0;
     if (cw < 20 || ch < 20) return [];
     const G = new Float32Array(cw * ch), B = new Float32Array(cw * ch);
@@ -1173,7 +1184,8 @@ function recommend(state) {
     const loc = boxBlur(G, cw, ch, Math.max(4, Math.round(ch * 0.18)));
     const mask = new Uint8Array(cw * ch);
     for (let k = 0; k < cw * ch; k++) mask[k] = (G[k] < loc[k] - CFG.darkDelta && B[k] < CFG.blueMax) ? 1 : 0;
-    const hMin = ch * CFG.hMinRatio, hMax = ch * CFG.hMaxRatio;
+    const chBase = b0.y1 - b0.y0;
+    const hMin = chBase * CFG.hMinRatio, hMax = chBase * CFG.hMaxRatio;
     const digits = labelBlobs(mask, cw, ch)
       .filter((o) => o.h > hMin && o.h < hMax && o.w > 6 && o.w < o.h * 1.25 && o.n / (o.w * o.h) > 0.28)
       .sort((p, q) => p.x - q.x);
@@ -1204,6 +1216,14 @@ function recommend(state) {
         }
       edge = cnt ? edge / cnt : 0;
       if (edge < CFG.minEdge) continue;
+      // 数字のかたまりの中心がどのマスに属するかで振り分ける。
+      // 端の列からはみ出した数字は、いちばん近い端のマスのものとして扱う。
+      const cxp = b.x0 + x + wdt / 2, cyp = b.y0 + y + hgt / 2;
+      const cellW = (b0.x1 - b0.x0), cellH = (b0.y1 - b0.y0);
+      const originX = b0.x0 - (i % 2) * cellW, originY = b0.y0 - ((i / 2) | 0) * cellH;
+      const col = Math.max(0, Math.min(1, Math.floor((cxp - originX) / cellW)));
+      const row = Math.max(0, Math.min(2, Math.floor((cyp - originY) / cellH)));
+      if (col !== i % 2 || row !== ((i / 2) | 0)) continue;
       out.push({ cell: i, letter: LETTERS[i], digits: g, edge,
         box: { x: b.x0 + x, y: b.y0 + y, w: wdt, h: hgt },
         vecs: g.map((o) => normalize(G, cw, ch, o)) });
@@ -1331,6 +1351,16 @@ function recommend(state) {
     }
     return best == null ? null : { value: best, score: bs, second: second };
   }
+  function floorFor(n) { return n === 1 ? MIN_GROUP_ONE : MIN_GROUP; }
+  function attempt(store, vecs, candidates) {
+    const r = pickBest(store, vecs, candidates);
+    if (!r || r.score < floorFor(vecs.length)) return null;
+    const free = bestFree(store, vecs);
+    return { value: r.value, score: r.score, margin: r.score - Math.max(r.second, -1),
+             digits: vecs.length, minDigit: -9,
+             free: free ? free.text : null, freeScore: free ? free.score : -9,
+             agree: !!free && free.text === String(r.value) };
+  }
   function readGroup(store, group, candidates) {
     if (group.vecs.some((v) => !v)) return null;
     // 先に桁として成立しないものを落とす。ここを通さずに候補と突き合わせると、
@@ -1338,14 +1368,20 @@ function recommend(state) {
     const t = trimNoise(store, group.vecs);
     if (!t.vecs.length || t.min < MIN_DIGIT) return null;
     const vecs = t.vecs;
-    const r = pickBest(store, vecs, candidates);
-    // 一致度が低いまま候補から1つ選ぶと、似ていない数字に化ける。
-    // 実測では正しく読めているときは 0.80 前後、取り違えでは 0.70 を割る。
-    if (!r || r.score < (vecs.length === 1 ? MIN_GROUP_ONE : MIN_GROUP)) return null;
-    const free = bestFree(store, vecs);
-    return { value: r.value, score: r.score, margin: r.score - Math.max(r.second, -1),
-             digits: vecs.length, minDigit: t.min,
-             free: free ? free.text : null, freeScore: free ? free.score : -9 };
+    const a = attempt(store, vecs, candidates);
+    if (a && a.agree) { a.minDigit = t.min; return a; }
+    // 素直に読んだ結果と候補が食い違うときは、鉱石の光を桁として数えている疑いがある。
+    // 端をひとつ落として読み直し、素直な読みがそのまま候補に入っていれば採用する。
+    if (vecs.length > 1) {
+      const variants = [vecs.slice(1), vecs.slice(0, vecs.length - 1)];
+      for (const w of variants) {
+        const b = attempt(store, w, candidates);
+        if (b && b.agree) { b.minDigit = t.min; b.trimmed = true; return b; }
+      }
+    }
+    if (!a) return null;
+    a.minDigit = t.min;
+    return a;
   }
   // 読めなかったときに「実際は何に見えていたか」を返す（原因追跡用）
   function probe(store, group) {
@@ -1358,7 +1394,7 @@ function recommend(state) {
 
   /* ---------- 射影変換：カメラ画像の四隅 → 正規化パネル ---------- */
   const PW = 1034, PH = 736;
-  const GW = Math.round((GRID[2] - GRID[0]) * PW), GH = Math.round((GRID[3] - GRID[1]) * PH);
+  const GW = Math.round((EGRID[2] - EGRID[0]) * PW), GH = Math.round((EGRID[3] - EGRID[1]) * PH);
   function homography(c) { // c: TL,TR,BR,BL
     const [p0, p1, p2, p3] = c;
     const dx1 = p1.x - p2.x, dx2 = p3.x - p2.x, dy1 = p1.y - p2.y, dy2 = p3.y - p2.y;
@@ -1373,9 +1409,9 @@ function recommend(state) {
     const M = homography(corners), out = new Uint8ClampedArray(GW * GH * 4);
     const sw = src.width, sh = src.height, sd = src.data;
     for (let y = 0; y < GH; y++) {
-      const v = GRID[1] + (GRID[3] - GRID[1]) * (y + 0.5) / GH;
+      const v = EGRID[1] + (EGRID[3] - EGRID[1]) * (y + 0.5) / GH;
       for (let x = 0; x < GW; x++) {
-        const u = GRID[0] + (GRID[2] - GRID[0]) * (x + 0.5) / GW;
+        const u = EGRID[0] + (EGRID[2] - EGRID[0]) * (x + 0.5) / GW;
         const d = M[6] * u + M[7] * v + M[8];
         const sx = Math.round((M[0] * u + M[1] * v + M[2]) / d);
         const sy = Math.round((M[3] * u + M[4] * v + M[5]) / d);
@@ -1404,7 +1440,7 @@ function recommend(state) {
     return store;
   }
 
-  return { GRID, LETTERS, CFG, PW, PH, GW, GH, cellBox, scanCell, createStore, learn, readGroup, scoreText,
+  return { GRID, EGRID, LETTERS, CFG, PW, PH, GW, GH, cellBox, scanCell, createStore, learn, readGroup, scoreText,
     normalize, dot, bestFree, digitScore, probe, rectifyGrid, homography, loadStore };
 });
 </script>
@@ -1594,7 +1630,7 @@ function recommend(state) {
     return { x: (M[0] * u + M[1] * v + M[2]) / d, y: (M[3] * u + M[4] * v + M[5]) / d };
   }
   function gridToVideo(gx, gy) {
-    const [X0, Y0, X1, Y1] = V.GRID;
+    const [X0, Y0, X1, Y1] = V.EGRID;
     return mapUV(X0 + (X1 - X0) * gx / V.GW, Y0 + (Y1 - Y0) * gy / V.GH);
   }
 
