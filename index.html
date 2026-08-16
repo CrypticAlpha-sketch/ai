@@ -1322,7 +1322,38 @@ function recommend(state) {
     // 走査範囲の左右端に接している塊は、板の外にあるゲージ棒が切れて写ったもの。
     // 数字がここまではみ出すことはないので落とす。
     const atEdge = (o) => (b.x0 === 0 && o.x <= 1) || (b.x1 === W && o.x + o.w >= cw - 1);
-    const digits = labelBlobs(mask, cw, ch)
+    // 数字が隣の数字や演出の光とくっつくと横長の塊になり、幅の条件で捨てられてしまう。
+    // 縦方向の画素数が谷になっている列で切り分けてから判定する。
+    function splitWide(o, depth) {
+      if (o.w < o.h * 1.15 || o.w > o.h * 3.2 || depth > 2) return [o];
+      const col = new Int32Array(o.w);
+      for (let y = o.y; y < o.y + o.h; y++) {
+        const row = y * cw;
+        for (let x = 0; x < o.w; x++) if (mask[row + o.x + x]) col[x]++;
+      }
+      let mean = 0;
+      for (let x = 0; x < o.w; x++) mean += col[x];
+      mean /= o.w;
+      const lo = Math.round(o.w * 0.28), hi = Math.round(o.w * 0.72);
+      let cut = -1, cv = 1e9;
+      for (let x = lo; x <= hi; x++) if (col[x] < cv) { cv = col[x]; cut = x; }
+      if (cut < 0 || cv > mean * 0.42) return [o];
+      const mk = (x0, x1) => {
+        let n = 0, ny0 = o.y + o.h, ny1 = o.y - 1;
+        for (let y = o.y; y < o.y + o.h; y++) for (let x = x0; x < x1; x++)
+          if (mask[y * cw + o.x + x]) { n++; if (y < ny0) ny0 = y; if (y > ny1) ny1 = y; }
+        return n < 25 || ny1 < ny0 ? null : { x: o.x + x0, y: ny0, w: x1 - x0, h: ny1 - ny0 + 1, n: n };
+      };
+      const a = mk(0, cut), c = mk(cut, o.w);
+      if (!a || !c) return [o];
+      return splitWide(a, depth + 1).concat(splitWide(c, depth + 1));
+    }
+    const raw = [];
+    for (const o of labelBlobs(mask, cw, ch)) {
+      if (o.h <= hMin || o.h >= hMax || atEdge(o)) continue;
+      for (const q of splitWide(o, 0)) raw.push(q);
+    }
+    const digits = raw
       .filter((o) => o.h > hMin && o.h < hMax && o.w > 6 && o.w < o.h * 1.25 && o.n / (o.w * o.h) > 0.28 && !atEdge(o))
       .sort((p, q) => p.x - q.x);
     const groups = [];
@@ -1672,7 +1703,7 @@ function recommend(state) {
   const cam = {
     stream: null, video: null, canvas: null, ctx: null, timer: null,
     corners: null, store: null, votes: {}, active: false,
-    onRead: null, onOff: null, targets: [], fps: 10, lastGroups: [], shots: [], raw: null, seen: {},
+    onRead: null, onOff: null, targets: [], fps: 15, lastGroups: [], shots: [], raw: null, seen: {},
     readIdx: {}, off: {}, lock: {}
   };
   window.ForgeCam = cam;
@@ -2046,6 +2077,9 @@ function recommend(state) {
     try { grid = grabGrid(); } catch (e) { return; }
     if (!grid) return;
     const found = [], done = [];
+    // 監視中でないときの6マス全走査は重いので3回に1回だけにする
+    cam.idleTick = (cam.idleTick || 0) + 1;
+    if (!cam.active && cam.idleTick % 3 !== 0) { drawPreview(grid); return; }
     const scanIdx = cam.active ? cam.targets.map((t) => t.idx) : [0, 1, 2, 3, 4, 5];
     const now0 = Date.now();
     for (const i of scanIdx) {
@@ -2074,22 +2108,29 @@ function recommend(state) {
         if (r && Object.keys(r.scores).length) {
           // フレームごとに勝者を決めず、候補ごとの一致度を足し込んでいく。
           // 1枚だと「2」と「3」が0.001差で入れ替わるので、数枚ぶんならすと安定する。
-          const v = (cam.votes[i] = cam.votes[i] || { n: 0, acc: {}, freeAcc: {}, freeN: {}, vecs: null });
-          v.n++; v.vecs = r.vecs; v.digits = r.digits;
-          for (const k of Object.keys(r.scores)) v.acc[k] = (v.acc[k] || 0) + r.scores[k];
+          const v = (cam.votes[i] = cam.votes[i] || { n: 0, acc: {}, cnt: {}, freeAcc: {}, freeN: {}, vecs: null });
+          v.n++; v.vecs = r.vecs;
+          // 桁数が合わなかったフレームでは、その候補は採点されない。
+          // 全フレーム数で割ると、演出の光でブレた数コマのせいで平均が落ちて
+          // いつまでも確定しなくなるので、候補ごとに採点された回数で割る。
+          for (const k of Object.keys(r.scores)) {
+            v.acc[k] = (v.acc[k] || 0) + r.scores[k];
+            v.cnt[k] = (v.cnt[k] || 0) + 1;
+          }
           if (r.free) {
             v.freeAcc[r.free.text] = (v.freeAcc[r.free.text] || 0) + r.free.score;
             v.freeN[r.free.text] = (v.freeN[r.free.text] || 0) + 1;
           }
+          const mean = (k) => v.acc[k] / v.cnt[k];
           let best = null, second = null;
           for (const k of Object.keys(v.acc)) {
-            if (best === null || v.acc[k] > v.acc[best]) { second = best; best = k; }
-            else if (second === null || v.acc[k] > v.acc[second]) second = k;
+            if (best === null || mean(k) > mean(best)) { second = best; best = k; }
+            else if (second === null || mean(k) > mean(second)) second = k;
           }
-          const meanBest = v.acc[best] / v.n;
-          const meanSecond = second === null ? -9 : v.acc[second] / v.n;
+          const meanBest = mean(best);
+          const meanSecond = second === null ? -9 : mean(second);
           const lead = meanBest - meanSecond;
-          label = `${best}（${v.n}枚 ${meanBest.toFixed(2)}）`;
+          label = `${best}（${v.cnt[best]}枚 ${meanBest.toFixed(2)}）`;
 
           // 候補に縛らない読みのほうが明らかに良く、候補側の一致度も低いときは
           // 候補リスト自体が間違っている。すり替わりを防ぐため採用しない。
@@ -2110,16 +2151,17 @@ function recommend(state) {
               if (cam.onOff) cam.onOff(i, +freeTop);
             }
           } else {
-            const floor = v.digits === 1 ? V.MIN_GROUP_ONE : V.MIN_GROUP;
+            const floor = String(best).length === 1 ? V.MIN_GROUP_ONE : V.MIN_GROUP;
+            const nb = v.cnt[best];
             // 1位と2位が「4と6」のように紛らわしい組で競っているときは、
             // わずかな差で決め打ちせず、はっきり離れるまで待つ。
             // 黙って別の数字を入れるより、読めないままのほうが害が小さい。
             // 一致度がそこそこ止まりのときだけ厳しくする。はっきり読めているなら待たない。
             const risky = second !== null && meanBest < 0.88 && V.confusable(+best, +second);
             const need = risky ? 0.04 : 0.012;
-            const sure = (v.n >= 3 && meanBest >= floor && lead >= need)
-              || (v.n >= 2 && meanBest >= 0.84 && lead >= Math.max(0.04, need));
-            if (!sure && risky && v.n >= 5) label = `${best}? ${second}? 判別中`;
+            const sure = (nb >= 3 && meanBest >= floor && lead >= need)
+              || (nb >= 2 && meanBest >= 0.84 && lead >= Math.max(0.04, need));
+            if (!sure && risky && nb >= 5) label = `${best}? ${second}? 判別中`;
             if (sure) done.push({ idx: i, letter: g.letter, val: +best, vecs: v.vecs, box: g.box, lead: lead });
           }
         } else {
