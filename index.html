@@ -388,7 +388,7 @@ body.drawer-open #drawer{transform:none}
           <button id="openBenchmark" class="chip" type="button">検証を実行 <b id="headlineRate">—</b></button>
           <button id="openOcrTest" class="chip" type="button">OCR診断</button>
           <button id="resetButton" class="chip" type="button">最初からやり直す</button>
-          <span class="tag ver" id="appVersion">v2026.08.17-27</span>
+          <span class="tag ver" id="appVersion">v2026.08.17-29</span>
         </div>
       </details>
     </header>
@@ -398,6 +398,7 @@ body.drawer-open #drawer{transform:none}
       <span id="camStatus">待機中</span>
       <span class="rail-side">
         <button id="camCopy" class="chip" type="button" title="いまの診断内容を書き出します">診断をコピー</button>
+        <button id="camTape" class="chip" type="button" title="取りこぼした瞬間の映像を画像にして保存します" hidden>映像を保存</button>
         <button id="camOpen" type="button">画面を取り込む</button>
       </span>
     </div>
@@ -496,7 +497,7 @@ body.drawer-open #drawer{transform:none}
     <h3>動作</h3>
     <label class="autoskip"><input id="autoSkipToggle" type="checkbox" checked>基本手順のなかの火力上げは自動で進める（冷やしこみ・必殺・アドリブ帯は自動化しません）</label>
     <h3>バージョン</h3>
-    <p class="hint">超あまつゆ Forge <b>v2026.08.17-27</b><br>
+    <p class="hint">超あまつゆ Forge <b>v2026.08.17-29</b><br>
       主な変更：画面を「次の一手」中心に再設計／盤面を指示書化（対象マスが光り、結果待ちは「?」）／二重加算の防止／読み取り判定の緩和。</p>
     <h3>使い方</h3>
     <p class="hint">緑のマス目が鉱石の3×2からズレていたら、映像上のオレンジの丸をドラッグして<b>板（羊皮紙）の外周4隅</b>に合わせてください。位置はこのブラウザに記憶されます。とくぎの説明枠が板に重なると読み取りを邪魔するので、カーソルを外しておくと安定します。</p>
@@ -1811,7 +1812,7 @@ function recommend(state) {
     // 数字が隣の数字や演出の光とくっつくと横長の塊になり、幅の条件で捨てられてしまう。
     // 縦方向の画素数が谷になっている列で切り分けてから判定する。
     function splitWide(o, depth) {
-      if (o.w < o.h * 0.82 || o.w > o.h * 4.2 || depth > 2) return [o];
+      if (o.w < o.h * 0.98 || o.w > o.h * 4.2 || depth > 2) return [o];
       const col = new Int32Array(o.w);
       for (let y = o.y; y < o.y + o.h; y++) {
         const row = y * cw;
@@ -1899,7 +1900,7 @@ function recommend(state) {
     for (const o of base) {
       const parts = splitWide(o, 0);
       const est = Math.max(2, Math.round(o.w / (o.h * 0.58)));
-      const wide = o.w > o.h * 0.82;
+      const wide = o.w > o.h * 0.98;
       if (wide) anyWide = true;
       const alt1 = wide ? splitEven(o, est) : parts;
       const alt2 = wide ? splitEven(o, est + 1) : parts;
@@ -2382,7 +2383,8 @@ function recommend(state) {
     reader: null, lastTickAt: 0, lastMediaTime: -1, gapMax: 0, gapSince: 0, hiddenMs: 0, diag: {},
     learned: [], learningReady: false, dbPromise: null,
     readIdx: {}, off: {}, lock: {}, cleared: {}, epoch: {}, readEpoch: {}, emptyRun: {},
-    diag: {}, hit: {}, scanFrames: 0, probe: {}
+    diag: {}, hit: {}, scanFrames: 0, probe: {},
+    tape: [], tapeFrozen: false, tapeW: 0, tapeH: 0
   };
   window.ForgeCam = cam;
   cam.__tickOnce = function (grid) { cam.__testGrid = grid; try { tick(); } finally { cam.__testGrid = null; } };
@@ -2805,6 +2807,7 @@ function recommend(state) {
     cam.executedAt = Date.now(); cam.missReported = false; cam.seen = {}; cam.lowStreak = {}; cam.votes = {}; cam.diag = {}; cam.cleared = {};
     cam.scanFrames = 0; cam.hit = {}; cam.probe = {};
     cam.tmax = { grab: 0, scan: 0, paint: 0, outside: 0 };
+    cam.tape = []; cam.tapeFrozen = false;
     cam.gapMax = 0;
     const letters = cam.targets.map((t) => t.letter).join("・");
     if (letters) reason("waiting", "表示待ち", `${letters} の数字表示を30fpsで待っています。`);
@@ -2846,6 +2849,74 @@ function recommend(state) {
   // 毎フレーム画面全体を取り込むと 1600×900 ぶんの画素コピーが発生して重い。
   // 実際に使うのは四隅で囲んだ板の内側だけなので、その範囲だけ切り出す。
   // 画素の細かさ（scale）は従来と同じなので読み取り精度は変わらない。
+  // 取り込んだ板の映像を、直近のぶんだけ手元に残しておく。
+  // 取りこぼしたとき「そのとき何が映っていたか」を後から確認できるようにする。
+  // 判定に使うのは明るさだけなので、灰色に落として幅240pxまで縮めて持つ
+  // （1コマ約80KB・72コマで約5.8MB）。
+  const TAPE_MAX = 72, TAPE_W = 240;
+  function pushTape(grid, note) {
+    if (cam.tapeFrozen) return;
+    const tw = TAPE_W, th = Math.max(1, Math.round(grid.height * tw / grid.width));
+    const g = new Uint8Array(tw * th), d = grid.data;
+    for (let y = 0; y < th; y++) {
+      const sy = Math.min(grid.height - 1, Math.round(y * grid.height / th));
+      for (let x = 0; x < tw; x++) {
+        const sx = Math.min(grid.width - 1, Math.round(x * grid.width / tw));
+        const o = (sy * grid.width + sx) * 4;
+        g[y * tw + x] = (d[o] * 3 + d[o + 1] * 6 + d[o + 2]) / 10;
+      }
+    }
+    cam.tapeW = tw; cam.tapeH = th;
+    cam.tape.push({ t: Date.now(), gray: g, note: note || "" });
+    if (cam.tape.length > TAPE_MAX) cam.tape.shift();
+  }
+
+  // 録画を1枚の画像に並べて書き出す。各コマにマスの区切り線と判定結果を重ねるので、
+  // 「数字がマスの外に出ている」「そもそも表示されていない」「表示は出たが判定が渋い」
+  // のどれなのかが一目で切り分けられる。
+  function buildTapeSheet() {
+    const n = cam.tape.length;
+    if (!n) return null;
+    const tw = cam.tapeW, th = cam.tapeH, cols = Math.min(8, n);
+    const rows = Math.ceil(n / cols), lab = 28, pad = 4;
+    const cvs = document.createElement("canvas");
+    cvs.width = cols * (tw + pad) + pad;
+    cvs.height = rows * (th + lab + pad) + pad + 22;
+    const cx = cvs.getContext("2d");
+    cx.fillStyle = "#14181c"; cx.fillRect(0, 0, cvs.width, cvs.height);
+    cx.font = "11px monospace"; cx.textBaseline = "top";
+    cx.fillStyle = "#9fb0bf";
+    const t0 = cam.tape[0].t;
+    cx.fillText("超あまつゆ Forge 取りこぼし時の映像  " + n + "コマ  "
+      + new Date(t0).toLocaleTimeString("ja-JP") + " から "
+      + ((cam.tape[n - 1].t - t0) / 1000).toFixed(2) + "秒間", pad, 5);
+    const img = cx.createImageData(tw, th);
+    for (let k = 0; k < n; k++) {
+      const fr = cam.tape[k];
+      const col = k % cols, row = (k / cols) | 0;
+      const ox = pad + col * (tw + pad), oy = 22 + pad + row * (th + lab + pad);
+      for (let j = 0; j < tw * th; j++) {
+        const v = fr.gray[j];
+        img.data[j * 4] = v; img.data[j * 4 + 1] = v; img.data[j * 4 + 2] = v; img.data[j * 4 + 3] = 255;
+      }
+      cx.putImageData(img, ox, oy);
+      // マスの区切り（2列3行）と、板の有効範囲を重ねる
+      const E = V.EGRID;
+      cx.strokeStyle = "rgba(110,215,255,.85)"; cx.lineWidth = 1;
+      const gx0 = ox + E[0] * tw, gy0 = oy + E[1] * th;
+      const gw = (E[2] - E[0]) * tw, gh = (E[3] - E[1]) * th;
+      cx.strokeRect(gx0 + .5, gy0 + .5, gw, gh);
+      cx.strokeStyle = "rgba(110,215,255,.45)";
+      for (let c2 = 1; c2 < 2; c2++) { cx.beginPath(); cx.moveTo(gx0 + gw * c2 / 2, gy0); cx.lineTo(gx0 + gw * c2 / 2, gy0 + gh); cx.stroke(); }
+      for (let r2 = 1; r2 < 3; r2++) { cx.beginPath(); cx.moveTo(gx0, gy0 + gh * r2 / 3); cx.lineTo(gx0 + gw, gy0 + gh * r2 / 3); cx.stroke(); }
+      cx.fillStyle = "#dbe6ef";
+      cx.fillText("#" + (k + 1) + " +" + ((fr.t - t0) / 1000).toFixed(2) + "s", ox, oy + th + 1);
+      cx.fillStyle = "#8fd7b0";
+      cx.fillText(fr.note.slice(0, 30), ox, oy + th + 1 + 12);
+    }
+    return cvs;
+  }
+
   function grabGrid(src) {
     const source = src || cam.video;
     const w = (src && src.displayWidth) || vw(), h = (src && src.displayHeight) || vh();
@@ -3059,6 +3130,7 @@ function recommend(state) {
     };
     const found = [], done = [], causes = { miss: [], locked: [], low: [], outside: [], reading: [] };
     const tScan0 = performance.now();
+    const fnote = {};
     // 監視中でないときの6マス全走査は重いので3回に1回だけにする
     cam.idleTick = (cam.idleTick || 0) + 1;
     if (!cam.active && cam.idleTick % 3 !== 0) { paint(grid); return; }
@@ -3127,6 +3199,7 @@ function recommend(state) {
         if (i === scanIdx[0]) cam.scanFrames = (cam.scanFrames || 0) + 1;
         if (gs.length) cam.hit[i] = (cam.hit[i] || 0) + 1;
       }
+      if (tg) fnote[i] = { n: gs.length };
       if (!gs.length) {
         if (tg) {
           causes.miss.push(tg.letter); cam.lowStreak[i] = 0;
@@ -3211,7 +3284,7 @@ function recommend(state) {
           for (const c of t.candidates) candKeys[String(+c)] = true;
           const freeInCand = freeTop !== null && !!candKeys[String(+freeTop)];
           const offCand = v.n >= 3 && freeTop !== null && !freeInCand && freeTop !== String(+best)
-            && freeMean > meanBest + 0.05 && meanBest < 0.80;
+            && freeMean >= 0.82 && freeMean > meanBest + 0.05 && meanBest < 0.80;
 
           if (offCand) {
             cam.off[i] = (cam.off[i] || 0) + 1;
@@ -3264,6 +3337,7 @@ function recommend(state) {
               && meanBest >= 0.58 && leadAdj >= (risky ? 0.08 : 0.05);
             const conflict = (sure || stable) && freeSure && +best !== +freeTop;
             cam.diag[i] = { letter: g.letter, val: +best, score: meanBest, n: nb, lead: leadAdj };
+            if (fnote[i]) { fnote[i].v = +best; fnote[i].s = meanBest; fnote[i].d = String(best).length; }
             v.last = { val: +best, mean: meanBest, nb: nb, leadAdj: leadAdj, floor: floor, risky: risky,
               vecs: v.bestVecs || v.vecs, box: g.box, letter: g.letter, candidates: t.candidates.slice() };
             if (conflict) label = `${+best}? ${+freeTop}? 判別中`;
@@ -3303,6 +3377,17 @@ function recommend(state) {
       found.push({ box: g.box, label: label });
     }
     if (cam.executedAt) { const ds = performance.now() - tScan0; if (ds > cam.tmax.scan) cam.tmax.scan = ds; }
+    // このコマで各マスがどう判定されたかを添えて記録する
+    if (cam.active) {
+      const bits = [];
+      for (const tg4 of cam.targets) {
+        const f4 = fnote[tg4.idx];
+        if (!f4) { bits.push(tg4.letter + ":-"); continue; }
+        if (f4.v != null) bits.push(tg4.letter + ":" + f4.v + "(" + f4.s.toFixed(2) + ")" + f4.d + "桁");
+        else bits.push(tg4.letter + (f4.n ? ":塊" + f4.n : ":なし"));
+      }
+      pushTape(grid, bits.join(" "));
+    }
     cam.lastGroups = found;
     // 「何も起きない」ときに見るものが無いと原因が追えない。
     // 監視中は常に、見たコマ数・検出コマ数・現在の最有力を出しておく。
@@ -3314,6 +3399,11 @@ function recommend(state) {
         return d3 ? `${tg3.letter} 検出${hit3}・最有力${d3.val}(${d3.score.toFixed(2)})`
                   : `${tg3.letter} 検出${hit3}`;
       });
+      const tb2 = document.querySelector("#camTape");
+      if (tb2) {
+        tb2.hidden = !cam.tape.length;
+        if (!cam.tapeFrozen) tb2.textContent = "映像を保存 (" + cam.tape.length + "コマ)";
+      }
       const gapTxt = cam.gapMax ? "・最長" + Math.round(cam.gapMax) + "ms" : "";
       status(`監視${cam.scanFrames || 0}コマ ${cam.measuredFps ? cam.measuredFps.toFixed(0) + "fps" : ""}${gapTxt}｜` + parts.join("｜"));
     }
@@ -3361,6 +3451,9 @@ function recommend(state) {
                 candidates: ps.candidates, confidence: ps.confidence, onApply: cam.onRead, onCorrect: cam.onCorrect });
           }
         }
+        cam.tapeFrozen = true;   // 取りこぼした瞬間の映像を保全する
+        const tb = document.querySelector("#camTape");
+        if (tb) { tb.hidden = false; tb.textContent = "映像を保存 (" + cam.tape.length + "コマ)"; }
         cam.lastFail = {
           at: new Date().toLocaleTimeString("ja-JP"),
           miss: causes.miss.slice(),
@@ -3415,6 +3508,20 @@ function recommend(state) {
     });
     $("#camAuto").addEventListener("click", () => cam.autoAlign(false));
     $("#camReset").addEventListener("click", cam.reset);
+    const tapeBtn = $("#camTape");
+    if (tapeBtn) tapeBtn.addEventListener("click", function () {
+      let cvs = null;
+      try { cvs = buildTapeSheet(); } catch (e) { cvs = null; }
+      if (!cvs) { notice("保存できる映像がありません。取りこぼしが起きたあとに押してください。"); return; }
+      cvs.toBlob((blob) => {
+        if (!blob) { notice("画像の書き出しに失敗しました。"); return; }
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "forge-ocr-" + new Date().toISOString().replace(/[:.]/g, "-") + ".png";
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      }, "image/png");
+    });
     // 診断をそのまま貼れる形で書き出す。スクショで文字が切れる問題を避ける。
     const cc = $("#camCopy");
     if (cc) cc.addEventListener("click", async function () {
@@ -3495,7 +3602,7 @@ function recommend(state) {
 </script>
 <script>(function () {
   "use strict";
-  const APP_VERSION = "2026.08.17-27";
+  const APP_VERSION = "2026.08.17-29";
   const AI = window.AmatsuyuAI;
   const $ = (s) => document.querySelector(s);
   const L = AI.LETTERS, Z = AI.ZONES;
