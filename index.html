@@ -383,7 +383,7 @@ body.drawer-open #drawer{transform:none}
           <button id="openBenchmark" class="chip" type="button">検証を実行 <b id="headlineRate">—</b></button>
           <button id="openOcrTest" class="chip" type="button">OCR診断</button>
           <button id="resetButton" class="chip" type="button">最初からやり直す</button>
-          <span class="tag ver" id="appVersion">v2026.08.17-18</span>
+          <span class="tag ver" id="appVersion">v2026.08.17-19</span>
         </div>
       </details>
     </header>
@@ -2223,7 +2223,7 @@ function recommend(state) {
   const cam = {
     stream: null, video: null, canvas: null, ctx: null, timer: null, frameRequest: null, frameMode: "timer",
     corners: null, store: null, votes: {}, active: false,
-    onRead: null, onOff: null, targets: [], fps: 30, measuredFps: 0, fpsFrames: 0, fpsStarted: 0,
+    onRead: null, onOff: null, targets: [], fps: 60, measuredFps: 0, fpsFrames: 0, fpsStarted: 0,
     lastGroups: [], shots: [], raw: null, seen: {}, lowStreak: {}, executedAt: 0, missReported: false,
     reader: null, lastTickAt: 0, lastMediaTime: -1, gapMax: 0, gapSince: 0, hiddenMs: 0, diag: {},
     learned: [], learningReady: false, dbPromise: null,
@@ -2385,7 +2385,7 @@ function recommend(state) {
     }
     try {
       cam.stream = await navigator.mediaDevices.getDisplayMedia({
-        video: { frameRate: { ideal: 30, max: 30 }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+        video: { frameRate: { ideal: 60, max: 60 }, width: { ideal: 1920 }, height: { ideal: 1080 } },
         audio: false,
         // 自分のタブを選ばせない・ウィンドウ選択を促す
         preferCurrentTab: false,
@@ -2646,6 +2646,7 @@ function recommend(state) {
   cam.unwatch = function () { cam.active = false; cam.targets = []; cam.votes = {}; cam.sig = ""; cam.readIdx = {}; cam.off = {}; cam.executedAt = 0; reason("waiting", "OCR待機", "次の数値入力が必要なときに自動で監視します。"); draw(); };
   cam.markExecuted = function () {
     cam.executedAt = Date.now(); cam.missReported = false; cam.seen = {}; cam.lowStreak = {}; cam.votes = {}; cam.diag = {}; cam.cleared = {};
+    cam.scanFrames = 0; cam.hit = {};
     cam.gapMax = 0;
     const letters = cam.targets.map((t) => t.letter).join("・");
     if (letters) reason("waiting", "表示待ち", `${letters} の数字表示を30fpsで待っています。`);
@@ -2925,10 +2926,10 @@ function recommend(state) {
           else { causes.locked.push("ABCDEF"[i]); if (gs.length) found.push({ box: gs[0].box, label: "表示が消えるのを待っています" }); continue; }
         }
       }
-      // 実行後に「そのマスに数字が無い」瞬間を1度でも見たか。
-      // これを見るまで採用しないことで、実行時点ですでに画面に残っていた
-      // 前の手のダメージを新しい結果として二重に数えることが原理的に起きなくなる。
-      if (!gs.length && cam.executedAt) cam.cleared[i] = true;
+      // 何コマ見て、何コマで数字らしきものが見つかったか。
+      // 取りこぼしの原因が「見つけられない」のか「見つけたが決められない」のかを分ける。
+      if (tg && cam.executedAt) { if (i === scanIdx[0]) cam.scanFrames = (cam.scanFrames || 0) + 1;
+        if (gs.length) cam.hit[i] = (cam.hit[i] || 0) + 1; }
       if (!gs.length) {
         if (tg) { causes.miss.push(tg.letter); cam.lowStreak[i] = 0; }
         continue;
@@ -3028,11 +3029,7 @@ function recommend(state) {
             cam.diag[i] = { letter: g.letter, val: +best, score: meanBest, n: nb, lead: lead };
             if (conflict) label = `${+best}? ${+freeTop}? 判別中`;
             else if (!sure && !stable && risky && nb >= 5) label = `${best}? ${second}? 判別中`;
-            if (!conflict && (sure || stable || freeSure) && !cam.cleared[i]) {
-              // 前の手の数字が消えるのをまだ見ていない＝いま見えているのは前回の表示。
-              causes.locked.push(g.letter);
-              label = "前の表示待ち";
-            } else if (!conflict && (sure || stable || freeSure)) {
+            if (!conflict && (sure || stable || freeSure)) {
               const val = (sure || stable) ? +best : +freeTop;
               done.push({ idx: i, letter: g.letter, val: val, vecs: v.bestVecs || v.vecs, box: g.box, lead: lead,
                 confidence: (sure || stable) ? meanBest : freeMean, candidates: t.candidates.slice(), onCorrect: cam.onCorrect });
@@ -3087,6 +3084,7 @@ function recommend(state) {
         for (const tg2 of cam.targets) {
           const v2 = cam.votes[tg2.idx], d2 = cam.diag[tg2.idx];
           if (d2) notes.push(`${d2.letter} は ${d2.val} が最有力（一致度 ${d2.score.toFixed(2)}・${d2.n}枚・差 ${d2.lead.toFixed(2)}）`);
+          else notes.push(`${tg2.letter} は数字を検出 ${cam.hit[tg2.idx] || 0} コマ`);
           if (v2 && v2.pendingShot) {
             const ps = v2.pendingShot; v2.pendingShot = null;
             addShot(ps.url, ps.letter, `確定できず ${+ps.predicted}`, false,
@@ -3095,7 +3093,7 @@ function recommend(state) {
           }
         }
         reason("error", "読み取りなし",
-          `${causes.miss.join("・")} で数字表示を確認できませんでした（実測 ${fpsTxt}fps・最大フレーム間隔 ${gapTxt}）。`
+          `${causes.miss.join("・")} で数字表示を確認できませんでした（監視 ${cam.scanFrames || 0}コマ・実測 ${fpsTxt}fps・最大フレーム間隔 ${gapTxt}）。`
           + (notes.length ? notes.join("／") + "。下の画像で「正解」を押すと手本が増えます。" : "")
           + (slow ? "映像が途切れています。ドラクエ10をウィンドウ／ボーダレスにして、このブラウザが完全に隠れないように置いてください。"
                   : notes.length ? "" : "枠位置を確認し、数値は手動入力してください。"));
@@ -3169,7 +3167,7 @@ function recommend(state) {
 </script>
 <script>(function () {
   "use strict";
-  const APP_VERSION = "2026.08.17-18";
+  const APP_VERSION = "2026.08.17-19";
   const AI = window.AmatsuyuAI;
   const $ = (s) => document.querySelector(s);
   const L = AI.LETTERS, Z = AI.ZONES;
