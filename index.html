@@ -388,7 +388,7 @@ body.drawer-open #drawer{transform:none}
           <button id="openBenchmark" class="chip" type="button">検証を実行 <b id="headlineRate">—</b></button>
           <button id="openOcrTest" class="chip" type="button">OCR診断</button>
           <button id="resetButton" class="chip" type="button">最初からやり直す</button>
-          <span class="tag ver" id="appVersion">v2026.08.17-29</span>
+          <span class="tag ver" id="appVersion">v2026.08.17-30</span>
         </div>
       </details>
     </header>
@@ -497,7 +497,7 @@ body.drawer-open #drawer{transform:none}
     <h3>動作</h3>
     <label class="autoskip"><input id="autoSkipToggle" type="checkbox" checked>基本手順のなかの火力上げは自動で進める（冷やしこみ・必殺・アドリブ帯は自動化しません）</label>
     <h3>バージョン</h3>
-    <p class="hint">超あまつゆ Forge <b>v2026.08.17-29</b><br>
+    <p class="hint">超あまつゆ Forge <b>v2026.08.17-30</b><br>
       主な変更：画面を「次の一手」中心に再設計／盤面を指示書化（対象マスが光り、結果待ちは「?」）／二重加算の防止／読み取り判定の緩和。</p>
     <h3>使い方</h3>
     <p class="hint">緑のマス目が鉱石の3×2からズレていたら、映像上のオレンジの丸をドラッグして<b>板（羊皮紙）の外周4隅</b>に合わせてください。位置はこのブラウザに記憶されます。とくぎの説明枠が板に重なると読み取りを邪魔するので、カーソルを外しておくと安定します。</p>
@@ -1713,7 +1713,7 @@ function recommend(state) {
     blueMax: 120,       // 数字は青が低い
     minEdge: 10.0,       // 数字らしさ（輪郭の強さ）のしきい値
     minDigits: 2,       // 2桁以上のまとまりだけ採用
-    hMinRatio: 0.17, hMaxRatio: 0.40  // セル高に対する文字高
+    hMinRatio: 0.17, hMaxRatio: 0.62  // セル高に対する文字高（実測0.15〜0.56を含む）
   };
 
   function cellBox(i, W, H, isGrid) {
@@ -1805,7 +1805,7 @@ function recommend(state) {
     for (let k = 0; k < cw * ch; k++) mask[k] = (G[k] < loc[k] - darkDelta && B[k] < blueMax) ? 1 : 0;
     const chBase = b0.y1 - b0.y0;
     const hMin = chBase * (loose ? 0.09 : relaxed ? 0.13 : CFG.hMinRatio);
-    const hMax = chBase * (loose ? 0.58 : relaxed ? 0.46 : CFG.hMaxRatio);
+    const hMax = chBase * (loose ? 0.72 : relaxed ? 0.66 : CFG.hMaxRatio);
     // 走査範囲の左右端に接している塊は、板の外にあるゲージ棒が切れて写ったもの。
     // 数字がここまではみ出すことはないので落とす。
     const atEdge = (o) => (b.x0 === 0 && o.x <= 1) || (b.x1 === W && o.x + o.w >= cw - 1);
@@ -3155,10 +3155,13 @@ function recommend(state) {
       // 桁が1つ足りないまま読むと、108 が 18 になって2桁候補に化ける。
       // 候補にもっと長い桁数があるなら、空洞の 0 や細い 1 も拾える設定で
       // もう一度だけ探し、長いまとまりが見つかったらそちらを使う。
-      if (tg && cam.executedAt && gs.length) {
+      // いちばん緩い設定での探索は、これまで「まとまりは見つかったが桁が足りないとき」
+      // だけ動いていた。実測では数字が大きすぎて1つも見つからない場面があり、
+      // そのときこそ必要なのに動かず、検出0のまま終わっていた。
+      if (tg && cam.executedAt) {
         const maxLen = tg.candidates.reduce((m, c) => Math.max(m, String(c).length), 0);
         const bestLen = gs.reduce((m, g0) => Math.max(m, (g0.vecs || []).length), 0);
-        if (bestLen < maxLen) {
+        if (!gs.length || bestLen < maxLen) {
           try {
             const gl = V.scanCell(grid, i, minD, true, null, true);
             const glBest = gl.reduce((m, g0) => Math.max(m, (g0.vecs || []).length), 0);
@@ -3602,7 +3605,7 @@ function recommend(state) {
 </script>
 <script>(function () {
   "use strict";
-  const APP_VERSION = "2026.08.17-29";
+  const APP_VERSION = "2026.08.17-30";
   const AI = window.AmatsuyuAI;
   const $ = (s) => document.querySelector(s);
   const L = AI.LETTERS, Z = AI.ZONES;
