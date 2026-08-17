@@ -383,7 +383,7 @@ body.drawer-open #drawer{transform:none}
           <button id="openBenchmark" class="chip" type="button">検証を実行 <b id="headlineRate">—</b></button>
           <button id="openOcrTest" class="chip" type="button">OCR診断</button>
           <button id="resetButton" class="chip" type="button">最初からやり直す</button>
-          <span class="tag ver" id="appVersion">v2026.08.17-20</span>
+          <span class="tag ver" id="appVersion">v2026.08.17-21</span>
         </div>
       </details>
     </header>
@@ -488,7 +488,7 @@ body.drawer-open #drawer{transform:none}
     <h3>動作</h3>
     <label class="autoskip"><input id="autoSkipToggle" type="checkbox" checked>基本手順のなかの火力上げは自動で進める（冷やしこみ・必殺・アドリブ帯は自動化しません）</label>
     <h3>バージョン</h3>
-    <p class="hint">超あまつゆ Forge <b>v2026.08.17-20</b><br>
+    <p class="hint">超あまつゆ Forge <b>v2026.08.17-21</b><br>
       主な変更：画面を「次の一手」中心に再設計／盤面を指示書化（対象マスが光り、結果待ちは「?」）／二重加算の防止／読み取り判定の緩和。</p>
     <h3>使い方</h3>
     <p class="hint">緑のマス目が鉱石の3×2からズレていたら、映像上のオレンジの丸をドラッグして<b>板（羊皮紙）の外周4隅</b>に合わせてください。位置はこのブラウザに記憶されます。とくぎの説明枠が板に重なると読み取りを邪魔するので、カーソルを外しておくと安定します。</p>
@@ -1949,17 +1949,28 @@ function recommend(state) {
   const MIN_DIGIT_VOTE = 0.46;  // 投票に参加させる下限（採用の下限ではない）
   const MIN_GROUP = 0.70;
   const MIN_GROUP_ONE = 0.74;   // 1桁は情報が少ないぶん厳しく
+  // 1コマぶんの計算の大半は「この桁は0〜9のどれに似ているか」の照合で占められる。
+  // 候補が20個あると同じ桁を何十回も測り直していたので、1コマのあいだだけ結果を覚えておく。
+  // 手本が増えたら世代番号で捨てる。
+  let storeGen = 0;
+  const profCache = new WeakMap();
+  function digitProfile(store, v) {
+    if (!v) return null;
+    const hit = profCache.get(v);
+    if (hit && hit.gen === storeGen) return hit.p;
+    const p = new Array(10);
+    for (let d = 0; d <= 9; d++) p[d] = matchDigit(v, store[d]);
+    profCache.set(v, { gen: storeGen, p: p });
+    return p;
+  }
   function digitScore(store, v) {
+    const p = digitProfile(store, v);
+    if (!p) return -9;
     let bd = -9;
-    for (let d = 0; d <= 9; d++) { const sc = matchDigit(v, store[d]); if (sc > bd) bd = sc; }
+    for (let d = 0; d <= 9; d++) if (p[d] > bd) bd = p[d];
     return bd;
   }
   // 1桁ぶんの、0〜9それぞれに対する一致度
-  function digitProfile(store, v) {
-    const out = new Array(10);
-    for (let d = 0; d <= 9; d++) out[d] = matchDigit(v, store[d]);
-    return out;
-  }
   // 鉱石の光が桁として拾われることがあるので、端にある「数字らしくない塊」を落とす
   function trimNoise(store, vecs, floor) {
     const lim = floor == null ? MIN_DIGIT : floor;
@@ -1994,6 +2005,7 @@ function recommend(state) {
   /* ---------- テンプレート辞書 ---------- */
   function createStore() { const s = {}; for (let d = 0; d <= 9; d++) s[d] = []; return s; }
   function learn(store, text, vecs) {
+    storeGen++;
     if (vecs && vecs.length && Array.isArray(vecs[0])) vecs = vecs.map((v) => (v && v[0]) || null);
     if (!store || text.length !== vecs.length) return 0;
     let n = 0;
@@ -2010,8 +2022,10 @@ function recommend(state) {
   function scoreText(store, vecs, text) {
     let tot = 0;
     for (let i = 0; i < vecs.length; i++) {
-      const b = matchDigit(vecs[i], store[text[i]]);
-      if (b < -1) return -9;
+      const p = digitProfile(store, vecs[i]);
+      if (!p) return -9;
+      const b = p[+text[i]];
+      if (b == null || b < -1) return -9;
       tot += b;
     }
     return tot / vecs.length;
@@ -2164,6 +2178,7 @@ function recommend(state) {
   }
 
   function loadStore(packed) {
+    storeGen++;
     const store = createStore();
     for (const ch of Object.keys(packed)) {
       const { s, d } = packed[ch];
@@ -2223,7 +2238,7 @@ function recommend(state) {
   const cam = {
     stream: null, video: null, canvas: null, ctx: null, timer: null, frameRequest: null, frameMode: "timer",
     corners: null, store: null, votes: {}, active: false,
-    onRead: null, onOff: null, targets: [], fps: 60, measuredFps: 0, fpsFrames: 0, fpsStarted: 0,
+    onRead: null, onOff: null, targets: [], fps: 30, measuredFps: 0, fpsFrames: 0, fpsStarted: 0,
     lastGroups: [], shots: [], raw: null, seen: {}, lowStreak: {}, executedAt: 0, missReported: false,
     reader: null, lastTickAt: 0, lastMediaTime: -1, gapMax: 0, gapSince: 0, hiddenMs: 0, diag: {},
     learned: [], learningReady: false, dbPromise: null,
@@ -2387,7 +2402,7 @@ function recommend(state) {
     }
     try {
       cam.stream = await navigator.mediaDevices.getDisplayMedia({
-        video: { frameRate: { ideal: 60, max: 60 }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+        video: { frameRate: { ideal: 30, max: 30 }, width: { ideal: 1920 }, height: { ideal: 1080 } },
         audio: false,
         // 自分のタブを選ばせない・ウィンドウ選択を促す
         preferCurrentTab: false,
@@ -3081,7 +3096,8 @@ function recommend(state) {
         return d3 ? `${tg3.letter} 検出${hit3}・最有力${d3.val}(${d3.score.toFixed(2)})`
                   : `${tg3.letter} 検出${hit3}`;
       });
-      status(`監視${cam.scanFrames || 0}コマ ${cam.measuredFps ? cam.measuredFps.toFixed(0) + "fps" : ""}｜` + parts.join("｜"));
+      const gapTxt = cam.gapMax ? "・最長" + Math.round(cam.gapMax) + "ms" : "";
+      status(`監視${cam.scanFrames || 0}コマ ${cam.measuredFps ? cam.measuredFps.toFixed(0) + "fps" : ""}${gapTxt}｜` + parts.join("｜"));
     }
     paint(grid, done.length > 0);
     if (cam.active) {
@@ -3186,7 +3202,7 @@ function recommend(state) {
 </script>
 <script>(function () {
   "use strict";
-  const APP_VERSION = "2026.08.17-20";
+  const APP_VERSION = "2026.08.17-21";
   const AI = window.AmatsuyuAI;
   const $ = (s) => document.querySelector(s);
   const L = AI.LETTERS, Z = AI.ZONES;
