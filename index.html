@@ -388,7 +388,7 @@ body.drawer-open #drawer{transform:none}
           <button id="openBenchmark" class="chip" type="button">検証を実行 <b id="headlineRate">—</b></button>
           <button id="openOcrTest" class="chip" type="button">OCR診断</button>
           <button id="resetButton" class="chip" type="button">最初からやり直す</button>
-          <span class="tag ver" id="appVersion">v2026.08.17-26</span>
+          <span class="tag ver" id="appVersion">v2026.08.17-27</span>
         </div>
       </details>
     </header>
@@ -496,7 +496,7 @@ body.drawer-open #drawer{transform:none}
     <h3>動作</h3>
     <label class="autoskip"><input id="autoSkipToggle" type="checkbox" checked>基本手順のなかの火力上げは自動で進める（冷やしこみ・必殺・アドリブ帯は自動化しません）</label>
     <h3>バージョン</h3>
-    <p class="hint">超あまつゆ Forge <b>v2026.08.17-26</b><br>
+    <p class="hint">超あまつゆ Forge <b>v2026.08.17-27</b><br>
       主な変更：画面を「次の一手」中心に再設計／盤面を指示書化（対象マスが光り、結果待ちは「?」）／二重加算の防止／読み取り判定の緩和。</p>
     <h3>使い方</h3>
     <p class="hint">緑のマス目が鉱石の3×2からズレていたら、映像上のオレンジの丸をドラッグして<b>板（羊皮紙）の外周4隅</b>に合わせてください。位置はこのブラウザに記憶されます。とくぎの説明枠が板に重なると読み取りを邪魔するので、カーソルを外しておくと安定します。</p>
@@ -1811,7 +1811,7 @@ function recommend(state) {
     // 数字が隣の数字や演出の光とくっつくと横長の塊になり、幅の条件で捨てられてしまう。
     // 縦方向の画素数が谷になっている列で切り分けてから判定する。
     function splitWide(o, depth) {
-      if (o.w < o.h * 1.15 || o.w > o.h * 3.2 || depth > 2) return [o];
+      if (o.w < o.h * 0.82 || o.w > o.h * 4.2 || depth > 2) return [o];
       const col = new Int32Array(o.w);
       for (let y = o.y; y < o.y + o.h; y++) {
         const row = y * cw;
@@ -1824,84 +1824,165 @@ function recommend(state) {
       let cut = -1, cv = 1e9;
       for (let x = lo; x <= hi; x++) if (col[x] < cv) { cv = col[x]; cut = x; }
       if (cut < 0 || cv > mean * 0.42) return [o];
+      // 縦の範囲は元の塊のものを引き継ぐ。桁ごとに測り直すと、
+      // 「7」の左側のように上辺だけの薄い断片が背の低い塊と判定され、
+      // 高さの条件で捨てられてまとまりごと壊れる。
       const mk = (x0, x1) => {
-        let n = 0, ny0 = o.y + o.h, ny1 = o.y - 1;
+        let n = 0;
         for (let y = o.y; y < o.y + o.h; y++) for (let x = x0; x < x1; x++)
-          if (mask[y * cw + o.x + x]) { n++; if (y < ny0) ny0 = y; if (y > ny1) ny1 = y; }
-        return n < 25 || ny1 < ny0 ? null : { x: o.x + x0, y: ny0, w: x1 - x0, h: ny1 - ny0 + 1, n: n };
+          if (mask[y * cw + o.x + x]) n++;
+        return n < 25 ? null : { x: o.x + x0, y: o.y, w: x1 - x0, h: o.h, n: n };
       };
       const a = mk(0, cut), c = mk(cut, o.w);
       if (!a || !c) return [o];
       return splitWide(a, depth + 1).concat(splitWide(c, depth + 1));
     }
-    const raw = [];
-    for (const o of labelBlobs(mask, cw, ch)) {
-      if (o.h <= hMin || o.h >= hMax || atEdge(o)) continue;
-      for (const q of splitWide(o, 0)) raw.push(q);
+    // 板が発光していると、隣り合う桁の縁取りがつながって1つの横長の塊になる。
+    // その場合は谷が浅くて上の分割が失敗し、塊ごと「横長」で捨てられていた
+    // （実測：F は塊1個・高さ比0.363が横長で除外され、検出0になっていた）。
+    // 谷で切れないときは、文字幅の見積もりから等間隔で割る。
+    // でたらめな分割は後段の候補照合と桁ごとの一致度で必ず落ちる。
+    function splitEven(o, kWant) {
+      const k = Math.max(2, Math.min(4, kWant || Math.round(o.w / (o.h * 0.58))));
+      if (k < 2) return [o];
+      const out2 = [];
+      for (let j = 0; j < k; j++) {
+        const x0 = Math.round(o.w * j / k), x1 = Math.round(o.w * (j + 1) / k);
+        let n = 0;
+        for (let y = o.y; y < o.y + o.h; y++) for (let x = x0; x < x1; x++)
+          if (mask[y * cw + o.x + x]) n++;
+        if (n < 20) return [o];
+        // 縦の範囲は切り出した部分ごとに測り直さず、元の塊のものを使う。
+        // 同じ数字の桁は上下の位置がそろっているので、そのほうが実態に合う。
+        // 測り直すと「7」の左半分のように薄い断片が背の低い塊と判定され、
+        // 高さの条件で捨てられてまとまりが壊れる。
+        out2.push({ x: o.x + x0, y: o.y, w: x1 - x0, h: o.h, n: n });
+      }
+      return out2;
     }
-    const digits = raw
-      .filter((o) => {
-        // loose では、中が空洞の「0」や細い「1」を落とさないところまで緩める。
-        // 誤検出は後段の候補照合・桁ごとの一致度・複数コマ投票で必ず落ちる。
-        const ok = o.h > hMin && o.h < hMax && o.w > (loose ? 3 : relaxed ? 4 : 6)
-          && o.w < o.h * (loose ? 1.7 : relaxed ? 1.38 : 1.25)
-          && o.n / (o.w * o.h) > (loose ? 0.10 : relaxed ? 0.20 : 0.28) && !atEdge(o);
-        if (stats) {
-          stats.blobs++;
-          stats.hRatio.push(+(o.h / chBase).toFixed(3));
-          if (!ok) {
-            if (o.h >= hMax) stats.tooTall++;
-            else if (o.h <= hMin) stats.tooShort++;
-            else if (o.w >= o.h * (relaxed ? 1.38 : 1.25)) stats.tooWide++;
-            else if (o.w <= (relaxed ? 4 : 6)) stats.tooThin++;
-            else if (atEdge(o)) stats.atEdge++;
-            else stats.tooSparse++;
+    // 発光で桁が縦に割れることもある（8の中棒が切れる等）。
+    // 横方向にほぼ重なっていて上下に隣接する破片は、1つの桁として繋ぎ直す。
+    // 実測で C[0.154,0.346,0.359] のように高さがばらつき、
+    // 高さの近さを見るまとまり判定を通らず、1桁ずつばらけて桁数外になっていた。
+    function mergeFragments(list) {
+      const arr = list.slice().sort((p, q) => p.x - q.x);
+      let changed = true;
+      while (changed) {
+        changed = false;
+        for (let a2 = 0; a2 < arr.length && !changed; a2++) {
+          for (let b2 = a2 + 1; b2 < arr.length; b2++) {
+            const p = arr[a2], q = arr[b2];
+            const ov = Math.min(p.x + p.w, q.x + q.w) - Math.max(p.x, q.x);
+            if (ov <= 0) continue;
+            const narrow = Math.min(p.w, q.w);
+            const vGap = Math.max(p.y, q.y) - Math.min(p.y + p.h, q.y + q.h);
+            if (ov < narrow * 0.55) continue;
+            if (vGap > Math.max(p.h, q.h) * 0.45) continue;
+            const x0 = Math.min(p.x, q.x), y0 = Math.min(p.y, q.y);
+            const x1 = Math.max(p.x + p.w, q.x + q.w), y1 = Math.max(p.y + p.h, q.y + q.h);
+            arr.splice(b2, 1);
+            arr[a2] = { x: x0, y: y0, w: x1 - x0, h: y1 - y0, n: p.n + q.n };
+            changed = true; break;
           }
         }
-        return ok;
-      })
-      .sort((p, q) => p.x - q.x);
-    const groups = [];
-    for (const o of digits) {
-      let placed = false;
-      for (const g of groups) {
-        const l = g[g.length - 1];
-        // 同じ数字を構成する桁は、高さも上端もほぼ揃う。ここを緩くすると
-        // 鉱石の光の塊が桁として混ざり、2桁の数字が3桁に化ける。
-        if (Math.abs(o.y - l.y) < l.h * (loose ? 0.40 : relaxed ? 0.30 : 0.22)
-            && Math.abs(o.h - l.h) < l.h * (loose ? 0.42 : relaxed ? 0.28 : 0.18)
-            && o.x - (l.x + l.w) > -l.h * 0.22 && o.x - (l.x + l.w) < l.h * (loose ? 0.95 : relaxed ? 0.72 : 0.55)) { g.push(o); placed = true; break; }
       }
-      if (!placed) groups.push([o]);
+      return arr;
     }
-    if (stats) { stats.groups = groups.length; stats.groupSizes = groups.map((g) => g.length); stats.hMinRatio = +(hMin / chBase).toFixed(3); stats.hMaxRatio = +(hMax / chBase).toFixed(3); }
-    const out = [];
-    for (const g of groups) {
-      if (g.length < (minDigits || CFG.minDigits) || g.length > 4) { if (stats) stats.badCount++; continue; }
-      const x = g[0].x, y = Math.min.apply(null, g.map((o) => o.y));
-      const wdt = g[g.length - 1].x + g[g.length - 1].w - x, hgt = Math.max.apply(null, g.map((o) => o.h));
-      // 輪郭の強さ（鉱石の模様は勾配が緩い）
-      let edge = 0, cnt = 0;
-      for (let yy = Math.max(1, y - 4); yy < Math.min(ch - 1, y + hgt + 4); yy++)
-        for (let xx = Math.max(1, x - 4); xx < Math.min(cw - 1, x + wdt + 4); xx++) {
-          const gx = G[yy * cw + xx + 1] - G[yy * cw + xx - 1];
-          const gy = G[(yy + 1) * cw + xx] - G[(yy - 1) * cw + xx];
-          edge += Math.sqrt(gx * gx + gy * gy) / 2; cnt++;
+    // くっついた桁の切り方は1通りに決められない。
+    // 先頭が「1」だと横幅が足りず、幅から桁数を見積もる方法では必ず外れる。
+    // そこで切り方の候補を複数作り、どれが正しいかは呼び出し側で
+    // 「候補の数字としてどれだけ筋が通るか」に判定させる。
+    const base = mergeFragments(labelBlobs(mask, cw, ch)
+      .filter((o2) => o2.h > hMin && o2.h < hMax && !atEdge(o2)));
+    const segs = [[], [], []];
+    let anyWide = false;
+    for (const o of base) {
+      const parts = splitWide(o, 0);
+      const est = Math.max(2, Math.round(o.w / (o.h * 0.58)));
+      const wide = o.w > o.h * 0.82;
+      if (wide) anyWide = true;
+      const alt1 = wide ? splitEven(o, est) : parts;
+      const alt2 = wide ? splitEven(o, est + 1) : parts;
+      for (const q of parts) segs[0].push(q);
+      for (const q of alt1) segs[1].push(q);
+      for (const q of alt2) segs[2].push(q);
+    }
+    function buildFrom(raw) {
+      const digits = raw
+        .filter((o) => {
+          // loose では、中が空洞の「0」や細い「1」を落とさないところまで緩める。
+          // 誤検出は後段の候補照合・桁ごとの一致度・複数コマ投票で必ず落ちる。
+          const ok = o.h > hMin && o.h < hMax && o.w > (loose ? 3 : relaxed ? 4 : 6)
+            && o.w < o.h * (loose ? 1.7 : relaxed ? 1.38 : 1.25)
+            && o.n / (o.w * o.h) > (loose ? 0.10 : relaxed ? 0.20 : 0.28) && !atEdge(o);
+          if (stats) {
+            stats.blobs++;
+            stats.hRatio.push(+(o.h / chBase).toFixed(3));
+            if (!ok) {
+              if (o.h >= hMax) stats.tooTall++;
+              else if (o.h <= hMin) stats.tooShort++;
+              else if (o.w >= o.h * (relaxed ? 1.38 : 1.25)) stats.tooWide++;
+              else if (o.w <= (relaxed ? 4 : 6)) stats.tooThin++;
+              else if (atEdge(o)) stats.atEdge++;
+              else stats.tooSparse++;
+            }
+          }
+          return ok;
+        })
+        .sort((p, q) => p.x - q.x);
+      const groups = [];
+      for (const o of digits) {
+        let placed = false;
+        for (const g of groups) {
+          const l = g[g.length - 1];
+          // 同じ数字を構成する桁は、高さも上端もほぼ揃う。ここを緩くすると
+          // 鉱石の光の塊が桁として混ざり、2桁の数字が3桁に化ける。
+          if (Math.abs(o.y - l.y) < l.h * (loose ? 0.40 : relaxed ? 0.30 : 0.22)
+              && Math.abs(o.h - l.h) < l.h * (loose ? 0.42 : relaxed ? 0.28 : 0.18)
+              && o.x - (l.x + l.w) > -l.h * 0.22 && o.x - (l.x + l.w) < l.h * (loose ? 0.95 : relaxed ? 0.72 : 0.55)) { g.push(o); placed = true; break; }
         }
-      edge = cnt ? edge / cnt : 0;
-      if (edge < (loose ? 5.0 : relaxed ? 7.0 : CFG.minEdge)) { if (stats) stats.weakEdge++; continue; }
-      // 数字のかたまりの中心がどのマスに属するかで振り分ける。
-      // 端の列からはみ出した数字は、いちばん近い端のマスのものとして扱う。
-      const cxp = b.x0 + x + wdt / 2, cyp = b.y0 + y + hgt / 2;
-      const cellW = (b0.x1 - b0.x0), cellH = (b0.y1 - b0.y0);
-      const originX = b0.x0 - (i % 2) * cellW, originY = b0.y0 - ((i / 2) | 0) * cellH;
-      const col = Math.max(0, Math.min(1, Math.floor((cxp - originX) / cellW)));
-      const row = Math.max(0, Math.min(2, Math.floor((cyp - originY) / cellH)));
-      if (col !== i % 2 || row !== ((i / 2) | 0)) { if (stats) stats.otherCell++; continue; }
-      out.push({ cell: i, letter: LETTERS[i], digits: g, edge,
-        box: { x: b.x0 + x, y: b.y0 + y, w: wdt, h: hgt },
-        vecs: g.map((o) => variants(G, cw, ch, o)),
-        plain: g.map((o) => normalize(G, cw, ch, o)) });
+        if (!placed) groups.push([o]);
+      }
+      if (stats) { stats.groups = groups.length; stats.groupSizes = groups.map((g) => g.length); stats.hMinRatio = +(hMin / chBase).toFixed(3); stats.hMaxRatio = +(hMax / chBase).toFixed(3); }
+      const out = [];
+      for (const g of groups) {
+        if (g.length < (minDigits || CFG.minDigits) || g.length > 4) { if (stats) stats.badCount++; continue; }
+        const x = g[0].x, y = Math.min.apply(null, g.map((o) => o.y));
+        const wdt = g[g.length - 1].x + g[g.length - 1].w - x, hgt = Math.max.apply(null, g.map((o) => o.h));
+        // 輪郭の強さ（鉱石の模様は勾配が緩い）
+        let edge = 0, cnt = 0;
+        for (let yy = Math.max(1, y - 4); yy < Math.min(ch - 1, y + hgt + 4); yy++)
+          for (let xx = Math.max(1, x - 4); xx < Math.min(cw - 1, x + wdt + 4); xx++) {
+            const gx = G[yy * cw + xx + 1] - G[yy * cw + xx - 1];
+            const gy = G[(yy + 1) * cw + xx] - G[(yy - 1) * cw + xx];
+            edge += Math.sqrt(gx * gx + gy * gy) / 2; cnt++;
+          }
+        edge = cnt ? edge / cnt : 0;
+        if (edge < (loose ? 5.0 : relaxed ? 7.0 : CFG.minEdge)) { if (stats) stats.weakEdge++; continue; }
+        // 数字のかたまりの中心がどのマスに属するかで振り分ける。
+        // 端の列からはみ出した数字は、いちばん近い端のマスのものとして扱う。
+        const cxp = b.x0 + x + wdt / 2, cyp = b.y0 + y + hgt / 2;
+        const cellW = (b0.x1 - b0.x0), cellH = (b0.y1 - b0.y0);
+        const originX = b0.x0 - (i % 2) * cellW, originY = b0.y0 - ((i / 2) | 0) * cellH;
+        const col = Math.max(0, Math.min(1, Math.floor((cxp - originX) / cellW)));
+        const row = Math.max(0, Math.min(2, Math.floor((cyp - originY) / cellH)));
+        if (col !== i % 2 || row !== ((i / 2) | 0)) { if (stats) stats.otherCell++; continue; }
+        out.push({ cell: i, letter: LETTERS[i], digits: g, edge,
+          box: { x: b.x0 + x, y: b.y0 + y, w: wdt, h: hgt },
+          vecs: g.map((o) => variants(G, cw, ch, o)),
+          plain: g.map((o) => normalize(G, cw, ch, o)) });
+      }
+      return out;
+    }
+    // 切り方の候補を順に組み立て、桁数の違う案だけ残して呼び出し側に渡す
+    let out = buildFrom(segs[0]);
+    for (let si = 1; anyWide && si < segs.length; si++) {
+      if (!segs[si].length) continue;
+      let alt = [];
+      try { alt = buildFrom(segs[si]); } catch (e) { alt = []; }
+      for (const g of alt) {
+        if (!out.some((x) => x.vecs.length === g.vecs.length && Math.abs(x.box.x - g.box.x) < 4)) out.push(g);
+      }
     }
     return out;
   }
@@ -2723,6 +2804,7 @@ function recommend(state) {
   cam.markExecuted = function () {
     cam.executedAt = Date.now(); cam.missReported = false; cam.seen = {}; cam.lowStreak = {}; cam.votes = {}; cam.diag = {}; cam.cleared = {};
     cam.scanFrames = 0; cam.hit = {}; cam.probe = {};
+    cam.tmax = { grab: 0, scan: 0, paint: 0, outside: 0 };
     cam.gapMax = 0;
     const letters = cam.targets.map((t) => t.letter).join("・");
     if (letters) reason("waiting", "表示待ち", `${letters} の数字表示を30fpsで待っています。`);
@@ -2945,6 +3027,13 @@ function recommend(state) {
     }
     if (!grid) return;
     const fpsNow = performance.now();
+    if (!cam.tmax) cam.tmax = { grab: 0, scan: 0, paint: 0, outside: 0 };
+    if (cam.lastEnd && cam.executedAt) {
+      // 前回の処理終了から今回の開始までの空白。ここが大きいと、
+      // 遅いのはOCRではなく他の処理（画面の再描画やAIの探索）ということになる。
+      const outside = fpsNow - cam.lastEnd;
+      if (outside > cam.tmax.outside) cam.tmax.outside = outside;
+    }
     // フレームがどれだけ途切れたかを記録する。「30fpsで見ているはずなのに
     // 反応しない」ときは、ここが数百msに跳ねているかどうかで原因が切り分けられる。
     if (cam.lastTickAt) {
@@ -2963,11 +3052,13 @@ function recommend(state) {
     }
     // 枠の描き直しは毎フレームやると（SVGの組み直しとレイアウト再計算で）
     // 読み取り本体より重くなる。見た目には十分な12fps程度に間引く。
+    if (cam.executedAt) { const dg = performance.now() - fpsNow; if (dg > cam.tmax.grab) cam.tmax.grab = dg; }
     const paint = (g, force) => {
       if (!force && fpsNow - (cam.paintedAt || 0) < 80) return;
       cam.paintedAt = fpsNow; drawPreview(g); draw();
     };
     const found = [], done = [], causes = { miss: [], locked: [], low: [], outside: [], reading: [] };
+    const tScan0 = performance.now();
     // 監視中でないときの6マス全走査は重いので3回に1回だけにする
     cam.idleTick = (cam.idleTick || 0) + 1;
     if (!cam.active && cam.idleTick % 3 !== 0) { paint(grid); return; }
@@ -3057,7 +3148,7 @@ function recommend(state) {
       const t = tg;
       let g = null, r = null;
       if (t) {
-        const ordered = gs.slice().sort((a, b) => b.edge - a.edge).slice(0, 3);
+        const ordered = gs.slice().sort((a, b) => b.edge - a.edge).slice(0, 5);
         let bestTop = -9;
         for (const cg of ordered) {
           let cr = null;
@@ -3211,6 +3302,7 @@ function recommend(state) {
       }
       found.push({ box: g.box, label: label });
     }
+    if (cam.executedAt) { const ds = performance.now() - tScan0; if (ds > cam.tmax.scan) cam.tmax.scan = ds; }
     cam.lastGroups = found;
     // 「何も起きない」ときに見るものが無いと原因が追えない。
     // 監視中は常に、見たコマ数・検出コマ数・現在の最有力を出しておく。
@@ -3279,7 +3371,8 @@ function recommend(state) {
           probe: JSON.parse(JSON.stringify(cam.probe || {})),
           diag: JSON.parse(JSON.stringify(cam.diag || {})),
           hit: JSON.parse(JSON.stringify(cam.hit || {})),
-          targets: cam.targets.map((x) => x.letter + "[" + x.candidates.join(",") + "]")
+          targets: cam.targets.map((x) => x.letter + "[" + x.candidates.join(",") + "]"),
+          tmax: Object.assign({}, cam.tmax)
         };
         reason("error", "読み取りなし",
           `${causes.miss.join("・")} で数字表示を確認できませんでした（監視 ${cam.scanFrames || 0}コマ・実測 ${fpsTxt}fps・最大フレーム間隔 ${gapTxt}）。`
@@ -3300,6 +3393,7 @@ function recommend(state) {
       delete cam.off[dn.idx];
     }
     cam.active = cam.targets.length > 0;
+    cam.lastEnd = performance.now();
     if (done.length) draw();
     if (done.length) {
       status(done.map((x) => `${x.letter} = ${x.val}`).join(" / ") + " を読み取りました");
@@ -3347,6 +3441,8 @@ function recommend(state) {
         const f = cam.lastFail;
         lines.push("--- 直前の取りこぼし (" + f.at + ") ---");
         lines.push("対象: " + f.miss.join("・") + " / 監視" + f.frames + "コマ・" + f.fps + "fps・最長" + f.gapMax + "ms");
+        if (f.tmax) lines.push("内訳(最悪値): 切出" + Math.round(f.tmax.grab) + "ms 走査" + Math.round(f.tmax.scan)
+          + "ms OCR以外" + Math.round(f.tmax.outside) + "ms");
         lines.push("監視候補: " + f.targets.join(" / "));
         for (const ln of f.notes) lines.push("  " + ln);
         for (const k of Object.keys(f.probe)) {
@@ -3399,7 +3495,7 @@ function recommend(state) {
 </script>
 <script>(function () {
   "use strict";
-  const APP_VERSION = "2026.08.17-26";
+  const APP_VERSION = "2026.08.17-27";
   const AI = window.AmatsuyuAI;
   const $ = (s) => document.querySelector(s);
   const L = AI.LETTERS, Z = AI.ZONES;
