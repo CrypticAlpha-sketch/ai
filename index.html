@@ -10,16 +10,64 @@
 <style>
 :root{
   color-scheme:light;
-  --paper:#fff;--mist:#f2f4f6;--sink:#e9edf1;--ink:#111519;--slate:#6b7682;--rule:#dfe4e9;
+  --paper:#fff;--mist:#f2f4f6;--sink:#e9edf1;--ink:#111519;--slate:#5c6672;--rule:#dfe4e9;
   --ember:#dd5220;--jade:#0d8659;--crimson:#c53129;--azure:#1a72c4;
+  /* ---- リキッドグラス ----
+     面（バー・カード・ボタン）だけをガラスにする。
+     文字は実機の数字を読み取って照合する道具の生命線なので、
+     透過や淡色にはせず、濃さを保つ。 */
+  --glass:rgba(255,255,255,.62);
+  --glass-md:rgba(255,255,255,.78);
+  --glass-lg:rgba(255,255,255,.9);
+  --glass-line:rgba(15,23,42,.13);
+  --glass-line-soft:rgba(15,23,42,.08);
+  --blur-sm:blur(10px) saturate(150%);
+  --blur-md:blur(20px) saturate(160%);
+  --blur-lg:blur(34px) saturate(165%);
+  --sheen:linear-gradient(140deg,rgba(255,255,255,.75) 0%,rgba(255,255,255,0) 46%);
+  --edge:inset 0 1px 0 rgba(255,255,255,.92),inset 0 -1px 0 rgba(15,23,42,.05);
+  --lift:0 6px 22px rgba(15,23,42,.09),0 1px 3px rgba(15,23,42,.05);
+  --lift-lg:0 22px 60px rgba(15,23,42,.18),0 6px 18px rgba(15,23,42,.09);
+  --ease-liquid:cubic-bezier(.34,1.4,.64,1);
   font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;
   font-feature-settings:"palt";
 }
 *{box-sizing:border-box}
-body{margin:0;height:100dvh;overflow:hidden;background:var(--paper);color:var(--ink);font-size:13px;line-height:1.45}
+body{margin:0;height:100dvh;overflow:hidden;color:var(--ink);font-size:13px;line-height:1.45;
+  background:#e9eff7}
 button,input{font-family:inherit}
 :focus-visible{outline:2px solid var(--azure);outline-offset:1px}
-.app{height:100dvh;min-width:0;display:grid;grid-template-rows:auto minmax(90px,1fr) auto auto auto auto auto}
+
+/* 背景：ゆっくり漂う光。ガラスはこれを透かして初めて成立する */
+.scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.scene i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;display:block;
+  animation:drift var(--d,20s) ease-in-out infinite alternate}
+.scene i:nth-child(1){width:44vw;height:44vw;left:-10vw;top:-14vw;--d:23s;
+  background:radial-gradient(circle,#7ec8f5,#3b82f6)}
+.scene i:nth-child(2){width:38vw;height:38vw;right:-8vw;bottom:-12vw;--d:18s;animation-delay:-7s;
+  background:radial-gradient(circle,#f5b78f,#dd5220)}
+.scene i:nth-child(3){width:30vw;height:30vw;left:46%;top:38%;--d:26s;animation-delay:-13s;
+  background:radial-gradient(circle,#a7e9c9,#0d8659)}
+@keyframes drift{
+  0%{transform:translate(0,0) scale(1)}
+  50%{transform:translate(4vw,-3vw) scale(1.07)}
+  100%{transform:translate(-3vw,4vw) scale(.96)}
+}
+.app{position:relative;z-index:1;height:100dvh;min-width:0;display:flex;flex-direction:column}
+
+/* ガラス面の共通表現。::before で斜めのハイライトを重ねる */
+.glass{position:relative;background:var(--glass);border:1px solid var(--glass-line);
+  -webkit-backdrop-filter:var(--blur-md);backdrop-filter:var(--blur-md);box-shadow:var(--edge),var(--lift)}
+.glass::before{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--sheen);
+  pointer-events:none;z-index:0}
+.glass>*{position:relative;z-index:1}
+/* 端末が重いときは設定で切れるようにする（判定処理の速度を優先） */
+[data-glass="off"] .scene{display:none}
+[data-glass="off"] body{background:var(--paper)}
+[data-glass="off"] *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+@supports not (backdrop-filter:blur(1px)){
+  .glass,.topbar,.rail,.meters,.mass,.menu-pop{background:rgba(255,255,255,.93)}
+}
 
   --num:ui-monospace,"SF Mono","Cascadia Mono","Roboto Mono",Menlo,monospace;
 /* ---------- 骨格 ----------
@@ -29,7 +77,9 @@ button,input{font-family:inherit}
 .scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden}
 
 /* ---------- 上部バー ---------- */
-.topbar{display:flex;align-items:baseline;gap:12px;padding:9px 18px;border-bottom:1px solid var(--rule);flex:none}
+.topbar{display:flex;align-items:baseline;gap:12px;padding:10px 18px;flex:none;position:relative;z-index:30;
+  background:var(--glass-md);border-bottom:1px solid var(--glass-line);
+  -webkit-backdrop-filter:var(--blur-md);backdrop-filter:var(--blur-md);box-shadow:var(--edge)}
 .wordmark{font-size:11px;font-weight:800;color:var(--slate);white-space:nowrap}
 .wordmark em{font-style:normal;color:var(--ember)}
 #stepLabel{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;font-family:var(--num);white-space:nowrap}
@@ -38,23 +88,29 @@ button,input{font-family:inherit}
 .tag{font-size:11px;color:var(--slate);white-space:nowrap}
 .tag b{color:var(--ink);font-weight:700}
 .spacer{margin-left:auto}
-.chip{border:1px solid var(--rule);background:var(--paper);color:var(--slate);border-radius:7px;
-  padding:5px 10px;font-size:11px;cursor:pointer;white-space:nowrap}
-.chip:hover{background:var(--mist);color:var(--ink)}
+.chip{border:1px solid var(--glass-line);background:var(--glass);color:var(--slate);border-radius:999px;
+  padding:6px 13px;font-size:11px;cursor:pointer;white-space:nowrap;
+  -webkit-backdrop-filter:var(--blur-sm);backdrop-filter:var(--blur-sm);box-shadow:var(--edge);
+  transition:transform .16s var(--ease-liquid),background .16s,color .16s}
+.chip:hover{background:var(--glass-lg);color:var(--ink);transform:translateY(-1px)}
 .chip b{color:var(--ember);font-weight:800}
 .menu{position:relative;flex:none}
 .menu>summary{list-style:none;cursor:pointer;font-size:16px;color:var(--slate);padding:0 6px;line-height:1}
 .menu>summary::-webkit-details-marker{display:none}
 .menu>summary:hover{color:var(--ink)}
-.menu-pop{position:absolute;right:0;top:26px;z-index:30;background:var(--paper);border:1px solid var(--rule);
-  border-radius:10px;box-shadow:0 18px 40px #0f172a24;padding:8px;display:grid;gap:5px;min-width:190px}
+.menu-pop{position:absolute;right:0;top:28px;z-index:60;background:var(--glass-lg);border:1px solid var(--glass-line);
+  border-radius:18px;box-shadow:var(--edge),var(--lift-lg);padding:9px;display:grid;gap:5px;min-width:210px;
+  -webkit-backdrop-filter:var(--blur-lg);backdrop-filter:var(--blur-lg);
+  animation:pop .22s var(--ease-liquid) both}
+@keyframes pop{from{opacity:0;transform:translateY(-8px) scale(.97)}to{opacity:1;transform:none}}
 .menu-pop .chip{width:100%;text-align:left}
 
 /* ---------- 状態レール ----------
    取り込み・読み取りの状態はここ1本だけ。色は意味にしか使わない。 */
 /* 診断の本文はここに出る。1行に潰すと読めないので折り返す。 */
-.rail{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 12px;padding:9px 18px;
-  border-bottom:1px solid var(--rule);background:var(--mist);flex:none;align-items:start}
+.rail{position:relative;z-index:20;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 12px;padding:10px 18px;
+  border-bottom:1px solid var(--glass-line);background:rgba(255,255,255,.5);flex:none;align-items:start;
+  -webkit-backdrop-filter:var(--blur-md);backdrop-filter:var(--blur-md)}
 .rail-side{grid-column:2;grid-row:1/span 2;display:flex;align-items:center;gap:7px;align-self:center}
 .ocr-state{grid-column:1;display:flex;align-items:baseline;flex-wrap:wrap;gap:3px 8px;min-width:0;
   font-size:12px;color:#414a52}
@@ -70,16 +126,19 @@ button,input{font-family:inherit}
 @keyframes blip{50%{opacity:.25}}
 #camStatus{grid-column:1;font-size:11px;color:var(--slate);line-height:1.7;
   font-variant-numeric:tabular-nums;white-space:normal;word-break:break-word}
-.rail #camOpen{flex:none;border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:8px;
+.rail #camOpen{flex:none;border:1px solid rgba(15,23,42,.8);background:rgba(17,21,25,.9);color:#fff;border-radius:999px;
+  -webkit-backdrop-filter:var(--blur-sm);backdrop-filter:var(--blur-sm);box-shadow:0 6px 18px rgba(15,23,42,.28);
   padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer}
 .rail #camOpen:hover{background:#000}
-#camNotice{margin:0;padding:9px 18px;background:#fff6ef;border-bottom:1px solid #f3d9c6;
+#camNotice{margin:0;padding:10px 18px;background:rgba(255,246,239,.82);border-bottom:1px solid rgba(221,82,32,.18);
+  -webkit-backdrop-filter:var(--blur-sm);backdrop-filter:var(--blur-sm);
   font-size:11.5px;line-height:1.7;color:#8a4a12}
 #camNotice[hidden]{display:none}
 
 /* ---------- 確認スクショ ---------- */
 #camShots[hidden]{display:none}
-#camShots{display:flex;gap:9px;overflow-x:auto;padding:9px 18px;background:#f7fafc;border-bottom:1px solid var(--rule)}
+#camShots{display:flex;gap:9px;overflow-x:auto;padding:10px 18px;background:rgba(255,255,255,.5);
+  border-bottom:1px solid var(--glass-line);-webkit-backdrop-filter:var(--blur-sm);backdrop-filter:var(--blur-sm)}
 #camShots figure{margin:0;flex:none;text-align:center}
 #camShots img{display:block;height:46px;width:auto;border-radius:6px;border:2px solid var(--jade);background:#000}
 #camShots figure.ng img{border-color:var(--crimson)}
@@ -121,8 +180,14 @@ button,input{font-family:inherit}
    このアプリでいちばん大事なのは「どのマスを、いくつにするか」。
    だから盤面を状態表示ではなく指示そのものにする。 */
 .forge-board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:0}
-.mass{position:relative;min-width:0;border:1.5px solid var(--rule);border-radius:12px;padding:9px 10px 8px;
-  background:var(--paper);display:grid;grid-template-columns:minmax(0,1fr);gap:5px;transition:border-color .15s,background .15s,box-shadow .15s}
+.mass{position:relative;min-width:0;border:1px solid var(--glass-line);border-radius:16px;padding:10px 11px 9px;
+  background:var(--glass);display:grid;grid-template-columns:minmax(0,1fr);gap:5px;
+  -webkit-backdrop-filter:var(--blur-sm);backdrop-filter:var(--blur-sm);
+  box-shadow:var(--edge),var(--lift);overflow:hidden;
+  transition:border-color .2s,background .2s,box-shadow .2s,transform .2s var(--ease-liquid)}
+.mass::before{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--sheen);
+  pointer-events:none;z-index:0}
+.mass>*{position:relative;z-index:1}
 .mass-top{display:flex;align-items:baseline;gap:6px;min-width:0;overflow:hidden}
 .mass-letter{font-size:13px;font-weight:900;line-height:1;flex:none;color:var(--slate)}
 .mass.priority-mass .mass-letter:after{content:"";display:inline-block;width:4px;height:4px;border-radius:50%;
@@ -137,11 +202,11 @@ button,input{font-family:inherit}
 /* 編集は必要だが主役ではない。触れたときだけ前に出る。 */
 .mass-edit{display:flex;align-items:center;gap:4px;min-width:0;opacity:.35;transition:opacity .15s}
 .mass:hover .mass-edit,.mass:focus-within .mass-edit{opacity:1}
-.mass-edit input[type="number"]{flex:1;min-width:0;border:1px solid var(--rule);border-radius:6px;
-  background:var(--paper);font-family:var(--num);font-size:13px;font-weight:700;text-align:center;padding:2px;
+.mass-edit input[type="number"]{flex:1;min-width:0;border:1px solid var(--glass-line);border-radius:9px;
+  background:rgba(255,255,255,.72);font-family:var(--num);font-size:13px;font-weight:700;text-align:center;padding:2px;
   outline:0;color:inherit;font-variant-numeric:tabular-nums;-moz-appearance:textfield}
 .mass-edit input::-webkit-outer-spin-button,.mass-edit input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-.nudge{border:1px solid var(--rule);background:var(--paper);color:var(--slate);border-radius:6px;
+.nudge{border:1px solid var(--glass-line);background:var(--glass-md);color:var(--slate);border-radius:9px;
   width:26px;height:26px;font-size:14px;line-height:1;cursor:pointer;flex:none;padding:0}
 .nudge:hover{background:var(--mist);color:var(--ink)}
 .crit-toggle{flex:none;display:flex;align-items:center;gap:3px;font-size:10px;color:var(--slate);cursor:pointer;white-space:nowrap}
@@ -170,15 +235,27 @@ button,input{font-family:inherit}
 
 /* ---------- 行動 ---------- */
 .act{display:flex;gap:8px;align-items:stretch}
-.primary-button{flex:1;min-height:58px;border:1px solid var(--ember);background:var(--ember);color:#fff;
-  border-radius:12px;padding:10px 14px;font-weight:800;font-size:18px;cursor:pointer;line-height:1.25;
-  white-space:normal;word-break:keep-all}
-.primary-button:hover:not(:disabled){background:#c74716}
+.primary-button{position:relative;flex:1;min-height:58px;border:1px solid rgba(221,82,32,.55);color:#fff;
+  border-radius:16px;padding:10px 14px;font-weight:800;font-size:18px;cursor:pointer;line-height:1.25;
+  white-space:normal;word-break:keep-all;overflow:hidden;
+  background:linear-gradient(140deg,rgba(233,109,58,.94),rgba(199,71,22,.94));
+  -webkit-backdrop-filter:var(--blur-sm);backdrop-filter:var(--blur-sm);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.42),0 8px 26px rgba(221,82,32,.32);
+  transition:transform .16s var(--ease-liquid),box-shadow .16s,filter .16s}
+.primary-button::before{content:"";position:absolute;inset:0;background:var(--sheen);opacity:.5;pointer-events:none}
+.primary-button:active:not(:disabled){transform:scale(.985)}
+.primary-button:hover:not(:disabled){transform:translateY(-2px);filter:saturate(1.08);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 12px 32px rgba(221,82,32,.42)}
 .primary-button small{display:block;font-size:10px;font-weight:400;opacity:.85}
-.primary-button:disabled{border-color:var(--rule);background:var(--sink);color:#9aa4ae;cursor:default}
-.ghost-button{min-height:58px;padding:8px 16px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);
-  border-radius:12px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;flex:none}
-.ghost-button:hover:not(:disabled){background:var(--mist)}
+.primary-button:disabled{border-color:var(--glass-line);background:rgba(233,237,241,.72);color:#9aa4ae;
+  cursor:default;box-shadow:none}
+.ghost-button{position:relative;min-height:58px;padding:8px 16px;border:1px solid var(--glass-line);
+  background:var(--glass);color:var(--ink);border-radius:16px;font-size:12.5px;font-weight:700;cursor:pointer;
+  white-space:nowrap;flex:none;overflow:hidden;
+  -webkit-backdrop-filter:var(--blur-sm);backdrop-filter:var(--blur-sm);
+  box-shadow:var(--edge),var(--lift);transition:transform .16s var(--ease-liquid),background .16s}
+.ghost-button::before{content:"";position:absolute;inset:0;background:var(--sheen);pointer-events:none}
+.ghost-button:hover:not(:disabled){background:var(--glass-md);transform:translateY(-2px)}
 .ghost-button:disabled{opacity:.35;cursor:default}
 .ghost-button.wide{width:100%}
 .chainbtn{border-color:var(--ember);color:var(--ember);background:#fdf3ef}
@@ -201,23 +278,30 @@ button,input{font-family:inherit}
 .section-head h2{font-size:15px;margin:2px 0 0}
 .section-head .ghost-button{min-height:36px;padding:6px 14px;font-size:11px;flex:none}
 .section-head .hint{min-width:0}
-.cand-row{border:1px solid var(--rule);border-left:3px solid var(--azure);border-radius:10px;padding:10px 12px;
-  background:var(--paper);display:grid;gap:7px}
+.cand-row{border:1px solid var(--glass-line);border-left:3px solid var(--azure);border-radius:16px;padding:11px 13px;
+  background:var(--glass);display:grid;gap:7px;-webkit-backdrop-filter:var(--blur-sm);backdrop-filter:var(--blur-sm);
+  box-shadow:var(--edge),var(--lift)}
 .cand-row.done{opacity:.4;border-left-color:var(--jade)}
 .cand-head{display:flex;align-items:baseline;gap:8px;margin:0}
 .cand-head b{font-size:20px;font-weight:900;color:var(--azure)}
 .cand-head span{font-size:11px;color:var(--slate);font-variant-numeric:tabular-nums}
 .cand-sub{font-size:10.5px;color:var(--slate);margin:0}
 .cand-list{display:flex;gap:6px;flex-wrap:wrap;margin:0}
-.cand{border:1.5px solid var(--rule);background:var(--paper);border-radius:9px;padding:6px 12px;cursor:pointer;
-  display:grid;justify-items:center;line-height:1.15;color:inherit;min-width:64px;min-height:46px;align-content:center}
-.cand:hover{border-color:var(--ink);background:var(--mist)}
+.cand{position:relative;border:1px solid var(--glass-line);background:var(--glass);border-radius:14px;
+  padding:6px 12px;cursor:pointer;display:grid;justify-items:center;line-height:1.15;color:inherit;
+  min-width:64px;min-height:46px;align-content:center;overflow:hidden;
+  -webkit-backdrop-filter:var(--blur-sm);backdrop-filter:var(--blur-sm);box-shadow:var(--edge),var(--lift);
+  transition:transform .16s var(--ease-liquid),background .16s,border-color .16s}
+.cand::before{content:"";position:absolute;inset:0;background:var(--sheen);pointer-events:none}
+.cand>*{position:relative;z-index:1}
+.cand:hover{border-color:rgba(15,23,42,.3);background:var(--glass-lg);transform:translateY(-2px)}
 .cand b{font-family:var(--num);font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
 .cand i{font-style:normal;font-family:var(--num);font-size:10px;color:var(--slate);font-variant-numeric:tabular-nums}
 .cand.crit b{color:var(--ember)}
 .cand.on{border-color:var(--jade);background:#eefaf4}
 .cand.snapbtn,.cand.other{font-size:11.5px;font-weight:700;padding:6px 12px;color:var(--slate)}
-details.quick{border:1px solid var(--rule);border-radius:10px;background:var(--paper)}
+details.quick{border:1px solid var(--glass-line);border-radius:16px;background:var(--glass);
+  -webkit-backdrop-filter:var(--blur-sm);backdrop-filter:var(--blur-sm);box-shadow:var(--edge)}
 details.quick:has(#quickPlay[hidden]){display:none}
 details.quick>summary{list-style:none;cursor:pointer;padding:10px 14px;font-size:11.5px;font-weight:700;
   color:var(--slate);display:flex;align-items:center;gap:7px}
@@ -232,12 +316,13 @@ details.quick>summary:hover{color:var(--ink)}
 .hint b{color:var(--ink)}
 
 /* ---------- 参照値（温度・集中力・大成功率） ---------- */
-.meters{display:flex;align-items:stretch;gap:10px;padding:10px 18px;border-top:1px solid var(--rule);
-  background:var(--mist);flex:none;flex-wrap:wrap}
+.meters{position:relative;z-index:20;display:flex;align-items:stretch;gap:10px;padding:11px 18px;border-top:1px solid var(--glass-line);
+  background:var(--glass-md);flex:none;flex-wrap:wrap;
+  -webkit-backdrop-filter:var(--blur-md);backdrop-filter:var(--blur-md);box-shadow:var(--edge)}
 .meter{display:grid;gap:3px;min-width:0}
 .meter>span{font-size:10.5px;letter-spacing:.06em;color:var(--slate)}
 .meter .io-row{display:grid;grid-template-columns:28px 84px 28px;gap:4px;align-items:center}
-.meter input{width:100%;min-width:0;border:1px solid var(--rule);border-radius:7px;background:var(--paper);
+.meter input{width:100%;min-width:0;border:1px solid var(--glass-line);border-radius:11px;background:var(--glass-lg);
   font-family:var(--num);font-size:19px;font-weight:700;text-align:center;padding:3px;outline:0;color:inherit;
   font-variant-numeric:tabular-nums;-moz-appearance:textfield}
 .meter input::-webkit-outer-spin-button,.meter input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
@@ -255,7 +340,7 @@ details.quick>summary:hover{color:var(--ink)}
 .autoskip input{accent-color:var(--ember);width:13px;height:13px;margin:2px 0 0}
 
 /* ---------- 取り込みの設定（普段は畳む） ---------- */
-.setup{border-top:1px solid var(--rule)}
+.setup{border-top:1px solid var(--glass-line);background:rgba(255,255,255,.35)}
 .setup>summary{list-style:none;cursor:pointer;padding:9px 18px;font-size:11.5px;font-weight:700;color:var(--slate);
   display:flex;align-items:center;gap:7px}
 .setup>summary::-webkit-details-marker{display:none}
@@ -263,7 +348,8 @@ details.quick>summary:hover{color:var(--ink)}
 .setup[open]>summary::before{transform:rotate(90deg)}
 .setup>summary:hover{color:var(--ink);background:var(--mist)}
 .setup-body{padding:0 18px 14px}
-.calib{border:1px solid var(--rule);border-radius:10px;background:var(--paper);margin:0 0 10px}
+.calib{border:1px solid var(--glass-line);border-radius:16px;background:var(--glass);margin:0 0 10px;
+  -webkit-backdrop-filter:var(--blur-sm);backdrop-filter:var(--blur-sm);box-shadow:var(--edge)}
 .calib>summary{list-style:none;cursor:pointer;padding:9px 13px;font-size:11.5px;font-weight:700;color:var(--slate);
   display:flex;align-items:center;gap:7px}
 .calib>summary::-webkit-details-marker{display:none}
@@ -279,14 +365,15 @@ details.quick>summary:hover{color:var(--ink)}
 .cal-cell.done{border-color:var(--jade);background:#eefaf4;color:var(--jade)}
 .cal-cell.waiting{border-color:var(--ember);background:#fff6f1;color:var(--ember)}
 .cambar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:0 0 9px}
-.cambar button{border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:8px;
+.cambar button{border:1px solid var(--glass-line);background:var(--glass);color:var(--ink);border-radius:999px;
+  -webkit-backdrop-filter:var(--blur-sm);backdrop-filter:var(--blur-sm);box-shadow:var(--edge);
   padding:7px 12px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap}
 .cambar button:hover{background:var(--mist)}
 #camPreview{width:60px;height:auto;border:1px solid var(--rule);border-radius:6px;background:var(--sink)}
 .legend{display:flex;gap:10px;font-size:10.5px;color:var(--slate);align-items:center}
 .legend span{display:flex;align-items:center;gap:4px}
 .legend i{width:9px;height:9px;border-radius:3px;display:inline-block}
-.stage{position:relative;border:1px solid var(--rule);border-radius:10px;overflow:hidden;background:var(--sink);
+.stage{position:relative;border:1px solid var(--glass-line);border-radius:16px;overflow:hidden;background:rgba(233,237,241,.6);
   min-height:180px;max-height:46vh;display:flex;align-items:center;justify-content:center}
 #camPanel{width:100%;height:100%}
 #camStage{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;line-height:0}
@@ -298,9 +385,10 @@ details.quick>summary:hover{color:var(--ink)}
 .stage-empty span{font-size:11px;max-width:44ch;line-height:1.8}
 #camPanel:not([hidden])~.stage-empty{display:none}
 /* ---------- 引き出し ---------- */
-#drawer{position:fixed;top:0;right:0;bottom:0;width:min(370px,90vw);background:var(--paper);
-  border-left:1px solid var(--rule);box-shadow:-16px 0 40px #0f172a1f;padding:14px 16px;overflow:auto;
-  transform:translateX(101%);transition:transform .2s ease;z-index:40}
+#drawer{position:fixed;top:0;right:0;bottom:0;width:min(370px,90vw);background:rgba(255,255,255,.82);
+  border-left:1px solid var(--glass-line);box-shadow:var(--lift-lg);padding:16px 18px;overflow:auto;
+  -webkit-backdrop-filter:var(--blur-lg);backdrop-filter:var(--blur-lg);
+  transform:translateX(101%);transition:transform .28s var(--ease-liquid);z-index:40}
 body.drawer-open #drawer{transform:none}
 #drawer h3{font-size:12.5px;margin:16px 0 7px}
 .drawer-head{display:flex;align-items:center;justify-content:space-between}
@@ -324,8 +412,9 @@ body.drawer-open #drawer{transform:none}
 
 /* ---------- 検証ダイアログ ---------- */
 .modal{border:0;padding:0;background:transparent;color:var(--ink);width:min(440px,calc(100% - 24px))}
-.modal::backdrop{background:#0f172a55}
-.modal-card{position:relative;border:1px solid var(--rule);border-radius:13px;padding:20px;background:var(--paper);
+.modal::backdrop{background:rgba(15,23,42,.42);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.modal-card{position:relative;border:1px solid var(--glass-line);border-radius:22px;padding:22px;
+  background:rgba(255,255,255,.94);-webkit-backdrop-filter:var(--blur-lg);backdrop-filter:var(--blur-lg);
   box-shadow:0 30px 70px #0f172a2e}
 .modal-close{position:absolute;right:11px;top:8px;border:0;background:transparent;color:var(--slate);font-size:20px;cursor:pointer}
 .modal h2{font-size:18px;margin:4px 0 7px}
@@ -388,6 +477,7 @@ body.drawer-open #drawer{transform:none}
 </style>
 </head>
 <body>
+  <div class="scene" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="app">
 
     <header class="topbar">
@@ -402,8 +492,9 @@ body.drawer-open #drawer{transform:none}
         <div class="menu-pop">
           <button id="openBenchmark" class="chip" type="button">検証を実行 <b id="headlineRate">—</b></button>
           <button id="openOcrTest" class="chip" type="button">OCR診断</button>
+          <button id="glassToggle" class="chip" type="button">ガラス表現を切る</button>
           <button id="resetButton" class="chip" type="button">最初からやり直す</button>
-          <span class="tag ver" id="appVersion">v2026.08.17-31</span>
+          <span class="tag ver" id="appVersion">v2026.08.18-33</span>
         </div>
       </details>
     </header>
@@ -527,7 +618,7 @@ body.drawer-open #drawer{transform:none}
     <h3>動作</h3>
     <label class="autoskip"><input id="autoSkipToggle" type="checkbox" checked>基本手順のなかの火力上げは自動で進める（冷やしこみ・必殺・アドリブ帯は自動化しません）</label>
     <h3>バージョン</h3>
-    <p class="hint">超あまつゆ Forge <b>v2026.08.17-31</b><br>
+    <p class="hint">超あまつゆ Forge <b>v2026.08.18-33</b><br>
       主な変更：画面を「次の一手」中心に再設計／盤面を指示書化（対象マスが光り、結果待ちは「?」）／二重加算の防止／読み取り判定の緩和。</p>
     <h3>使い方</h3>
     <p class="hint">緑のマス目が鉱石の3×2からズレていたら、映像上のオレンジの丸をドラッグして<b>板（羊皮紙）の外周4隅</b>に合わせてください。位置はこのブラウザに記憶されます。とくぎの説明枠が板に重なると読み取りを邪魔するので、カーソルを外しておくと安定します。</p>
@@ -1853,7 +1944,7 @@ function recommend(state) {
     return out;
   }
 
-  function scanCell(panel, i, minDigits, relaxed, stats, loose) {
+  function scanCell(panel, i, minDigits, relaxed, stats, loose, wantLens) {
     const W = panel.width, H = panel.height, d = panel.data;
     const b0 = cellBox(i, W, H, !!panel.isGrid);
     // 走査だけ左右に広げ、隣のマスの数字は中心位置で除外する
@@ -1982,6 +2073,15 @@ function recommend(state) {
       for (const q of alt1) segs[1].push(q);
       for (const q of alt2) segs[2].push(q);
     }
+    // 切り方の候補が複数あると、同じ塊を何度も正規化していた。
+    // 1回の走査のあいだだけ結果を覚えておく。
+    const vmemo = new Map();
+    function vcache(o) {
+      const k = o.x + "," + o.y + "," + o.w + "," + o.h;
+      let v = vmemo.get(k);
+      if (v === undefined) { v = variants(G, cw, ch, o); vmemo.set(k, v); }
+      return v;
+    }
     function buildFrom(raw) {
       const digits = raw
         .filter((o) => {
@@ -2042,21 +2142,35 @@ function recommend(state) {
         const col = Math.max(0, Math.min(1, Math.floor((cxp - originX) / cellW)));
         const row = Math.max(0, Math.min(2, Math.floor((cyp - originY) / cellH)));
         if (col !== i % 2 || row !== ((i / 2) | 0)) { if (stats) stats.otherCell++; continue; }
-        out.push({ cell: i, letter: LETTERS[i], digits: g, edge,
-          box: { x: b.x0 + x, y: b.y0 + y, w: wdt, h: hgt },
-          vecs: g.map((o) => variants(G, cw, ch, o)),
-          plain: g.map((o) => normalize(G, cw, ch, o)) });
+        // 桁の画像は重い。まとまりの候補は複数作るが、実際に照合されるのは
+        // ごく一部なので、必要になった時点で作る（数だけ先に持っておく）。
+        const grp = { cell: i, letter: LETTERS[i], digits: g, edge, count: g.length,
+          box: { x: b.x0 + x, y: b.y0 + y, w: wdt, h: hgt } };
+        let _v = null, _p = null;
+        Object.defineProperty(grp, "vecs", { enumerable: true, get() {
+          if (!_v) _v = g.map((o) => vcache(o));
+          return _v;
+        } });
+        Object.defineProperty(grp, "plain", { enumerable: false, get() {
+          if (!_p) _p = g.map((o) => normalize(G, cw, ch, o));
+          return _p;
+        } });
+        out.push(grp);
       }
       return out;
     }
-    // 切り方の候補を順に組み立て、桁数の違う案だけ残して呼び出し側に渡す
+    // 切り方の候補を順に組み立て、桁数の違う案だけ残して呼び出し側に渡す。
+    // ただし最初の切り方で欲しい桁数がすでに得られているなら、
+    // 代案は作らない（同じ塊を何度も正規化するのが走査時間の大半だった）。
     let out = buildFrom(segs[0]);
-    for (let si = 1; anyWide && si < segs.length; si++) {
+    const satisfied = wantLens && wantLens.length
+      && out.some((g) => wantLens.indexOf(g.count) >= 0);
+    for (let si = 1; anyWide && !satisfied && si < segs.length; si++) {
       if (!segs[si].length) continue;
       let alt = [];
       try { alt = buildFrom(segs[si]); } catch (e) { alt = []; }
       for (const g of alt) {
-        if (!out.some((x) => x.vecs.length === g.vecs.length && Math.abs(x.box.x - g.box.x) < 4)) out.push(g);
+        if (!out.some((x) => x.count === g.count && Math.abs(x.box.x - g.box.x) < 4)) out.push(g);
       }
     }
     return out;
@@ -2116,7 +2230,10 @@ function recommend(state) {
 
   // 切り出し位置が1pxずれるだけで一致度が大きく揺れるので、
   // 上下左右に1pxずらした9通りを作り、照合時にいちばん合うものを使う。
-  const OFFSETS = [[0, 0], [-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]];
+  // 1桁ぶんの画像は、1画素ずらした版も作って照合の当たりを良くしている。
+  // ただし9通り作ると走査時間の6割が正規化に消える（実測 16.2ms→6.6ms）。
+  // 斜めは上下左右で代替できるので5通りに絞る。
+  const OFFSETS = [[0, 0], [-1, 0], [1, 0], [0, -1], [0, 1]];
   function variants(G, cw, ch, o) {
     const out = [];
     for (const [dx, dy] of OFFSETS) { const v = normalize(G, cw, ch, o, dx, dy); if (v) out.push(v); }
@@ -3313,11 +3430,14 @@ function recommend(state) {
       // ねらい打ちや半減ターンではダメージが1桁になる。
       // 候補に1桁の値があるときだけ、1桁のまとまりも読み取り対象にする。
       const minD = tg && tg.candidates.some((c) => c < 10) ? 1 : 2;
-      let gs = V.scanCell(grid, i, minD, false);
+      const wantLens = tg ? tg.candidates.reduce((a, c) => {
+        const L = String(c).length; if (a.indexOf(L) < 0) a.push(L); return a;
+      }, []) : null;
+      let gs = V.scanCell(grid, i, minD, false, null, false, wantLens);
       const strictFound = gs.length > 0;
       // 演出で数字が薄い・欠けている瞬間は通常条件で拾えないため、監視対象だけ
       // 緩和条件でもう一度探す。採用は後段の候補照合と投票を必ず通す。
-      if (!gs.length && tg && cam.executedAt) gs = V.scanCell(grid, i, minD, true);
+      if (!gs.length && tg && cam.executedAt) gs = V.scanCell(grid, i, minD, true, null, false, wantLens);
       // 桁が1つ足りないまま読むと、108 が 18 になって2桁候補に化ける。
       // 候補にもっと長い桁数があるなら、空洞の 0 や細い 1 も拾える設定で
       // もう一度だけ探し、長いまとまりが見つかったらそちらを使う。
@@ -3326,11 +3446,11 @@ function recommend(state) {
       // そのときこそ必要なのに動かず、検出0のまま終わっていた。
       if (tg && cam.executedAt) {
         const maxLen = tg.candidates.reduce((m, c) => Math.max(m, String(c).length), 0);
-        const bestLen = gs.reduce((m, g0) => Math.max(m, (g0.vecs || []).length), 0);
+        const bestLen = gs.reduce((m, g0) => Math.max(m, g0.count || 0), 0);
         if (!gs.length || bestLen < maxLen) {
           try {
-            const gl = V.scanCell(grid, i, minD, true, null, true);
-            const glBest = gl.reduce((m, g0) => Math.max(m, (g0.vecs || []).length), 0);
+            const gl = V.scanCell(grid, i, minD, true, null, true, wantLens);
+            const glBest = gl.reduce((m, g0) => Math.max(m, g0.count || 0), 0);
             if (glBest > bestLen) gs = gl;
           } catch (e) {}
         }
@@ -3815,7 +3935,7 @@ function recommend(state) {
 </script>
 <script>(function () {
   "use strict";
-  const APP_VERSION = "2026.08.17-31";
+  const APP_VERSION = "2026.08.18-33";
   const AI = window.AmatsuyuAI;
   const $ = (s) => document.querySelector(s);
   const L = AI.LETTERS, Z = AI.ZONES;
@@ -4425,6 +4545,43 @@ function recommend(state) {
   });
   $("#toggleLog").addEventListener("click", () => document.body.classList.toggle("drawer-open"));
   $("#closeDrawer").addEventListener("click", () => document.body.classList.remove("drawer-open"));
+
+  // 開いているメニューは、外側のどこを押しても閉じる。
+  // わざわざ「…」まで戻って押し直させない。Esc でも閉じる。
+  document.addEventListener("pointerdown", (e) => {
+    document.querySelectorAll("details.menu[open]").forEach((d) => {
+      if (!d.contains(e.target)) d.open = false;
+    });
+  }, true);
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    let closed = false;
+    document.querySelectorAll("details.menu[open]").forEach((d) => { d.open = false; closed = true; });
+    if (!closed && document.body.classList.contains("drawer-open")) document.body.classList.remove("drawer-open");
+  });
+  // メニュー内の項目を選んだら閉じる
+  document.querySelectorAll("details.menu .menu-pop").forEach((pop) => {
+    pop.addEventListener("click", (e) => {
+      if (e.target.closest("button")) { const d = pop.closest("details.menu"); if (d) d.open = false; }
+    });
+  });
+
+  // 端末が重いときのためにガラス表現を切れるようにする
+  const GLASS_KEY = "forge-glass";
+  const applyGlass = (on) => {
+    document.documentElement.dataset.glass = on ? "on" : "off";
+    const b = $("#glassToggle");
+    if (b) b.textContent = on ? "ガラス表現を切る" : "ガラス表現を戻す";
+  };
+  let glassOn = true;
+  try { glassOn = localStorage.getItem(GLASS_KEY) !== "off"; } catch (e) {}
+  applyGlass(glassOn);
+  const gt = $("#glassToggle");
+  if (gt) gt.addEventListener("click", () => {
+    glassOn = !glassOn;
+    try { localStorage.setItem(GLASS_KEY, glassOn ? "on" : "off"); } catch (e) {}
+    applyGlass(glassOn);
+  });
   $("#exportJson").addEventListener("click", exportJson);
   $("#exportCsv").addEventListener("click", exportCsv);
   $("#clearSavedRuns").addEventListener("click", () => {
