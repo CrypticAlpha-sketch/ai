@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 超あまつゆ Forge  version 2026.08.16-14 -->
+<!-- 超あまつゆ Forge  version 2026.08.20-38 -->
 <html lang="ja">
 <head>
 <meta charset="utf-8">
@@ -497,7 +497,7 @@ body.drawer-open #drawer{transform:none}
           <button id="openOcrTest" class="chip" type="button">OCR診断</button>
           <button id="glassToggle" class="chip" type="button">ガラス表現を切る</button>
           <button id="resetButton" class="chip" type="button">最初からやり直す</button>
-          <span class="tag ver" id="appVersion">v2026.08.18-35</span>
+          <span class="tag ver" id="appVersion">v2026.08.20-38</span>
         </div>
       </details>
     </header>
@@ -621,7 +621,7 @@ body.drawer-open #drawer{transform:none}
     <h3>動作</h3>
     <label class="autoskip"><input id="autoSkipToggle" type="checkbox" checked>基本手順のなかの火力上げは自動で進める（冷やしこみ・必殺・アドリブ帯は自動化しません）</label>
     <h3>バージョン</h3>
-    <p class="hint">超あまつゆ Forge <b>v2026.08.18-35</b><br>
+    <p class="hint">超あまつゆ Forge <b>v2026.08.20-38</b><br>
       主な変更：画面を「次の一手」中心に再設計／盤面を指示書化（対象マスが光り、結果待ちは「?」）／二重加算の防止／読み取り判定の緩和。</p>
     <h3>使い方</h3>
     <p class="hint">緑のマス目が鉱石の3×2からズレていたら、映像上のオレンジの丸をドラッグして<b>板（羊皮紙）の外周4隅</b>に合わせてください。位置はこのブラウザに記憶されます。とくぎの説明枠が板に重なると読み取りを邪魔するので、カーソルを外しておくと安定します。</p>
@@ -654,7 +654,7 @@ body.drawer-open #drawer{transform:none}
       <button class="modal-close" value="close" aria-label="閉じる">×</button>
       <p class="eyebrow">OCR QUALITY CHECK</p>
       <h2>OCR精度診断</h2>
-      <p class="modal-lead">内蔵している実機由来の数字切り抜きを1枚ずつテスト対象にし、その画像を学習用から外して再判定します。全体正解率と数字別の誤認率を確認できます。</p>
+      <p class="modal-lead">内蔵している実機由来の「切り出し済み1桁画像」を1枚ずつテスト対象にし、その画像を学習用から外して再判定します。ここで測るのは数字分類だけで、画面から数字を見つける検出率は含みません。</p>
       <div id="ocrSummary" class="ocr-summary"><strong>—</strong><span>診断を準備しています</span></div>
       <div id="ocrSamples" class="ocr-samples"></div>
       <table class="ocr-table"><thead><tr><th>数字</th><th>画像数</th><th>正解率</th><th>誤認率</th><th>主な誤認先</th></tr></thead><tbody id="ocrRows"></tbody></table>
@@ -689,7 +689,8 @@ const PRIORITY = [1, 0, 0, 1, 1, 0]; // A・D・E = 11幅・会心優先
 
 const VERTICAL_PAIRS = [[0, 2], [2, 4], [1, 3], [3, 5]];
 const HORIZONTAL_PAIRS = [[0, 1], [2, 3], [4, 5]];
-const DIAGONAL_PAIRS = [[0, 3], [1, 2], [2, 5], [3, 4]];
+// ななめ打ちの実機対象は B・C と D・E の2組だけ。
+const DIAGONAL_PAIRS = [[1, 2], [3, 4]];
 const QUAD_BLOCKS = [[0, 1, 2, 3], [2, 3, 4, 5]];
 
 const SKILLS = {
@@ -914,7 +915,7 @@ function grade(state) {
   function fixedFor(state) { return routeById(state && state.fixedRoute).steps; }
   function fixedLength(state) { return fixedFor(state).length; }
 
-// 新AI（V3）: 隠れ基準値を参照せず、表示盤面のみで
+// 新AI（V4）: 隠れ基準値を参照せず、表示盤面のみで
 //  (1) 倍ターン(400の倍数)を狙う温度スケジュール
 //  (2) ねらい系の「会心成立バンド」への位置合わせ
 //  (3) 各マスの最終誤差分布を解析計算して P(合計誤差<=7) を最大化
@@ -961,6 +962,33 @@ const P = {
   hepaOffBeat: 600,     // 倍ターン+50℃以外でヘパイトスを撃つことへのペナルティ
   arriveHepa: 60,       // 必殺チャージ中に「倍ターン+50℃」へ着地することへの加点
   hepaBoost: 0,         // 火力上げで上の倍ターンへ戻り、確定本会心マス数を増やす価値
+  pairAimOnlyDouble: false, // 上下ねらいは原則として倍ターンだけに使う
+  structuredSchedule: false, // 1200℃・800℃の上下ねらいを逆算して通常技で準備する
+  scheduleFocusWeight: 0.05,
+  endgameProbabilityFirst: false,
+  terminalPlanner: false,
+  thirdScheduledAim: false,
+  scheduleFourHit: false,
+  exactAllIn: false,
+  exactLastCell: false,
+  exactLastCellFocus: 24,
+  monteCarloEndgame: false,
+  monteCarloSamples: 12,
+  monteCarloTemp: 750,
+  monteCarloRoots: 5,
+  monteCarloExactFinish: false,
+  pairAimBonus: 0,
+  narrowAimPenalty: 0,
+  wideAimBonus: 0,
+  forceWideAim: false,
+  wideAimMin: 0.27,
+  schedulePairBias: 0,
+  scheduleRetryValue: 0,
+  scheduledSingleFallback: false,
+  scheduledWideSnapMin: 0.30,
+  scheduledPairWideMin: 0.27,
+  scheduledPairNarrowMin: 0.16,
+  hardReachReservePerCell: 0,
   wTempShort: 30,       // 温度が足りない（0℃で強制終了する）ことへのペナルティ
   hitsPerAction: 1.45,  // 1手あたりの平均打撃数
   hepaHoldBack: 0,     // 確定会心で止める予定のマスを、先に成功範囲へ入れてしまう手への抑制
@@ -1190,6 +1218,28 @@ function futureGreatProb(state) {
   return Math.max(0, Math.min(1, convolve(dists)));
 }
 
+// 全マスが成功範囲内で、残り集中力から実質あと1回しか会心技を撃てない局面は、
+// 近似盤面へ圧縮せず「この一手後にそのまま仕上げる確率」を厳密に比較する。
+function immediateGreatAfter(state, act) {
+  const skill = SKILLS[act.skill];
+  if (!skill || skill.utility || skill.cost > state.focus) return -1;
+  const effect = C.turnEffect(state.temp, state.hasActed);
+  const pCrit = state.hepaActive ? 1 : C.critRate(skill, state.cfg);
+  const dists = [];
+  for (let i = 0; i < 6; i++) {
+    if (state.crits[i]) { dists.push(SNAP_DIST); continue; }
+    const k = act.targets.indexOf(i);
+    if (k < 0) {
+      const v = state.values[i];
+      if (v < ZONES[i][0] || v > ZONES[i][1]) return -1;
+      dists.push(errAt(i, v));
+    } else {
+      dists.push(hitOutcome(act.skill, state.temp, effect.multiplier, i, state.values[i], pCrit).err);
+    }
+  }
+  return convolve(dists);
+}
+
 // 乱数結果を代表盤面へ圧縮する。はみ出し確率は survival に残し、探索値へ必ず反映する。
 function projectAction(state, act) {
   const skill = SKILLS[act.skill];
@@ -1270,12 +1320,133 @@ function beamProbability(afterRoot, depth) {
   for (const node of frontier) best = Math.max(best, node.survival * futureGreatProb(node.state));
   return Math.max(0, Math.min(1, best));
 }
+
+function observableSeed(state) {
+  let h = 2166136261 >>> 0;
+  const xs = state.values.concat([state.temp, state.focus, state.step,
+    state.hepaCharged ? 1 : 0, state.hepaActive ? 1 : 0]);
+  for (const x of xs) { h ^= (x | 0) + 0x9e3779b9; h = Math.imul(h, 16777619) >>> 0; }
+  return h >>> 0;
+}
+
+// モンテカルロ内だけで使う軽量方策。隠れ基準値は一切見ず、公開盤面の評価だけで進める。
+function fastRolloutAction(state) {
+  if (state.finished || state.focus < SKILLS.tataku.cost || state.temp <= 0)
+    return { skill: "finish", targets: [] };
+  const fixed = fixedFor(state);
+  if (state.step < fixed.length) return fixedStep(state);
+  if (state.hepaActive && P.forceCho4) {
+    const id = state.focus >= SKILLS.cho4.cost ? "cho4" : (state.focus >= SKILLS.yon.cost ? "yon" : null);
+    if (id) {
+      let best = null, bs = -Infinity;
+      for (const blk of QUAD_BLOCKS) {
+        const a = C.action(id, blk, ""); const s = evalAction(state, a);
+        if (s > bs) { bs = s; best = a; }
+      }
+      if (best) return best;
+    }
+  }
+  if (P.structuredSchedule) {
+    const a = scheduledStrategyAction(state);
+    if (a) return a;
+  }
+  if (P.exactLastCell && state.focus <= P.exactLastCellFocus) {
+    const outside = state.values.reduce((n, v, i) => n + (v < ZONES[i][0] || v > ZONES[i][1] ? 1 : 0), 0);
+    if (outside === 1) {
+      let exactBest = null, exactP = -1;
+      for (const a of enumerate(state)) {
+        if (SKILLS[a.skill].utility) continue;
+        const p = immediateGreatAfter(state, a);
+        if (p > exactP) { exactP = p; exactBest = a; }
+      }
+      if (exactBest && exactP >= 0) return exactBest;
+    }
+  }
+  const stop = greatChance(state.values, state.crits);
+  let best = null, bs = -Infinity;
+  for (const a of enumerate(state)) {
+    let s = evalAction(state, a);
+    if (!isFinite(s)) continue;
+    if (stop != null && !SKILLS[a.skill].utility) {
+      const p = immediateGreatAfter(state, a);
+      if (p >= 0) s = p * 1000;
+    }
+    if (s > bs) { bs = s; best = a; }
+  }
+  if (!best || (stop != null && stop * 1000 >= bs)) return { skill: "finish", targets: [] };
+  return best;
+}
+
+function monteCarloRerank(state, rows) {
+  if (!P.monteCarloEndgame || state.temp > P.monteCarloTemp || rows.length < 2) return rows;
+  const roots = rows.slice(0, Math.max(2, P.monteCarloRoots | 0)), n = Math.max(6, P.monteCarloSamples | 0);
+  const wins = new Array(roots.length).fill(0);
+  const baseSeed = observableSeed(state);
+  for (let k = 0; k < n; k++) {
+    for (let ri = 0; ri < roots.length; ri++) {
+      // すべての候補を同じ仮想基準値・同じ乱数列で比較する（共通乱数法）。
+      // 候補ごとに別乱数を使う旧実装は、少数サンプル時に「手の差」より
+      // 「たまたま割り当てられた乱数の差」を順位へ混ぜていた。
+      const rng = C.mulberry32((baseSeed + k * 2654435761) >>> 0);
+      let s = C.cloneState(state);
+      // 本会心済みだけは基準値が表示値に確定する。それ以外は範囲内一様から生成し、
+      // 実戦の隠れ値やシミュレーター内部の ideals はコピーしない。
+      s.ideals = ZONES.map(([lo, hi], i) => s.crits[i] ? s.values[i] : C.randInt(rng, lo, hi));
+      s.finished = false;
+      s = C.applyAction(s, roots[ri].action, rng);
+      for (let guard = 0; guard < 35 && !s.finished; guard++) {
+        const a = fastRolloutAction(s);
+        if (!a || a.skill === "finish") break;
+        s = C.applyAction(s, a, rng);
+      }
+      if (P.monteCarloExactFinish) {
+        const p = greatChance(s.values, s.crits);
+        wins[ri] += p == null ? 0 : p;
+      } else if (C.grade(s).great) wins[ri]++;
+    }
+  }
+  roots.forEach((row, i) => { row.prob = wins[i] / n; row.score = row.prob * 1000; row.monteCarlo = n; });
+  roots.sort((a, b) => b.prob - a.prob || b.heuristic - a.heuristic);
+  return roots.concat(rows.slice(roots.length));
+}
+
 function searchedMoves(state) {
   const fixed = fixedFor(state), depth = searchDepthFor(state);
+  const allIn = state.values.every((v, i) => v >= ZONES[i][0] && v <= ZONES[i][1]);
+  const outside = state.values.reduce((n, v, i) => n + (v < ZONES[i][0] || v > ZONES[i][1] ? 1 : 0), 0);
+  const exactTerminal = allIn && (state.focus <= 29 || P.exactAllIn)
+    || (P.exactLastCell && outside === 1 && state.focus <= P.exactLastCellFocus);
+  if (state.step >= fixed.length && exactTerminal && !state.hepaActive) {
+    const exactRows = enumerate(state).filter((a) => !SKILLS[a.skill].utility).map((a) => ({
+      action: a, prob: immediateGreatAfter(state, a), heuristic: evalAction(state, a),
+      score: immediateGreatAfter(state, a) * 1000, depth: 1, fixed: false
+    })).filter((x) => x.prob >= 0 && isFinite(x.heuristic))
+      .sort((a, b) => b.prob - a.prob || b.heuristic - a.heuristic).slice(0, 7);
+    if (exactRows.length) return exactRows;
+  }
+  if (state.step >= fixed.length && P.structuredSchedule && !state.hepaActive) {
+    const scheduled = scheduledStrategyAction(state);
+    if (scheduled) {
+      const h = evalAction(state, scheduled);
+      const projected = projectAction(state, scheduled);
+      const prob = beamProbability(projected, Math.min(4, depth));
+      return [{ action: scheduled, prob, heuristic: h, score: prob * 1000,
+        depth: Math.min(4, depth), fixed: false, scheduled: true }];
+    }
+  }
   let roots;
   if (state.step < fixed.length) roots = [{ a: fixedStep(state), h: 0 }];
-  else roots = enumerate(state).map((a) => ({ a, h: evalAction(state, a) }))
-    .filter((x) => isFinite(x.h)).sort((x, y) => y.h - x.h).slice(0, 7);
+  else {
+    let pool = enumerate(state);
+    if (P.forceScheduledPair && (state.temp === 1200 || state.temp === 800) && state.focus >= SKILLS.jonerai.cost) {
+      const eff = C.turnEffect(state.temp, state.hasActed);
+      const pairs = pool.filter((a) => a.skill === "jonerai" && a.targets.every((i) =>
+        hitOutcome(a.skill, state.temp, eff.multiplier, i, state.values[i], C.critRate(SKILLS.jonerai, state.cfg)).failP < 1e-9));
+      if (pairs.length) pool = pairs;
+    }
+    roots = pool.map((a) => ({ a, h: evalAction(state, a) }))
+      .filter((x) => isFinite(x.h)).sort((x, y) => y.h - x.h).slice(0, 7);
+  }
   const out = roots.map((root, i) => {
     const a = root.a;
     const projected = projectAction(state, a);
@@ -1285,11 +1456,14 @@ function searchedMoves(state) {
     // しあげるかどうかの比較には planScore を使わず、prob だけを使う。
     return { action: a, prob, heuristic: root.h, score: prob * 1000, depth, fixed: state.step < fixed.length };
   });
-  // 従来評価が明確に離れている安全手は維持し、5点以内の近接候補だけを先読み確率で入れ替える。
-  // これにより温度スケジュールを壊さず、複数手の組み合わせが本当に有利な局面だけ探索を効かせる。
-  out.sort((a, b) => Math.abs((a.heuristic || 0) - (b.heuristic || 0)) > 5
-    ? (b.heuristic || 0) - (a.heuristic || 0) : b.prob - a.prob);
-  return out;
+  // 通常局面では会心成立バンドと温度スケジュールを維持し、近接候補だけを
+  // 先読み確率で入れ替える。終盤の0%ルートは別の可達性ガードで除外する。
+  const probabilityFirst = P.endgameProbabilityFirst && (state.focus <= 55 || state.temp <= 650
+    || unreachedIndices(state).length <= 2);
+  out.sort(probabilityFirst ? ((a, b) => b.prob - a.prob || b.heuristic - a.heuristic)
+    : ((a, b) => Math.abs((a.heuristic || 0) - (b.heuristic || 0)) > 5
+      ? (b.heuristic || 0) - (a.heuristic || 0) : b.prob - a.prob));
+  return monteCarloRerank(state, out);
 }
 
 // 次のターンに「上下ねらいの組」または「単体ねらい」がどれだけ成立するか。
@@ -1322,6 +1496,239 @@ function aimReadyAt(values, crits, temp) {
     }
   }
   return best;
+}
+
+// 1200℃・800℃の倍ターンから逆算する、人間の定石に近い軽量スケジューラ。
+// ねらいの直前だけを見るのではなく、そこまでの通常技を中央値でビーム探索し、
+// 上下ねらいの「会心なら本会心／非会心でもはみ出さない」組を作る。
+function scheduledAimAt(values, crits, focus, temp) {
+  if ((temp !== 1200 && temp !== 800) || focus < SKILLS.jonerai.cost) return null;
+  const pc = C.DEFAULT_CFG.aimedCrit;
+  let best = null;
+  for (const pair of VERTICAL_PAIRS) {
+    if (pair.some((i) => crits[i] || values[i] > ZONES[i][1])) continue;
+    const rows = pair.map((i) => hitOutcome("jonerai", temp, 2, i, values[i], pc));
+    if (rows.some((o) => o.failP > P.pairMaxFail)) continue;
+    const wide = pair.find((i) => PRIORITY[i]);
+    const wi = pair.indexOf(wide), ni = 1 - wi;
+    if (rows[wi].snapP < P.scheduledPairWideMin || rows[ni].snapP < P.scheduledPairNarrowMin) continue;
+    let score = rows[wi].snapP * 3.2 + rows[ni].snapP * 0.8
+      + rows.reduce((s, o) => s + o.err.reduce((a, b) => a + b, 0), 0) * 0.08;
+    // 外れ時に11幅が成功範囲へ入らず残れば、次の800℃や単体ねらいで再抽選できる。
+    score += P.scheduleRetryValue * rows[wi].belowP * (temp === 1200 ? 1 : 0.55);
+    // 1200℃で使う組を作る途中に、800℃で狙う別の11幅まで進め過ぎない。
+    // 現在の組と重ならない上下組が800℃のバンドへ残っているほど加点する。
+    if (temp === 1200) {
+      let future = -4;
+      for (const p2 of VERTICAL_PAIRS) {
+        if (p2.some((i) => pair.indexOf(i) >= 0 || crits[i])) continue;
+        let q = 0, ok = true;
+        for (const i of p2) {
+          const b = aimBand("jonerai", 800, 2, i), v = values[i];
+          if (v > b.safeHi) { ok = false; break; }
+          const gap = Math.max(0, b.critLo - v);
+          q += (PRIORITY[i] ? 3 : 0.8) * Math.max(0, 1 - gap / 85);
+        }
+        if (ok && q > future) future = q;
+      }
+      score += Math.max(0, future) * 0.55;
+    }
+    const pairIndex = VERTICAL_PAIRS.findIndex((p) => p[0] === pair[0] && p[1] === pair[1]);
+    score += P.schedulePairBias * [0.35, -1, 0.55, 1][pairIndex];
+    if (!best || score > best.score) best = {
+      action: C.action("jonerai", pair, `${temp}℃の倍ターン用に準備した上下ねらい打ち`), score
+    };
+  }
+  return best;
+}
+
+// 上下の2マスを同時に安全な帯へ作れなかった倍ターンは捨てず、
+// 11幅だけを単体ねらいで抽選する。上下ねらいを無理に撃つより9集中力安く、
+// 7幅へ不要な会心コストを払わないためのフォールバックである。
+function scheduledWideAt(values, crits, focus, temp) {
+  if (!P.scheduledSingleFallback || (temp !== 1200 && temp !== 800)
+      || focus < SKILLS.nerai.cost) return null;
+  const pc = C.DEFAULT_CFG.aimedCrit;
+  let best = null;
+  for (let i = 0; i < 6; i++) {
+    if (!PRIORITY[i] || crits[i] || values[i] > ZONES[i][1]) continue;
+    const o = hitOutcome("nerai", temp, 2, i, values[i], pc);
+    if (o.failP > P.pairMaxFail || o.snapP < P.scheduledWideSnapMin) continue;
+    const inP = o.err.reduce((a, b) => a + b, 0);
+    const score = o.snapP * 4.5 + inP * 0.10 + o.belowP * 0.20;
+    if (!best || score > best.score) best = {
+      action: C.action("nerai", [i], `${temp}℃の倍ターンで11幅を単体ねらい`), score
+    };
+  }
+  return best;
+}
+
+function scheduledDoubleGoal(values, crits, focus, temp) {
+  return scheduledAimAt(values, crits, focus, temp)
+    || scheduledWideAt(values, crits, focus, temp);
+}
+
+function scheduledSingleAt(values, crits, focus, temp) {
+  if (temp !== 400 || focus < SKILLS.nerai.cost) return null;
+  const pc = C.DEFAULT_CFG.aimedCrit;
+  let best = null;
+  for (let i = 0; i < 6; i++) {
+    if (!PRIORITY[i] || crits[i] || values[i] > ZONES[i][1]) continue;
+    const o = hitOutcome("nerai", temp, 2, i, values[i], pc);
+    if (o.failP > 0.06 || o.snapP < 0.27) continue;
+    const score = o.snapP * 4 + o.err.reduce((a, b) => a + b, 0) * 0.1;
+    if (!best || score > best.score) best = {
+      action: C.action("nerai", [i], "400℃の倍ターン用に残した11幅へのねらい打ち"), score
+    };
+  }
+  return best;
+}
+
+function wideAimNow(state) {
+  if (!P.forceWideAim || state.hepaCharged || state.hepaActive || state.focus < SKILLS.nerai.cost + 5) return null;
+  const effect = C.turnEffect(state.temp, true), pc = C.critRate(SKILLS.nerai, state.cfg);
+  let best = null;
+  for (let i = 0; i < 6; i++) {
+    if (!PRIORITY[i] || state.crits[i] || state.values[i] >= ZONES[i][0]) continue;
+    const o = hitOutcome("nerai", state.temp, effect.multiplier, i, state.values[i], pc);
+    if (o.failP > 0.08 || o.snapP < P.wideAimMin) continue;
+    const a = C.action("nerai", [i], "11幅を成功範囲へ入れる前に本会心を狙う");
+    const h = evalAction(state, a); if (!isFinite(h)) continue;
+    const q = o.snapP * 4 + o.err.reduce((s, x) => s + x, 0) * 0.1;
+    if (!best || q > best.q) best = { action: a, q };
+  }
+  return best && best.action;
+}
+
+function projectedPrep(state, act, floorTemp) {
+  const skill = SKILLS[act.skill];
+  if (!skill || skill.utility || skill.aimed || skill.cost > state.focus) return null;
+  const effect = C.turnEffect(state.temp, true);
+  const R = rawList(skill, state.temp, effect.multiplier);
+  const rmax = Math.max(...R);
+  if (act.targets.some((i) => state.crits[i] || state.values[i] + rmax > ZONES[i][1])) return null;
+  const temp2 = Math.max(0, state.temp - 50 + (skill.tempAfter || 0));
+  if (temp2 < floorTemp) return null;
+  const mid = Math.round((Math.min(...R) + rmax) / 2);
+  const next = C.cloneState(state);
+  next.values = state.values.slice();
+  for (const i of act.targets) next.values[i] += mid;
+  next.temp = temp2; next.focus = state.focus - skill.cost; next.hasActed = true; next.step += 1;
+  return next;
+}
+
+function scheduledPrepAction(state, targetTemp) {
+  const reserveSkill = targetTemp === 400 ? SKILLS.nerai : SKILLS.jonerai;
+  const goalAt = targetTemp === 400 ? scheduledSingleAt : scheduledDoubleGoal;
+  if (state.temp <= targetTemp || state.focus < reserveSkill.cost + 8) return null;
+  let frontier = [{ state: C.cloneState(state), first: null, cost: 0 }];
+  const endpoints = [];
+  const maxPly = Math.ceil((state.temp - targetTemp) / 50) + 1;
+  for (let ply = 0; ply < maxPly && frontier.length; ply++) {
+    const next = [], seen = new Map();
+    for (const node of frontier) {
+      if (node.state.temp === targetTemp) { endpoints.push(node); continue; }
+      for (const act of enumerate(node.state)) {
+        if (!act.targets.length || SKILLS[act.skill].utility || SKILLS[act.skill].aimed) continue;
+        if (!new Set(["tataku", "jouge", "sayu", "naname", "netsu", ...(P.scheduleFourHit ? ["yon"] : [])]).has(act.skill)) continue;
+        const s2 = projectedPrep(node.state, act, targetTemp); if (!s2) continue;
+        // 上下ねらい25を残せない準備線は採らない。
+        if (s2.focus < reserveSkill.cost) continue;
+        const row = { state: s2, first: node.first || act, cost: node.cost + SKILLS[act.skill].cost };
+        const key = s2.temp + "|" + s2.values.join(",");
+        const old = seen.get(key);
+        if (!old || row.cost < old.cost) seen.set(key, row);
+      }
+    }
+    for (const row of seen.values()) {
+      const aim = goalAt(row.state.values, row.state.crits, row.state.focus, targetTemp);
+      let progress = 0;
+      let gap = 0;
+      for (let i = 0; i < 6; i++) progress += Math.min(ZONES[i][0], row.state.values[i]) / ZONES[i][0];
+      for (let i = 0; i < 6; i++) if (!row.state.crits[i]) gap += Math.max(0, ZONES[i][0] - row.state.values[i]);
+      row.q = (aim ? 1000 + aim.score * 100 : 0) + progress * 2
+        + row.state.focus * P.scheduleFocusWeight - (targetTemp === 400 ? gap * 2.2 : 0);
+      next.push(row);
+    }
+    next.sort((a, b) => b.q - a.q || a.cost - b.cost);
+    frontier = next.slice(0, 72);
+  }
+  let best = null;
+  for (const node of endpoints) {
+    const aim = goalAt(node.state.values, node.state.crits, node.state.focus, targetTemp);
+    if (!aim || !node.first) continue;
+    let gap = 0;
+    for (let i = 0; i < 6; i++) if (!node.state.crits[i]) gap += Math.max(0, ZONES[i][0] - node.state.values[i]);
+    const q = aim.score * 100 + node.state.focus * P.scheduleFocusWeight
+      - (targetTemp === 400 ? gap * 2.2 : 0);
+    if (!best || q > best.q) best = { action: node.first, q };
+  }
+  return best && best.action;
+}
+
+function scheduledStrategyAction(state) {
+  // 必殺チャージ中は確定会心4枚の計画を優先する。
+  if (state.hepaCharged || state.hepaActive) return null;
+  const at = scheduledAimAt(state.values, state.crits, state.focus, state.temp);
+  if (at) return at.action;
+  const fallback = scheduledWideAt(state.values, state.crits, state.focus, state.temp);
+  if (fallback) return fallback.action;
+  if (state.temp < 800) {
+    const wide = wideAimNow(state); if (wide) return wide;
+  }
+  const single = P.thirdScheduledAim ? scheduledSingleAt(state.values, state.crits, state.focus, state.temp) : null;
+  if (single) return single.action;
+  const target = state.temp > 1200 ? 1200 : (state.temp > 800 ? 800
+    : (P.thirdScheduledAim && state.temp > 400 ? 400 : 0));
+  if (target) {
+    const prep = scheduledPrepAction(state, target);
+    if (prep) return prep;
+  }
+  if (state.temp < 800) {
+    const wide = wideAimNow(state); if (wide) return wide;
+  }
+  return P.terminalPlanner && state.temp < 400 ? terminalPlanAction(state) : null;
+}
+
+// 最後の低温域は「いま一番進む手」ではなく、残り温度内で全マスを中央寄りに
+// 入れ切る順番を探索する。熱風を先に撃って半減ターンの安い中央寄せを失う事故を防ぐ。
+function terminalPlanAction(state) {
+  if (state.values.every((v, i) => v >= ZONES[i][0] && v <= ZONES[i][1])) return null;
+  let frontier = [{ state: C.cloneState(state), first: null, cost: 0 }];
+  let best = null;
+  const maxPly = Math.min(9, Math.max(1, Math.ceil(state.temp / 50)));
+  for (let ply = 0; ply < maxPly && frontier.length; ply++) {
+    const next = [], seen = new Map();
+    for (const node of frontier) {
+      const p = greatChance(node.state.values, node.state.crits);
+      if (p != null) {
+        const q = p * 1000 + node.state.focus * 0.08;
+        if (node.first && (!best || q > best.q)) best = { action: node.first, q };
+        continue;
+      }
+      if (node.state.temp <= 0 || node.state.focus < SKILLS.tataku.cost) continue;
+      for (const act of enumerate(node.state)) {
+        if (!act.targets.length || SKILLS[act.skill].utility || SKILLS[act.skill].aimed) continue;
+        if (!new Set(["tataku", "tekagen", "jouge", "sayu", "naname", "yon", "netsu"]).has(act.skill)) continue;
+        const s2 = projectedPrep(node.state, act, 0); if (!s2) continue;
+        const row = { state: s2, first: node.first || act, cost: node.cost + SKILLS[act.skill].cost };
+        const key = s2.temp + "|" + s2.focus + "|" + s2.values.join(",");
+        if (!seen.has(key)) seen.set(key, row);
+      }
+    }
+    for (const row of seen.values()) {
+      let progress = 0;
+      for (let i = 0; i < 6; i++) {
+        const [lo, hi] = ZONES[i], center = (lo + hi) / 2, v = row.state.values[i];
+        progress += v >= lo ? 30 - Math.abs(v - center) : 25 - Math.min(25, lo - v);
+      }
+      row.q = progress + row.state.focus * 0.02;
+      next.push(row);
+    }
+    next.sort((a, b) => b.q - a.q || a.cost - b.cost);
+    frontier = next.slice(0, 96);
+  }
+  return best && best.action;
 }
 
 /* ---------- 必殺の使いどき ---------- */
@@ -1382,6 +1789,42 @@ function completedOnlyAdjustment(state, act) {
   const skill = act && SKILLS[act.skill];
   return unreachedIndices(state).length > 0 && skill && !skill.utility
     && act.targets && act.targets.length > 0 && actionReachCount(state, act) === 0;
+}
+
+// 低集中力の終盤だけ、残った未到達マスを「はみ出し0%の通常技」で
+// 全部埋め切るための最小集中力を小さな探索で求める。単純な 5×残り枚数では、
+// 次が倍ターンで一度冷やさないと叩けない局面を見落とすためである。
+function safeReachCost(values, crits, temp, ceiling) {
+  const left = values.map((v, i) => (!crits[i] && v < ZONES[i][0]) ? i : -1).filter((i) => i >= 0);
+  if (!left.length) return 0;
+  // まず「たたく」換算の下限を取る。温度が下がれば威力も落ちるため、
+  // 1マス1回より多く必要な大きな不足だけ回数を上乗せする。
+  const normalTemp = temp % 400 === 0 ? Math.max(0, temp - 300) : temp;
+  let reserve = 0;
+  for (const i of left) {
+    let bestCost = Infinity;
+    for (const id of ["tataku", "tekagen", "netsu"]) {
+      const skill = SKILLS[id], r = rawList(skill, normalTemp, 1);
+      const rmin = Math.min(...r), rmax = Math.max(...r);
+      // 最大乱数がはみ出す技は「確実に埋める予約」には使えない。
+      if (values[i] + rmax > ZONES[i][1]) continue;
+      const hits = Math.max(1, Math.ceil((ZONES[i][0] - values[i]) / Math.max(1, rmin)));
+      // 同じ技を繰り返した最大値でも安全な場合だけ採用する。
+      if (values[i] + hits * rmax <= ZONES[i][1]) bestCost = Math.min(bestCost, hits * skill.cost);
+    }
+    if (!isFinite(bestCost)) return Infinity;
+    reserve += bestCost;
+  }
+
+  // 次手が倍ターンで、どの未到達マスにも最大乱数を安全に当てられないなら、
+  // その倍ターンを消費するための別マスは残っていない。冷やしこみ代を必ず予約する。
+  if (temp > 0 && temp % 400 === 0) {
+    const doubled = rawList(SKILLS.tataku, temp, 2);
+    const max = Math.max(...doubled);
+    const hasSafeSink = left.some((i) => values[i] + max <= ZONES[i][1]);
+    if (!hasSafeSink) reserve += SKILLS.hiyashi.cost;
+  }
+  return reserve > (ceiling == null ? Infinity : ceiling) ? Infinity : reserve;
 }
 
 /* ---------- 候補評価 ---------- */
@@ -1461,6 +1904,14 @@ function evalAction(state, act) {
   sched += hepaHits * P.hepaHitValue;
   const effect = C.turnEffect(state.temp, state.hasActed);
   const pCrit = state.hepaActive ? 1 : C.critRate(skill, state.cfg);
+  if (P.pairAimOnlyDouble && skill.id === "jonerai" && !state.hepaActive
+      && effect.multiplier !== 2) return -Infinity;
+  if (skill.id === "jonerai" && !state.hepaActive) sched += P.pairAimBonus;
+  // 半減ターンは同じ集中力でオーバー事故を抑えつつ会心判定を増やせる。
+  // 通常ターンの弱いねらいうちを待てるよう、探索の到着評価とは別に明示評価する。
+  if (effect.multiplier === 0.5 && skill.aimed) {
+    sched += P.halfTurnAim || 0;
+  }
   const temp2 = Math.max(0, state.temp - 50 + (skill.tempAfter || 0));
   const per = act.targets.map((i) => hitOutcome(act.skill, state.temp, effect.multiplier, i, state.values[i], pCrit));
   // はみ出しは盤面全体の即死。温度に余裕があるうちは高リスクな一撃を禁止する。
@@ -1481,6 +1932,14 @@ function evalAction(state, act) {
     projValues[i] = o.belowP > 0.5 ? Math.round(o.belowAvg) : ZONES[i][0];
     if (o.snapP > 0.5) projCrits[i] = true;
   });
+  const projectedUnreached = unreachedIndices({ values: projValues, crits: projCrits }).length;
+  // 一手後に通常の「たたく」すら撃てないのに未到達を残す手は、確率評価に
+  // 関係なく詰み。ユーザー報告の「2マス残り→ねらい→残り1マス未達」をここで遮断する。
+  if (focusAfter < SKILLS.tataku.cost && projectedUnreached > 0) return -Infinity;
+  // 未到達が複数ある局面では「最後の1枚だけ」ではなく、各マスに最低1回の
+  // たたくを残す。0なら従来互換、5なら1マス5集中力を硬く予約する。
+  if (P.hardReachReservePerCell > 0
+      && focusAfter < projectedUnreached * P.hardReachReservePerCell) return -Infinity;
   const need = needFocusFor(projValues, projCrits, temp2);
   if (!isFinite(need)) return -2000;
   const needT = needTempFor(projValues, projCrits, temp2);
@@ -1517,6 +1976,13 @@ function evalAction(state, act) {
   if (tempSlack < 0) v -= (-tempSlack / 50) * P.wTempShort;
   v -= skill.cost * P.costWeight;
   v += bandScoreOf(projValues, projCrits, temp2);
+  // 7幅は中央へ収め、単体ねらいの集中力は誤差4になり得る11幅へ優先配分する。
+  if (skill.aimed && act.targets.length === 1 && !PRIORITY[act.targets[0]]) {
+    v -= P.narrowAimPenalty || 0;
+  }
+  if (skill.aimed && act.targets.length === 1 && PRIORITY[act.targets[0]]) {
+    v += P.wideAimBonus || 0;
+  }
   // 必殺チャージ中は、確定会心で止める予定のマスを成功範囲へ入れてしまわない
   if (state.hepaCharged && !state.hepaActive && P.hepaHoldBack) {
     const fireT = state.temp - (state.temp - 50) % 400 - 400 + 50;
@@ -1636,8 +2102,7 @@ function recommend(state) {
   const ranked = searchedMoves(state), best = ranked[0];
   const stopP = greatChance(state.values, state.crits);
   const forcedStop = state.focus < SKILLS.tataku.cost || state.temp <= 0;
-  const confidentStop = best && stopP != null && stopP >= best.prob
-    && (stopP >= 0.70 || state.focus < SKILLS.nerai.cost || state.temp <= 200);
+  const confidentStop = best && stopP != null && stopP >= best.prob;
   if (!best || forcedStop || confidentStop)
     return { skill: "finish", targets: [], reason: "現在の大成功確率が、3～5手探索で見つかった続行ルート以上のためしあげる" };
   return best.action;
@@ -1645,7 +2110,11 @@ function recommend(state) {
 
 
 
-  Object.assign(P, {"wFocusShort": 15, "effDamage": 5.2, "finishCost": 7, "aimCost": 16, "aimSnap": 0.434, "baseSnapFuture": 0.04, "costWeight": 0.5, "bandBonus": 26, "bandPriority": 2.4, "offSchedule": 55, "doubleTurnAim": 15, "doubleTurnWaste": 10, "minSnapP": 0.18, "hepaHold": 0, "aimHitCost": 20, "maxShots": 2.5, "effRatio": 0.68, "arriveDouble": 8, "arriveHalf": 6, "fineGap": 14, "tekagenPenalty": 12, "hepaReady": 40, "forceCho4": true, "hepaHitValue": 400, "reachMid": -200, "reachGap": 0, "reachSpread": 14, "smartHeatTarget": false, "maxFailP": 0.1, "maxFailPLate": 0.34, "riskTempFloor": 350, "riskFocusFloor": 26, "arriveAim": 55, "pairMaxFail": 0.06, "pairSnapMin": 0.3, "hepaOffBeat": 600, "arriveHepa": 60, "hepaHoldBack": 0, "chargeValue": 0, "hepaBoost": 0, "wTempShort": 400, "hitsPerAction": 1.2});
+  Object.assign(P, {"wFocusShort": 15, "effDamage": 5.2, "finishCost": 7, "aimCost": 16, "aimSnap": 0.434, "baseSnapFuture": 0.04, "costWeight": 0.5, "bandBonus": 26, "bandPriority": 2.4, "offSchedule": 55, "doubleTurnAim": 15, "doubleTurnWaste": 10, "minSnapP": 0.18, "hepaHold": 0, "aimHitCost": 20, "maxShots": 2.5, "effRatio": 0.68, "arriveDouble": 8, "arriveHalf": 6, "fineGap": 14, "tekagenPenalty": 12, "hepaReady": 40, "forceCho4": true, "hepaHitValue": 400, "reachMid": -200, "reachGap": 0, "reachSpread": 14, "smartHeatTarget": false, "maxFailP": 0.1, "maxFailPLate": 0.34, "riskTempFloor": 350, "riskFocusFloor": 26, "arriveAim": 55, "pairMaxFail": 0.06, "pairSnapMin": 0.3, "hepaOffBeat": 600, "arriveHepa": 60, "hepaHoldBack": 0, "chargeValue": 0, "hepaBoost": 0, "wTempShort": 400, "hitsPerAction": 1.2,
+    "structuredSchedule": true, "scheduleFocusWeight": 2, "schedulePairBias": 0.2,
+    "scheduleRetryValue": 0.8, "narrowAimPenalty": 35, "wideAimBonus": 30,
+    "monteCarloEndgame": true, "monteCarloSamples": 24, "monteCarloTemp": 750,
+    "monteCarloRoots": 5, "monteCarloExactFinish": true, "hardReachReservePerCell": 5});
 
   function simulateOne(options) {
     const o = options || {};
@@ -1792,13 +2261,19 @@ function recommend(state) {
       const crit = uniq(raws.map((r) => v + r * 2).filter((x) => x <= hi || v + 1 > hi));
       // 実機に表示されるダメージ値の候補を、通常／会心すり抜け／本会心の3種類に分けて作る
       const dmgNormal = uniq(raws);
-      const dmgCrit = uniq(raws.map((r) => r * 2).filter((dd) => v + dd < lo));
+      // 成功範囲内へ入る2倍ダメージでも、隠れ基準値がその先なら本会心ではない。
+      // 最高値未満に止まる2倍値は「通常の会心」と「本会心」の両方があり得るため、
+      // 数字だけで本会心と決め打ちしない。
+      const dmgCrit = uniq(raws.map((r) => r * 2).filter((dd) => v + dd < hi));
       const dmgSnap = [];
       const snapLo = Math.max(lo, v + 1), snapHi = Math.min(hi, v + 2 * rawMax);
       for (let dd = snapLo - v; dd <= snapHi - v; dd++) if (dd > 0) dmgSnap.push(dd);
+      // すでに隠れ基準値へ届いているマスへの会心は、変化0になる可能性がある。
+      const dmgZero = v >= lo && v <= hi ? [0] : [];
+      if (dmgZero.length) dmgSnap.unshift(0); // 正の打撃で変化0なら、すでに基準値に止まっている
       return { idx: i, letter: LETTERS[i], before: v, zone: [lo, hi],
         normal, crit, snapRange: snapLo <= snapHi ? [snapLo, snapHi] : null,
-        dmgNormal, dmgCrit, dmgSnap, rawMin, rawMax };
+        dmgNormal, dmgCrit, dmgSnap, dmgZero, rawMin, rawMax };
     });
   }
   function actionLabel(a) {
@@ -1809,7 +2284,7 @@ function recommend(state) {
     return name + t;
   }
   return { LETTERS, ZONES, GREAT_TOLERANCE, PRIORITY, SKILLS, DEFAULT_CFG,
-    VERTICAL_PAIRS, FIXED, FIXED_ROUTES, DEFAULT_AUTO_ROUTE, routeById, fixedFor, fixedLength,
+    VERTICAL_PAIRS, HORIZONTAL_PAIRS, DIAGONAL_PAIRS, FIXED, FIXED_ROUTES, DEFAULT_AUTO_ROUTE, routeById, fixedFor, fixedLength,
     calcDamage, turnEffect, createState, cloneState,
     applyAction, recommend, resolveTargets, grade, simulateOne, benchmark, snapLimit, hepaPlan,
     benchmarkRoutes, futureGreatProb, searchDepthFor,
@@ -1826,18 +2301,26 @@ function recommend(state) {
 
   // 鉱石グリッドのパネル内相対位置。
   // 四隅をどこに置いたかで大きく変わるので、実行時に校正して差し替えられるようにする。
-  const GRID = [0.353, 0.204, 0.663, 0.842];
+  const DEFAULT_GRID = Object.freeze([0.353, 0.204, 0.663, 0.842]);
+  const GRID = DEFAULT_GRID.slice();
   // 3桁のダメージはマスの幅より広く、右端の列では枠の外へはみ出す。
   // 切り出しはひとまわり大きく取り、どのマスの数字かは中心位置で決める。
   const PAD_U = 0.018, PAD_V = 0.022;
   const EGRID = [GRID[0] - PAD_U, GRID[1] - PAD_V, GRID[2] + PAD_U, GRID[3] + PAD_V];
+  function validGrid(g) {
+    if (!Array.isArray(g) || g.length !== 4 || g.some((x) => typeof x !== "number" || !Number.isFinite(x))) return false;
+    const [x0, y0, x1, y1] = g, w = x1 - x0, h = y1 - y0;
+    return x0 >= PAD_U && y0 >= PAD_V && x1 <= 1 - PAD_U && y1 <= 1 - PAD_V
+      && w >= 0.08 && w <= 0.80 && h >= 0.18 && h <= 0.95;
+  }
   function setGrid(g) {
-    if (!g || g.length !== 4) return false;
+    if (!validGrid(g)) return false;
     for (let k = 0; k < 4; k++) GRID[k] = g[k];
     EGRID[0] = GRID[0] - PAD_U; EGRID[1] = GRID[1] - PAD_V;
     EGRID[2] = GRID[2] + PAD_U; EGRID[3] = GRID[3] + PAD_V;
     return true;
   }
+  function resetGrid() { return setGrid(DEFAULT_GRID.slice()); }
   const LETTERS = ["A", "B", "C", "D", "E", "F"];
   const CW = 16, CH = 24;
 
@@ -1951,21 +2434,32 @@ function recommend(state) {
     return out;
   }
 
+  // 同じフレーム・同じマスを通常→緩和→最緩和と読み直す際、画素切り出しと
+  // 局所平均フィルタまで3回作り直していた。フレームオブジェクト単位で前処理を共有する。
+  const scanPrepCache = new WeakMap();
   function scanCell(panel, i, minDigits, relaxed, stats, loose, wantLens) {
-    const W = panel.width, H = panel.height, d = panel.data;
-    const b0 = cellBox(i, W, H, !!panel.isGrid);
-    // 走査だけ左右に広げ、隣のマスの数字は中心位置で除外する
-    const exX = (b0.x1 - b0.x0) * 0.34, exY = (b0.y1 - b0.y0) * 0.12;
-    const b = { x0: Math.max(0, Math.round(b0.x0 - exX)), y0: Math.max(0, Math.round(b0.y0 - exY)),
-                x1: Math.min(W, Math.round(b0.x1 + exX)), y1: Math.min(H, Math.round(b0.y1 + exY)) };
-    const cw = b.x1 - b.x0, ch = b.y1 - b.y0;
-    if (cw < 20 || ch < 20) return [];
-    const G = new Float32Array(cw * ch), B = new Float32Array(cw * ch);
-    for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) {
-      const s = ((b.y0 + y) * W + b.x0 + x) * 4;
-      G[y * cw + x] = d[s + 1]; B[y * cw + x] = d[s + 2];
+    let perCell = scanPrepCache.get(panel);
+    if (!perCell) { perCell = []; scanPrepCache.set(panel, perCell); }
+    const prepSig = panel.width + "|" + panel.height + "|" + (!!panel.isGrid) + "|" + GRID.join(",");
+    let prep = perCell[i];
+    if (!prep || prep.sig !== prepSig) {
+      const W0 = panel.width, H0 = panel.height, d = panel.data;
+      const b00 = cellBox(i, W0, H0, !!panel.isGrid);
+      // 走査だけ左右に広げ、隣のマスの数字は中心位置で除外する
+      const exX = (b00.x1 - b00.x0) * 0.34, exY = (b00.y1 - b00.y0) * 0.12;
+      const bb = { x0: Math.max(0, Math.round(b00.x0 - exX)), y0: Math.max(0, Math.round(b00.y0 - exY)),
+                   x1: Math.min(W0, Math.round(b00.x1 + exX)), y1: Math.min(H0, Math.round(b00.y1 + exY)) };
+      const cw0 = bb.x1 - bb.x0, ch0 = bb.y1 - bb.y0;
+      if (cw0 < 20 || ch0 < 20) return [];
+      const GG = new Float32Array(cw0 * ch0), BB = new Float32Array(cw0 * ch0);
+      for (let y = 0; y < ch0; y++) for (let x = 0; x < cw0; x++) {
+        const s = ((bb.y0 + y) * W0 + bb.x0 + x) * 4;
+        GG[y * cw0 + x] = d[s + 1]; BB[y * cw0 + x] = d[s + 2];
+      }
+      prep = perCell[i] = { sig: prepSig, W: W0, H: H0, b0: b00, b: bb, cw: cw0, ch: ch0,
+        G: GG, B: BB, loc: boxBlur(GG, cw0, ch0, Math.max(4, Math.round(ch0 * 0.18))) };
     }
-    const loc = boxBlur(G, cw, ch, Math.max(4, Math.round(ch * 0.18)));
+    const { W, H, b0, b, cw, ch, G, B, loc } = prep;
     const mask = new Uint8Array(cw * ch);
     // 高温だと板全体が発光して明るくなる。絶対差でしきい値を切ると、
     // 明るい場面ほど数字を取りこぼす。局所平均に対する「割合」で切ると
@@ -2129,8 +2623,9 @@ function recommend(state) {
       const out = [];
       for (const g of groups) {
         if (g.length < (minDigits || CFG.minDigits) || g.length > 4) { if (stats) stats.badCount++; continue; }
-        const x = g[0].x, y = Math.min.apply(null, g.map((o) => o.y));
-        const wdt = g[g.length - 1].x + g[g.length - 1].w - x, hgt = Math.max.apply(null, g.map((o) => o.h));
+        const x = Math.min.apply(null, g.map((o) => o.x)), y = Math.min.apply(null, g.map((o) => o.y));
+        const wdt = Math.max.apply(null, g.map((o) => o.x + o.w)) - x;
+        const hgt = Math.max.apply(null, g.map((o) => o.y + o.h)) - y;
         // 輪郭の強さ（鉱石の模様は勾配が緩い）
         let edge = 0, cnt = 0;
         for (let yy = Math.max(1, y - 4); yy < Math.min(ch - 1, y + hgt + 4); yy++)
@@ -2470,25 +2965,48 @@ function recommend(state) {
     return [p1.x - p0.x + g * p1.x, p3.x - p0.x + h * p3.x, p0.x,
             p1.y - p0.y + g * p1.y, p3.y - p0.y + h * p3.y, p0.y, g, h, 1];
   }
-  // 鉱石グリッドの範囲だけを等倍で切り出す（全パネルを変換するより4〜5倍軽い）
-  function rectifyGrid(src, corners) {
-    const M = homography(corners), out = new Uint8ClampedArray(GW * GH * 4);
-    const sw = src.width, sh = src.height, sd = src.data;
-    for (let y = 0; y < GH; y++) {
-      const v = EGRID[1] + (EGRID[3] - EGRID[1]) * (y + 0.5) / GH;
-      for (let x = 0; x < GW; x++) {
-        const u = EGRID[0] + (EGRID[2] - EGRID[0]) * (x + 0.5) / GW;
+  // 四隅と解像度が同じあいだは、出力画素→入力画素の対応表を使い回す。
+  // 射影式を約18万画素×毎フレーム計算していた負荷を、単純な画素コピーへ落とす。
+  const rectifyCache = { grid: null, panel: null };
+  function rectifyMap(src, corners, outW, outH, region, cacheName) {
+    const sw = src.width, sh = src.height;
+    const key = [sw, sh, outW, outH].concat(region, corners.flatMap((p) => [p.x, p.y])).join("|");
+    const old = rectifyCache[cacheName];
+    if (old && old.key === key) return old.map;
+    const M = homography(corners), map = new Int32Array(outW * outH).fill(-1);
+    for (let y = 0; y < outH; y++) {
+      const v = region[1] + (region[3] - region[1]) * (y + 0.5) / outH;
+      for (let x = 0; x < outW; x++) {
+        const u = region[0] + (region[2] - region[0]) * (x + 0.5) / outW;
         const d = M[6] * u + M[7] * v + M[8];
+        if (!Number.isFinite(d) || Math.abs(d) < 1e-9) continue;
         const sx = Math.round((M[0] * u + M[1] * v + M[2]) / d);
         const sy = Math.round((M[3] * u + M[4] * v + M[5]) / d);
-        const o = (y * GW + x) * 4;
-        if (sx >= 0 && sy >= 0 && sx < sw && sy < sh) {
-          const i = (sy * sw + sx) * 4;
-          out[o] = sd[i]; out[o + 1] = sd[i + 1]; out[o + 2] = sd[i + 2]; out[o + 3] = 255;
-        } else out[o + 3] = 255;
+        if (sx >= 0 && sy >= 0 && sx < sw && sy < sh) map[y * outW + x] = (sy * sw + sx) * 4;
       }
     }
-    return { width: GW, height: GH, data: out, isGrid: true };
+    rectifyCache[cacheName] = { key, map };
+    return map;
+  }
+  function rectifyTo(src, corners, outW, outH, region, cacheName) {
+    const map = rectifyMap(src, corners, outW, outH, region, cacheName);
+    const out = new Uint8ClampedArray(outW * outH * 4), sd = src.data;
+    for (let p = 0; p < map.length; p++) {
+      const o = p * 4, i = map[p];
+      if (i >= 0) { out[o] = sd[i]; out[o + 1] = sd[i + 1]; out[o + 2] = sd[i + 2]; }
+      out[o + 3] = 255;
+    }
+    return out;
+  }
+  // 鉱石グリッドの範囲だけを等倍で切り出す（通常の30fps監視用）。
+  function rectifyGrid(src, corners) {
+    return { width: GW, height: GH, data: rectifyTo(src, corners, GW, GH, EGRID, "grid"),
+      isGrid: true, sourceRegion: EGRID.slice() };
+  }
+  // 校正時だけ板全体を切り出す。数字位置をパネル全体の0〜1座標で測るために使う。
+  function rectifyPanel(src, corners) {
+    return { width: PW, height: PH, data: rectifyTo(src, corners, PW, PH, [0, 0, 1, 1], "panel"),
+      isPanel: true, sourceRegion: [0, 0, 1, 1] };
   }
   // 学習済みテンプレート（実機映像から作成）を読み込む
   // どの数字とどの数字が似ているかを、辞書そのものから測っておく。
@@ -2503,6 +3021,11 @@ function recommend(state) {
       if (mx >= CONFUSE_AT) { set[a + "-" + b] = true; set[b + "-" + a] = true; }
     }
     confusePairs = set;
+  }
+  function refreshStore(store) {
+    storeGen++;
+    buildConfuse(store);
+    return store;
   }
   // 2つの数値が「1桁だけ、しかも紛らわしい組で」違うか
   function confusable(a, b) {
@@ -2560,9 +3083,9 @@ function recommend(state) {
       method: "leave-one-out", threshold: MIN_DIGIT };
   }
 
-  return { GRID, EGRID, confusable, LETTERS, CFG, PW, PH, GW, GH, CW, CH, cellBox, scanCell, createStore, learn, readGroup, scoreText,
-    normalize, dot, bestFree, digitScore, readAll, probe, rectifyGrid, homography, loadStore, evaluateStore,
-    MIN_GROUP, MIN_GROUP_ONE, setGrid, scanPanel, PAD_U, PAD_V,
+  return { DEFAULT_GRID, GRID, EGRID, confusable, LETTERS, CFG, PW, PH, GW, GH, CW, CH, cellBox, scanCell, createStore, learn, readGroup, scoreText,
+    normalize, dot, bestFree, digitScore, readAll, probe, rectifyGrid, rectifyPanel, homography, loadStore, refreshStore, evaluateStore,
+    MIN_GROUP, MIN_GROUP_ONE, validGrid, setGrid, resetGrid, scanPanel, PAD_U, PAD_V,
     newStats: () => ({ blobs: 0, hRatio: [], tooTall: 0, tooShort: 0, tooWide: 0, tooThin: 0, atEdge: 0,
       tooSparse: 0, groups: 0, groupSizes: [], badCount: 0, weakEdge: 0, otherCell: 0, hMinRatio: 0, hMaxRatio: 0 }) };
 });
@@ -2581,13 +3104,16 @@ function recommend(state) {
     reader: null, lastTickAt: 0, lastMediaTime: -1, gapMax: 0, gapSince: 0, hiddenMs: 0, diag: {},
     learned: [], learningReady: false, dbPromise: null,
     readIdx: {}, off: {}, lock: {}, cleared: {}, epoch: {}, readEpoch: {}, emptyRun: {},
-    diag: {}, hit: {}, scanFrames: 0, probe: {},
+    hit: {}, scanFrames: 0, probe: {}, watchToken: "", preEmpty: {}, ready: {},
+    frameErrors: 0, frameErrorAt: 0,
     tape: [], tapeFrozen: false, tapeW: 0, tapeH: 0
   };
   window.ForgeCam = cam;
   cam.__tickOnce = function (grid) { cam.__testGrid = grid; try { tick(); } finally { cam.__testGrid = null; } };
 
   const LEARN_DB = "forge.ocr.learning.v1", LEARN_STORE = "samples", MAX_ACTIVE_PER_DIGIT = 40;
+  const MAX_STORED_SAMPLES = 500, MAX_IMPORT_SAMPLES = 500, MAX_IMPORT_BYTES = 25 * 1024 * 1024;
+  const VECTOR_LEN = V.CW * V.CH;
 
   function status(t) { const el = $("#camStatus"); if (el) el.textContent = t; }
   function reason(kind, title, detail) {
@@ -2610,7 +3136,7 @@ function recommend(state) {
         if (!req.result.objectStoreNames.contains(LEARN_STORE)) req.result.createObjectStore(LEARN_STORE, { keyPath: "id" });
       };
       req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error || new Error("学習データを開けません"));
+      req.onerror = () => { cam.dbPromise = null; reject(req.error || new Error("学習データを開けません")); };
     });
     return cam.dbPromise;
   }
@@ -2636,28 +3162,119 @@ function recommend(state) {
       tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
     });
   }
+  async function dbDeleteMany(ids) {
+    if (!ids.length) return;
+    const db = await openLearningDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(LEARN_STORE, "readwrite"), store = tx.objectStore(LEARN_STORE);
+      ids.forEach((id) => store.delete(id));
+      tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); tx.onabort = () => reject(tx.error);
+    });
+  }
+  async function boundedRecords() {
+    const records = await dbRecords();
+    records.sort((a, b) => String(b.confirmedAt || b.createdAt || "").localeCompare(String(a.confirmedAt || a.createdAt || "")));
+    if (records.length > MAX_STORED_SAMPLES) {
+      await dbDeleteMany(records.slice(MAX_STORED_SAMPLES).map((r) => r.id));
+      records.length = MAX_STORED_SAMPLES;
+    }
+    return records;
+  }
+
+  function flatVector(raw) {
+    let a = null;
+    if (ArrayBuffer.isView(raw)) a = Array.from(raw);
+    else if (Array.isArray(raw) && raw.length === VECTOR_LEN
+      && raw.every((x) => typeof x === "number" || typeof x === "string")) a = raw.slice();
+    else if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+      a = Array.from({ length: VECTOR_LEN }, (_, i) => raw[i]);
+    }
+    if (!a || a.length !== VECTOR_LEN) return null;
+    a = a.map(Number);
+    if (a.some((x) => !Number.isFinite(x))) return null;
+    let mean = 0; for (const x of a) mean += x; mean /= a.length;
+    let norm = 0; for (let i = 0; i < a.length; i++) { a[i] -= mean; norm += a[i] * a[i]; }
+    norm = Math.sqrt(norm);
+    if (!Number.isFinite(norm) || norm < 1e-6) return null;
+    for (let i = 0; i < a.length; i++) a[i] /= norm;
+    return a;
+  }
+  function vectorVariants(raw) {
+    const direct = flatVector(raw);
+    if (direct) return [direct];
+    if (!Array.isArray(raw)) return [];
+    return raw.map(flatVector).filter(Boolean);
+  }
+  function canonicalVector(raw, digit) {
+    const vars = vectorVariants(raw);
+    if (!vars.length) return null;
+    const templates = cam.store && cam.store[digit] ? cam.store[digit] : [];
+    let best = vars[0], bestScore = -Infinity;
+    for (const v of vars) {
+      let score = templates.length ? -Infinity : 0;
+      for (const t of templates) score = Math.max(score, V.dot(v, t));
+      if (score > bestScore) { best = v; bestScore = score; }
+    }
+    return { vec: best, score: bestScore };
+  }
+  function canonicalVectors(rawVecs, truth) {
+    if (!Array.isArray(rawVecs) || truth.length !== rawVecs.length) return null;
+    const out = [];
+    for (let i = 0; i < truth.length; i++) {
+      const picked = canonicalVector(rawVecs[i], +truth[i]);
+      if (!picked) return null;
+      out.push(picked);
+    }
+    return out;
+  }
+  function importedVectorsSafe(packed, truth) {
+    if (!packed || packed.length !== truth.length) return false;
+    for (let i = 0; i < packed.length; i++) {
+      const own = packed[i].score;
+      if (!Number.isFinite(own) || own < 0.40) return false;
+      let wrong = -Infinity;
+      for (let d = 0; d <= 9; d++) if (d !== +truth[i])
+        for (const t of (cam.store[d] || [])) wrong = Math.max(wrong, V.dot(packed[i].vec, t));
+      // 別の数字のほうが明確に近いラベルは、max照合を汚染するので取り込まない。
+      if (wrong > own + 0.02) return false;
+    }
+    return true;
+  }
+  // テストと移行確認用の副作用なしAPI。返すのは必ず「1桁につき384要素」の平坦配列。
+  cam.__normalizeLearningVectors = function (rawVecs, truth) {
+    truth = String(truth || "");
+    const packed = canonicalVectors(rawVecs, truth);
+    return packed ? packed.map((x) => x.vec.slice()) : null;
+  };
+  cam.__isSafeImportedLearning = function (rawVecs, truth) {
+    truth = String(truth || "");
+    return importedVectorsSafe(canonicalVectors(rawVecs, truth), truth);
+  };
   function rebuildLearnedStore() {
     cam.store = V.loadStore(window.FORGE_TEMPLATES || {});
     const perDigit = Array.from({ length: 10 }, () => []);
     const ordered = cam.learned.slice().sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
     for (const r of ordered) {
-      const truth = String(r.truth || ""), vecs = r.vecs || [];
-      if (!/^\d+$/.test(truth) || truth.length !== vecs.length) continue;
-      for (let i = 0; i < truth.length; i++) if (Array.isArray(vecs[i]) && vecs[i].length === V.CW * V.CH)
-        perDigit[+truth[i]].push(vecs[i]);
+      const truth = String(r.truth || ""), packed = /^\d{1,4}$/.test(truth) ? canonicalVectors(r.vecs || [], truth) : null;
+      r.trainable = !!packed && (r.origin !== "imported" || importedVectorsSafe(packed, truth));
+      if (!r.trainable) continue;
+      r.vecs = packed.map((x) => x.vec);
+      for (let i = 0; i < truth.length; i++) perDigit[+truth[i]].push(r.vecs[i]);
     }
     for (let d = 0; d <= 9; d++) for (const v of perDigit[d].slice(-MAX_ACTIVE_PER_DIGIT)) cam.store[d].push(v);
+    V.refreshStore(cam.store);
     cam.votes = {};
   }
   function updateLearnSummary() {
     const el = $("#ocrLearnSummary"); if (!el) return;
     const usable = cam.learned.filter((r) => r.trainable).length;
-    const counts = Array.from({ length: 10 }, (_, d) => cam.learned.filter((r) => String(r.truth || "").includes(String(d)) && r.trainable).length);
+    const counts = new Array(10).fill(0);
+    for (const r of cam.learned) if (r.trainable) for (const ch of String(r.truth || "")) counts[+ch]++;
     el.textContent = `確認済み ${cam.learned.length}枚（識別学習に使用可能 ${usable}枚）・数字別 ${counts.map((n, d) => d + ":" + n).join(" / ")}。判定には各数字の新しい40例まで使用します。`;
   }
   async function loadLearning() {
     try {
-      cam.learned = await dbRecords(); rebuildLearnedStore(); cam.learningReady = true; updateLearnSummary();
+      cam.learned = await boundedRecords(); rebuildLearnedStore(); cam.learningReady = true; updateLearnSummary();
     } catch (e) {
       cam.learningReady = false; updateLearnSummary();
       notice("学習データの保存領域を開けませんでした。OCR自体は利用できます。");
@@ -2681,6 +3298,16 @@ function recommend(state) {
     if (cam.timer) { clearInterval(cam.timer); cam.timer = null; }
   }
 
+  function frameError(where, err) {
+    cam.frameErrors = (cam.frameErrors || 0) + 1;
+    const now = Date.now();
+    if (now - (cam.frameErrorAt || 0) < 3000) return;
+    cam.frameErrorAt = now;
+    const name = err && (err.name || err.message) ? (err.name || err.message) : "不明";
+    status(`OCRフレーム処理エラー（${where}: ${name}）— 自動復帰を試しています`);
+    reason("warning", "映像処理を再試行", "一時的にフレームを処理できませんでした。取り込みは停止せず、次のフレームで再試行します。");
+  }
+
   // requestVideoFrameCallback は「映像が画面に描かれるとき」しか発火しない。
   // ドラクエ10を全画面にしてブラウザが完全に隠れると、Chrome はそのタブを
   // 非表示とみなして描画を止めるため、コールバックも一緒に止まる（=無反応の主因）。
@@ -2695,19 +3322,26 @@ function recommend(state) {
     (async () => {
       while (cam.stream && cam.reader === reader) {
         let res;
-        try { res = await reader.read(); } catch (e) { break; }
+        try { res = await reader.read(); } catch (e) { frameError("track", e); break; }
         if (res.done) break;
         const frame = res.value;
-        try { tick(frame); } catch (e) {} finally { try { frame.close(); } catch (e) {} }
+        try { tick(frame); } catch (e) { frameError("track-frame", e); } finally { try { frame.close(); } catch (e) {} }
       }
       try { reader.releaseLock(); } catch (e) {}
-      if (cam.reader === reader) cam.reader = null;
+      if (cam.reader === reader) {
+        cam.reader = null;
+        if (cam.stream) {
+          cam.frameMode = "timer";
+          status("トラック直結処理が終了したため、映像タイマー方式へ自動で切り替えました。");
+        }
+      }
     })();
     return true;
   }
 
   function startFrameLoop() {
     stopFrameLoop();
+    cam.frameMode = "timer";
     cam.lastTickAt = performance.now(); cam.lastMediaTime = -1;
     const track = cam.stream ? cam.stream.getVideoTracks()[0] : null;
     let started = false;
@@ -2718,22 +3352,21 @@ function recommend(state) {
         if (!cam.stream) { cam.frameRequest = null; return; }
         // コールバックは新しい映像フレームが届いたときだけ発火する。
         // 同じ静止フレームを複数票として数えず、処理後に次の1枚を要求する。
-        tick();
-        if (cam.stream) cam.frameRequest = cam.video.requestVideoFrameCallback(next);
+        try { tick(); } catch (e) { frameError("video-frame", e); }
+        finally { if (cam.stream) cam.frameRequest = cam.video.requestVideoFrameCallback(next); }
       };
       cam.frameRequest = cam.video.requestVideoFrameCallback(next);
     }
     // 保険のタイマー。上の経路が止まったときだけ動く。
     // 同じ静止フレームを二重に票へ数えないよう currentTime で重複を弾く。
-    if (cam.frameMode !== "track-processor") {
-      cam.timer = setInterval(() => {
-        if (!cam.stream || !cam.video) return;
-        if (performance.now() - cam.lastTickAt < 40) return;
-        const mt = cam.video.currentTime;
-        if (mt === cam.lastMediaTime) return;
-        tick();
-      }, 16);
-    }
+    cam.timer = setInterval(() => {
+      if (!cam.stream || !cam.video) return;
+      // Processor / rVFC が正常なら触らず、止まった場合だけ video から救済する。
+      if (performance.now() - cam.lastTickAt < 80) return;
+      const mt = cam.video.currentTime;
+      if (mt === cam.lastMediaTime) return;
+      try { tick(); } catch (e) { frameError("timer", e); }
+    }, 33);
   }
 
   cam.start = async function () {
@@ -2760,8 +3393,9 @@ function recommend(state) {
       const tr = cam.stream.getVideoTracks()[0];
       if (tr) tr.addEventListener("ended", () => { cam.stop(); notice("画面の取り込みが終了しました。もう一度「画面を取り込む」を押してください。"); });
       notice("");
+      if (!validCorners(cam.corners, vw(), vh())) cam.corners = null;
       const hadSaved = cam.corners ? true : loadCorners();
-      if (!cam.corners) defaultCorners();
+      if (!validCorners(cam.corners, vw(), vh())) defaultCorners();
       draw();
       // 記憶がない初回だけ、板を探して自動で合わせる
       if (!hadSaved) setTimeout(() => { if (cam.stream) cam.autoAlign(true); }, 500);
@@ -2771,6 +3405,10 @@ function recommend(state) {
       reason("waiting", "OCR待機", "とくぎ実行後、対象マスを30fpsで監視します。");
       return true;
     } catch (e) {
+      stopFrameLoop();
+      try { if (cam.stream) cam.stream.getTracks().forEach((t) => t.stop()); } catch (_) {}
+      cam.stream = null;
+      if (cam.video) cam.video.srcObject = null;
       const name = e && e.name ? e.name : "不明";
       notice(name === "NotAllowedError"
         ? "取り込みがキャンセルされました。候補タップでも入力できます。"
@@ -2784,9 +3422,11 @@ function recommend(state) {
     cam.targets = [];
     cam.lock = {}; cam.off = {}; cam.readIdx = {}; cam.cleared = {};
     cam.epoch = {}; cam.readEpoch = {}; cam.emptyRun = {};
+    cam.watchToken = ""; cam.preEmpty = {}; cam.ready = {};
     cam.measuredFps = 0; cam.fpsFrames = 0; cam.fpsStarted = 0;
     stopFrameLoop();
     if (cam.stream) { cam.stream.getTracks().forEach((t) => t.stop()); cam.stream = null; }
+    if (cam.video) cam.video.srcObject = null;
     $("#camPanel").hidden = true;
     const btn = $("#camOpen");
     if (btn) btn.textContent = "画面を取り込む";
@@ -2799,11 +3439,28 @@ function recommend(state) {
   }
   // 画面取り込みではウィンドウ位置が固定なので、合わせた四隅を覚えて次回に使う
   const CORNER_KEY = "forge.corners.v1";
+  function validCorners(c, w, h) {
+    if (!Array.isArray(c) || c.length !== 4 || !w || !h) return false;
+    if (c.some((p) => !p || !Number.isFinite(+p.x) || !Number.isFinite(+p.y)
+      || p.x < 0 || p.y < 0 || p.x > w || p.y > h)) return false;
+    const cross = [];
+    for (let i = 0; i < 4; i++) {
+      const a = c[i], b = c[(i + 1) % 4], d = c[(i + 2) % 4];
+      cross.push((b.x - a.x) * (d.y - b.y) - (b.y - a.y) * (d.x - b.x));
+      if (Math.hypot(b.x - a.x, b.y - a.y) < Math.min(w, h) * 0.04) return false;
+    }
+    // 順序は TL→TR→BR→BL 固定。逆順も凸形ではあるが、左右上下が反転して別マスを読む。
+    if (!cross.every((x) => x > 0)) return false;
+    let area = 0;
+    for (let i = 0; i < 4; i++) area += c[i].x * c[(i + 1) % 4].y - c[(i + 1) % 4].x * c[i].y;
+    return Math.abs(area) / 2 >= w * h * 0.005;
+  }
   function saveCorners() {
-    if (!cam.corners) return;
+    if (!validCorners(cam.corners, vw(), vh())) return false;
     try {
       localStorage.setItem(CORNER_KEY, JSON.stringify({ w: vw(), h: vh(), c: cam.corners }));
-    } catch (e) {}
+      return true;
+    } catch (e) { return false; }
   }
   function loadCorners() {
     try {
@@ -2813,7 +3470,9 @@ function recommend(state) {
       if (!o || !o.c || o.c.length !== 4 || !o.w || !o.h) return false;
       // 取り込み解像度が違っても比率でそのまま使える
       const sx = vw() / o.w, sy = vh() / o.h;
-      cam.corners = o.c.map((p) => ({ x: p.x * sx, y: p.y * sy }));
+      const mapped = o.c.map((p) => ({ x: +p.x * sx, y: +p.y * sy }));
+      if (!validCorners(mapped, vw(), vh())) return false;
+      cam.corners = mapped;
       return true;
     } catch (e) { return false; }
   }
@@ -2883,7 +3542,13 @@ function recommend(state) {
       if (quiet) status(msg); else notice(msg);
       return false;
     }
-    cam.corners = PANEL_RATIO.map((r) => ({ x: box.x + r[0] * box.w, y: box.y + r[1] * box.h }));
+    const nextCorners = PANEL_RATIO.map((r) => ({ x: box.x + r[0] * box.w, y: box.y + r[1] * box.h }));
+    if (!validCorners(nextCorners, vw(), vh())) {
+      const msg = "板の候補は見つかりましたが、安全な四隅を作れませんでした。丸を手で合わせてください。";
+      if (quiet) status(msg); else notice(msg);
+      return false;
+    }
+    cam.corners = nextCorners;
     saveCorners();
     draw();
     status("枠を自動調整しました。緑のマス目が鉱石の3×2からズレていたら、丸をドラッグして直してください。");
@@ -2950,7 +3615,7 @@ function recommend(state) {
   /* ---------- 四隅ドラッグ ---------- */
   function bindDrag() {
     const ov = $("#camOverlay");
-    let idx = -1;
+    let idx = -1, dragBefore = null;
     // 座標基準は必ず video 要素の矩形（SVGの箱とズレていても正しく変換する）
     const toVideo = (ev) => {
       const r = cam.video.getBoundingClientRect();
@@ -2964,46 +3629,65 @@ function recommend(state) {
       if (bd > (vw() * 0.35) * (vw() * 0.35)) { idx = -1; return; }
       ev.preventDefault();
       try { ov.setPointerCapture(ev.pointerId); } catch (e) {}
-      cam.corners[idx] = p; draw();
+      dragBefore = cam.corners.map((q) => ({ x: q.x, y: q.y }));
+      const next = cam.corners.map((q) => ({ x: q.x, y: q.y })); next[idx] = p;
+      if (validCorners(next, vw(), vh())) cam.corners = next;
+      draw();
     });
     ov.addEventListener("pointermove", (ev) => {
       if (idx < 0) return;
       ev.preventDefault();
-      cam.corners[idx] = toVideo(ev); draw();
+      const next = cam.corners.map((q) => ({ x: q.x, y: q.y })); next[idx] = toVideo(ev);
+      if (validCorners(next, vw(), vh())) cam.corners = next;
+      draw();
     });
     const end = (ev) => {
-      if (idx >= 0) { try { ov.releasePointerCapture(ev.pointerId); } catch (e) {} saveCorners(); }
-      idx = -1;
+      if (idx >= 0) {
+        try { ov.releasePointerCapture(ev.pointerId); } catch (e) {}
+        if (!validCorners(cam.corners, vw(), vh())) {
+          cam.corners = dragBefore;
+          notice("四隅が交差するか範囲が小さすぎるため、直前の位置に戻しました。");
+          draw();
+        } else saveCorners();
+      }
+      idx = -1; dragBefore = null;
     };
     ov.addEventListener("pointerup", end);
     ov.addEventListener("pointercancel", end);
   }
 
   /* ---------- 走査 ---------- */
-  cam.watch = function (targets, onRead) {
+  cam.watch = function (targets, onRead, token) {
     const list = targets || [];
-    const sig = list.map((t) => t.idx + ":" + t.candidates.join(",")).join("|");
+    token = String(token || "legacy");
+    const tokenChanged = token !== cam.watchToken;
+    const sig = token + "|" + list.map((t) => t.idx + ":" + t.candidates.join(",")).join("|");
     cam.onRead = onRead;
     if (sig !== cam.sig) {
       // 対象や候補が変わったときだけ投票を作り直す。
       // 同じ対象なら票を持ち越す（複数マス技で票が消えるのを防ぐ）
       const keep = {};
-      for (const t of list) if (cam.votes[t.idx]) keep[t.idx] = cam.votes[t.idx];
+      if (!tokenChanged) for (const t of list) if (cam.votes[t.idx]) keep[t.idx] = cam.votes[t.idx];
       cam.votes = keep; cam.sig = sig;
-      cam.readIdx = {}; cam.off = {}; cam.seen = {}; cam.lowStreak = {}; cam.executedAt = 0; cam.missReported = false; cam.diag = {}; cam.cleared = {};
+      if (tokenChanged) {
+        cam.readIdx = {}; cam.off = {}; cam.seen = {}; cam.lowStreak = {}; cam.executedAt = 0;
+        cam.missReported = false; cam.diag = {}; cam.cleared = {}; cam.preEmpty = {}; cam.ready = {};
+      }
     }
+    cam.watchToken = token;
     cam.targets = list;
     cam.active = list.length > 0;
     if (cam.active) {
       const letters = list.map((t) => t.letter).join("・");
       status(`${letters} のダメージ表示を待っています`);
-      reason("waiting", "監視準備", `${letters} を監視します。「この手を実行した」後から読み取り時間を判定します。`);
+      reason("waiting", "監視準備", `${letters} の古い表示が消え、新しい数字が出るのを待ちます。手動実行時は「この手を実行した」で直ちに開始できます。`);
     }
     draw();
   };
-  cam.unwatch = function () { cam.active = false; cam.targets = []; cam.votes = {}; cam.sig = ""; cam.readIdx = {}; cam.off = {}; cam.executedAt = 0; reason("waiting", "OCR待機", "次の数値入力が必要なときに自動で監視します。"); draw(); };
+  cam.unwatch = function () { cam.active = false; cam.targets = []; cam.votes = {}; cam.sig = ""; cam.watchToken = ""; cam.preEmpty = {}; cam.ready = {}; cam.readIdx = {}; cam.off = {}; cam.executedAt = 0; reason("waiting", "OCR待機", "次の数値入力が必要なときに自動で監視します。"); draw(); };
   cam.markExecuted = function () {
     cam.executedAt = Date.now(); cam.missReported = false; cam.seen = {}; cam.lowStreak = {}; cam.votes = {}; cam.diag = {}; cam.cleared = {};
+    cam.preEmpty = {}; cam.ready = {};
     cam.scanFrames = 0; cam.hit = {}; cam.probe = {};
     cam.tmax = { grab: 0, scan: 0, paint: 0, outside: 0 };
     cam.tape = []; cam.tapeFrozen = false;
@@ -3037,11 +3721,16 @@ function recommend(state) {
     return true;
   }
   cam.restart = async function () {
+    const ow = vw(), oh = vh();
+    const keep = validCorners(cam.corners, ow, oh)
+      ? cam.corners.map((p) => ({ u: p.x / ow, v: p.y / oh })) : null;
     try { if (cam.stream) cam.stream.getTracks().forEach((t) => t.stop()); } catch (e) {}
-    cam.stream = null;
-    const keep = cam.corners;
+    cam.stream = null; cam.corners = null;
     const ok = await cam.start();
-    if (ok && keep) { cam.corners = keep; draw(); }
+    if (ok && keep) {
+      const mapped = keep.map((p) => ({ x: p.u * vw(), y: p.v * vh() }));
+      if (validCorners(mapped, vw(), vh())) { cam.corners = mapped; saveCorners(); draw(); }
+    }
     return ok;
   };
 
@@ -3054,7 +3743,7 @@ function recommend(state) {
   // （1コマ約80KB・72コマで約5.8MB）。
   const TAPE_MAX = 72, TAPE_W = 240;
   function pushTape(grid, note) {
-    if (cam.tapeFrozen) return;
+    if (!cam.active || !cam.executedAt || cam.tapeFrozen) return;
     const tw = TAPE_W, th = Math.max(1, Math.round(grid.height * tw / grid.width));
     const g = new Uint8Array(tw * th), d = grid.data;
     for (let y = 0; y < th; y++) {
@@ -3137,8 +3826,9 @@ function recommend(state) {
   };
 
   cam.calibStart = function (letter) {
-    cam.calib = { active: true, letter: letter, hits: cam.calib.hits || {}, seen: 0 };
-    reason("waiting", "枠の校正", `実機で ${letter} のマスだけを1回たたいてください。数字が出た位置を測ります。`);
+    cam.calib = { active: true, letter: letter, hits: cam.calib.hits || {}, seen: 0,
+      baseline: [], baselineFrames: 0, samples: [] };
+    reason("waiting", "枠の校正", `まず通常画面を2コマ記録します。そのあと実機で ${letter} のマスだけを1回たたいてください。`);
     draw();
   };
   cam.calibCancel = function () {
@@ -3149,7 +3839,9 @@ function recommend(state) {
   cam.calibClear = function () {
     cam.calib = { active: false, letter: null, hits: {}, seen: 0 };
     try { localStorage.removeItem(CAL_KEY); } catch (e) {}
-    notice("校正の記録を消しました。既定の枠に戻すにはページを再読み込みしてください。");
+    V.resetGrid();
+    notice("校正の記録を消し、既定の枠に戻しました。");
+    draw();
   };
 
   // 校正中は板の全体を見て、数字らしいまとまりが出た位置を控える
@@ -3158,21 +3850,32 @@ function recommend(state) {
     if (!c.active || !c.letter) return;
     let gs = [];
     try { gs = V.scanPanel(grid); } catch (e) { return; }
-    if (!gs.length) return;
-    // いちばん画素の多いまとまりを採る（演出の光より数字のほうが濃い）
-    const g = gs.reduce((a, b) => (b.n > a.n ? b : a));
-    const prev = c.hits[c.letter];
-    // 数字は浮き上がるので、最初に見えた位置を採用する
-    if (!prev || prev.pending) {
-      c.hits[c.letter] = { u: g.u, v: g.v, w: g.w, h: g.h, at: Date.now() };
-      c.seen++;
-      c.active = false;
-      const done = Object.keys(c.hits).sort().join("");
-      reason("success", "校正", `${c.letter} の数字を (${g.u.toFixed(3)}, ${g.v.toFixed(3)}) で確認しました。取得済み: ${done}`);
-      const fit = cam.calibFit(true);
-      draw();
-      if (window.onCalibUpdate) window.onCalibUpdate(done, fit);
+    // 常時表示されている温度や集中力を誤採用しないよう、開始直後の2コマを背景として記録する。
+    if ((c.baselineFrames || 0) < 2) {
+      for (const g0 of gs) if (!c.baseline.some((b) => Math.hypot(b.u - g0.u, b.v - g0.v) < 0.025))
+        c.baseline.push({ u: g0.u, v: g0.v, w: g0.w, h: g0.h });
+      c.baselineFrames = (c.baselineFrames || 0) + 1;
+      if (c.baselineFrames === 2 && window.onCalibUpdate) window.onCalibUpdate();
+      return;
     }
+    const fresh = gs.filter((g0) => !c.baseline.some((b) => Math.hypot(b.u - g0.u, b.v - g0.v) < Math.max(0.025, b.h * 0.5)));
+    if (!fresh.length) { c.samples = []; return; }
+    // いちばん画素の多い新規グループを採るが、3コマ連続で同じ位置に出た場合だけ確定する。
+    const g = fresh.reduce((a, b) => (b.n > a.n ? b : a));
+    const last = c.samples[c.samples.length - 1];
+    if (!last || Math.hypot(last.u - g.u, last.v - g.v) < 0.035) c.samples.push(g);
+    else c.samples = [g];
+    if (c.samples.length < 3) return;
+    const avg = (k) => c.samples.reduce((a, q) => a + q[k], 0) / c.samples.length;
+    const hit = { u: avg("u"), v: avg("v"), w: avg("w"), h: avg("h"), at: Date.now() };
+    c.hits[c.letter] = hit;
+    c.seen++;
+    c.active = false;
+    const done = Object.keys(c.hits).sort().join("");
+    reason("success", "校正", `${c.letter} の数字を (${hit.u.toFixed(3)}, ${hit.v.toFixed(3)}) で3コマ確認しました。取得済み: ${done}`);
+    const fit = cam.calibFit(true);
+    draw();
+    if (window.onCalibUpdate) window.onCalibUpdate(done, fit);
   }
 
   // 集めた位置から格子を割り出す。左右の列と上中下の行が1つずつ揃えば計算できる。
@@ -3185,8 +3888,9 @@ function recommend(state) {
     if (cx0 == null || cx1 == null) return { ok: false, why: "左の列(A/C/E)と右の列(B/D/F)から1つずつ必要です" };
     const have = ry.filter((x) => x != null).length;
     if (have < 2) return { ok: false, why: "上段・中段・下段のうち2つ以上必要です" };
-    const cellW = Math.abs(cx1 - cx0);
-    const x0 = Math.min(cx0, cx1) - cellW / 2, x1 = Math.max(cx0, cx1) + cellW / 2;
+    if (!(cx1 > cx0)) return { ok: false, why: "右列の位置が左列より右になっていません" };
+    const cellW = cx1 - cx0;
+    const x0 = cx0 - cellW / 2, x1 = cx1 + cellW / 2;
     // 行は分かっているものから等間隔を当てはめる
     const idx = [], val = [];
     ry.forEach((v, k) => { if (v != null) { idx.push(k); val.push(v); } });
@@ -3195,11 +3899,14 @@ function recommend(state) {
       const span = (val[val.length - 1] - val[0]) / (idx[idx.length - 1] - idx[0]);
       cellH = span; top = val[0] - span * idx[0];
     }
+    if (!Number.isFinite(cellW) || !Number.isFinite(cellH) || cellW < 0.04 || cellW > 0.40 || cellH < 0.04 || cellH > 0.35)
+      return { ok: false, why: "列または行の間隔が不自然です。各マスをもう一度測ってください" };
     const y0 = top - cellH / 2, y1 = top + cellH * 2 + cellH / 2;
-    const g = [x0 + V.PAD_U, y0 + V.PAD_V, x1 - V.PAD_U, y1 - V.PAD_V];
+    const g = [x0, y0, x1, y1];
     for (const q of g) if (!isFinite(q)) return { ok: false, why: "計算できませんでした" };
+    if (!V.validGrid(g)) return { ok: false, why: "計算した6マス範囲が板の外か、広さが不自然です" };
     if (!preview) {
-      V.setGrid(g);
+      if (!V.setGrid(g)) return { ok: false, why: "安全でない校正値のため保存しませんでした" };
       try { localStorage.setItem(CAL_KEY, JSON.stringify(g)); } catch (e) {}
       notice(`枠を校正しました。6マスの範囲を 横 ${x0.toFixed(3)}〜${x1.toFixed(3)} / 縦 ${y0.toFixed(3)}〜${y1.toFixed(3)} に設定しました。`);
       draw();
@@ -3210,7 +3917,7 @@ function recommend(state) {
   function grabGrid(src) {
     const source = src || cam.video;
     const w = (src && src.displayWidth) || vw(), h = (src && src.displayHeight) || vh();
-    if (!w || !h || !cam.corners) return null;
+    if (!w || !h || !validCorners(cam.corners, w, h)) return null;
     const scale = Math.min(1, 1600 / w);
     const xs = cam.corners.map((p) => p.x), ys = cam.corners.map((p) => p.y), pad = 8;
     const x0 = Math.max(0, Math.floor(Math.min.apply(null, xs) - pad));
@@ -3224,7 +3931,11 @@ function recommend(state) {
     cam.ctx.drawImage(source, x0, y0, rw, rh, 0, 0, cw, chh);
     const img = cam.ctx.getImageData(0, 0, cw, chh);
     const sx = cw / rw, sy = chh / rh;
-    return V.rectifyGrid(img, cam.corners.map((p) => ({ x: (p.x - x0) * sx, y: (p.y - y0) * sy })));
+    const mapped = cam.corners.map((p) => ({ x: (p.x - x0) * sx, y: (p.y - y0) * sy }));
+    const grid = V.rectifyGrid(img, mapped);
+    // 校正だけは板全体を走査する。通常監視では小さいグリッドだけを作り、30fpsを維持する。
+    if (cam.calib && cam.calib.active) grid.calibrationPanel = V.rectifyPanel(img, mapped);
+    return grid;
   }
 
   // 検出部分の切り抜き画像を作る（実機表示と読み取り結果の突き合わせ用）
@@ -3270,25 +3981,34 @@ function recommend(state) {
 
   async function confirmShot(shot, truth) {
     truth = String(truth == null ? "" : truth).trim();
-    if (!/^\d+$/.test(truth)) { notice("正解の数値を半角数字で入力してください。"); return; }
-    const vecs = (shot.vecs || []).map((v) => Array.from(v || []));
-    const trainable = truth.length === vecs.length && vecs.every((v) => v.length === V.CW * V.CH);
+    if (!/^\d{1,4}$/.test(truth)) { notice("正解を1〜4桁の半角数字で入力してください。"); return; }
+    // 1桁につき5個ある位置ずらし候補から、正解数字に最も近い1個を選んで保存する。
+    // 旧版は5個の入れ子配列を384要素の1ベクトルとして検査していたため、学習が常に無効だった。
+    const packed = canonicalVectors(shot.vecs || [], truth);
+    const vecs = packed ? packed.map((x) => x.vec) : [];
+    const trainable = !!packed;
     const previousApplied = shot.appliedTruth != null ? String(shot.appliedTruth) : (shot.ok && shot.predicted != null ? String(shot.predicted) : null);
-    const record = { id: shot.id, schema: 1, createdAt: new Date(shot.t).toISOString(), confirmedAt: new Date().toISOString(),
+    const record = { id: shot.id, schema: 1, origin: "confirmed", createdAt: new Date(shot.t).toISOString(), confirmedAt: new Date().toISOString(),
       image: shot.url, letter: shot.letter, index: shot.idx, predicted: shot.predicted == null ? null : String(shot.predicted),
       truth, reason: shot.reason, candidates: shot.candidates || [], confidence: shot.confidence == null ? null : shot.confidence,
       fps: cam.measuredFps || null, vecs, trainable };
     try {
       await dbPutMany([record]);
-      cam.learned = await dbRecords(); rebuildLearnedStore(); updateLearnSummary();
+      cam.learned = await boundedRecords(); rebuildLearnedStore(); updateLearnSummary();
       shot.confirmed = true; shot.truth = truth;
-      if (previousApplied == null && shot.onApply) { shot.onApply(shot.idx, +truth); shot.appliedTruth = truth; }
-      else if (previousApplied !== null && previousApplied !== truth && shot.onCorrect) {
-        shot.onCorrect(shot.idx, +previousApplied, +truth); shot.appliedTruth = truth;
+      let boardApplied = true;
+      if (previousApplied == null && shot.onApply) {
+        try { if (shot.onApply(shot.idx, +truth) === false) boardApplied = false; else shot.appliedTruth = truth; }
+        catch (e) { boardApplied = false; }
       }
-      shot.label = `正解 ${truth}`; renderShots();
+      else if (previousApplied !== null && previousApplied !== truth && shot.onCorrect) {
+        try { if (shot.onCorrect(shot.idx, +previousApplied, +truth) === false) boardApplied = false; else shot.appliedTruth = truth; }
+        catch (e) { boardApplied = false; }
+      }
+      shot.label = `正解 ${truth}${boardApplied ? "" : "（盤面未反映）"}`; renderShots();
       reason("success", trainable ? "学習しました" : "画像を保存しました",
-        trainable ? `${shot.letter}=${truth} を確認済みテンプレートに追加しました。` : `${shot.letter}=${truth} を原因分析用に保存しました。桁を切り出せなかったため識別学習には使いません。`);
+        (trainable ? `${shot.letter}=${truth} を確認済みテンプレートに追加しました。` : `${shot.letter}=${truth} を原因分析用に保存しました。桁を切り出せなかったため識別学習には使いません。`)
+        + (boardApplied ? "" : " この画像は古い手に属するため、現在の盤面には反映していません。"));
     } catch (e) { notice("学習データを保存できませんでした。ブラウザの保存領域を確認してください。"); }
   }
 
@@ -3300,28 +4020,43 @@ function recommend(state) {
   }
   cam.exportLearning = async function () {
     try {
-      cam.learned = await dbRecords();
+      cam.learned = await boundedRecords(); rebuildLearnedStore();
       downloadLearning(`amatsuyu-ocr-learning-${new Date().toISOString().slice(0, 10)}.json`,
         { app: "超あまつゆ Forge", type: "ocr-supervised-learning", schema: 1, exportedAt: new Date().toISOString(), samples: cam.learned });
     } catch (e) { notice("学習データを書き出せませんでした。"); }
   };
   cam.importLearning = async function (file) {
     try {
+      if (!file || file.size > MAX_IMPORT_BYTES) throw new Error("ファイルが大きすぎます");
       const payload = JSON.parse(await file.text()), src = Array.isArray(payload) ? payload : payload.samples;
       if (!Array.isArray(src)) throw new Error("samplesなし");
-      const records = src.filter((r) => r && /^\d+$/.test(String(r.truth || ""))).map((r, n) => {
-        const vecs = Array.isArray(r.vecs) ? r.vecs.map((v) => Array.isArray(v) ? v.map(Number) : []) : [];
-        const truth = String(r.truth), trainable = truth.length === vecs.length && vecs.every((v) => v.length === V.CW * V.CH);
-        return { id: String(r.id || ("import-" + Date.now().toString(36) + "-" + n)), schema: 1,
-          createdAt: r.createdAt || new Date().toISOString(), confirmedAt: r.confirmedAt || new Date().toISOString(),
-          image: typeof r.image === "string" ? r.image : "", letter: String(r.letter || "?"), index: Number.isInteger(r.index) ? r.index : -1,
-          predicted: r.predicted == null ? null : String(r.predicted), truth, reason: String(r.reason || "imported"),
-          candidates: Array.isArray(r.candidates) ? r.candidates.map(Number) : [], confidence: Number.isFinite(+r.confidence) ? +r.confidence : null,
-          fps: Number.isFinite(+r.fps) ? +r.fps : null, vecs, trainable };
-      });
-      await dbPutMany(records); cam.learned = await dbRecords(); rebuildLearnedStore(); updateLearnSummary();
-      reason("success", "読み込み完了", `${records.length}枚を取り込み、確認済み学習データを再構築しました。`);
-    } catch (e) { notice("学習JSONを読み込めませんでした。書き出したファイルを選んでください。"); }
+      let invalid = 0;
+      const records = [];
+      const nowIso = new Date().toISOString();
+      const cleanDate = (v) => typeof v === "string" && v.length <= 40 && Number.isFinite(Date.parse(v))
+        ? new Date(v).toISOString() : nowIso;
+      for (const [n, r] of src.slice(0, MAX_IMPORT_SAMPLES).entries()) {
+        const truth = r && String(r.truth || "");
+        if (!r || !/^\d{1,4}$/.test(truth)) { invalid++; continue; }
+        const packed = canonicalVectors(r.vecs, truth), vecs = packed ? packed.map((x) => x.vec) : [];
+        const image = typeof r.image === "string" && r.image.length <= 250000
+          && /^data:image\/(?:png|jpeg|webp);base64,/i.test(r.image) ? r.image : "";
+        const safe = importedVectorsSafe(packed, truth);
+        records.push({ id: String(r.id || ("import-" + Date.now().toString(36) + "-" + n)).slice(0, 120), schema: 1, origin: "imported",
+          createdAt: cleanDate(r.createdAt), confirmedAt: cleanDate(r.confirmedAt),
+          image, letter: String(r.letter || "?").slice(0, 8), index: Number.isInteger(r.index) && r.index >= 0 && r.index < 6 ? r.index : -1,
+          predicted: r.predicted != null && /^\d{1,4}$/.test(String(r.predicted)) ? String(r.predicted) : null,
+          truth, reason: String(r.reason || "imported").slice(0, 120),
+          candidates: Array.isArray(r.candidates) ? r.candidates.map(Number).filter((x) => Number.isFinite(x) && x >= 0 && x <= 9999).slice(0, 100) : [],
+          confidence: Number.isFinite(+r.confidence) ? Math.max(-1, Math.min(1, +r.confidence)) : null,
+          fps: Number.isFinite(+r.fps) ? Math.max(0, Math.min(240, +r.fps)) : null, vecs, trainable: safe });
+      }
+      if (!records.length) throw new Error("有効なsamplesなし");
+      await dbPutMany(records); cam.learned = await boundedRecords(); rebuildLearnedStore(); updateLearnSummary();
+      const omitted = Math.max(0, src.length - MAX_IMPORT_SAMPLES) + invalid;
+      const usable = records.filter((r) => r.trainable).length;
+      reason("success", "読み込み完了", `${records.length}枚（識別学習 ${usable}枚）を取り込みました。${omitted ? `上限超過または不正な ${omitted}件は除外しました。` : ""}`);
+    } catch (e) { notice(`学習JSONを読み込めませんでした（${e && e.message ? e.message : "形式不正"}）。書き出したファイルを選んでください。`); }
   };
   cam.clearLearning = async function () {
     if (!confirm("確認済みのOCR学習画像をすべて消去しますか？内蔵79枚は消えません。")) return;
@@ -3351,7 +4086,7 @@ function recommend(state) {
     const live = cam.stream ? (cam.measuredFps ? cam.measuredFps.toFixed(1) + "fps" : "計測中") : "未接続";
     const mode = cam.frameMode === "track-processor" ? "トラック直結（裏でも動作）"
       : cam.frameMode === "video-frame" ? "映像フレーム同期（ブラウザが隠れると停止）" : "タイマー互換";
-    $("#ocrSummary").innerHTML = `<strong>${pct(r.accuracy)}</strong><span>${r.correct} / ${r.total}枚 正解・判定不能 ${r.rejected}枚<br>${mode}・最大${cam.fps}fps／実測 <i id="ocrLiveFps">${live}</i></span>`;
+    $("#ocrSummary").innerHTML = `<strong>${pct(r.accuracy)}</strong><span>切り出し後の数字識別のみ：${r.correct} / ${r.total}枚 正解・判定不能 ${r.rejected}枚<br>${mode}・最大${cam.fps}fps／実測 <i id="ocrLiveFps">${live}</i></span>`;
     $("#ocrRows").innerHTML = r.perDigit.map((d) => {
       const misses = d.errors.length ? d.errors.slice(0, 3).map((e) => `${e.as}（${e.count}）`).join("、") : "なし";
       return `<tr><td><b>${d.digit}</b></td><td>${d.samples}</td><td>${pct(d.accuracy)}</td><td class="${d.errorRate ? "warn" : ""}">${pct(d.errorRate)}</td><td>${misses}</td></tr>`;
@@ -3360,7 +4095,7 @@ function recommend(state) {
     $("#ocrSamples").querySelectorAll("canvas").forEach((cv) => {
       const d = +cv.dataset.digit; drawTemplate(cv, testStore[d] && testStore[d][0]);
     });
-    $("#ocrCoverage").textContent = "方式：leave-one-out交差検証。数字の切り抜き後の識別精度です。画面内から数字領域を見つける検出率は、正解ラベル付きの実機画面セットが未収集のため別指標として未計測です。候補外・判定不能の実戦画像は画面下に保存されます。";
+    $("#ocrCoverage").textContent = "方式：内蔵79枚のleave-one-out交差検証。この率は、正しく切り出せた1桁画像を0〜9へ分類する精度だけです。画面から数字を発見する率、複数桁を正しく分割する率、候補照合まで含む実戦の端から端までのOCR成功率ではありません。後者は正解ラベル付き実機動画が未収集のため未計測です。";
     $("#ocrDialog").showModal();
   };
 
@@ -3381,15 +4116,19 @@ function recommend(state) {
   }
 
   function tick(frame) {
+    const tickStart = performance.now();
     let grid = cam.__testGrid || null;
     if (!grid) {
       if (!ensureAlive(!!frame)) return;
-      try { grid = grabGrid(frame); } catch (e) { return; }
+      try { grid = grabGrid(frame); } catch (e) { frameError("grab", e); return; }
     }
     if (!grid) return;
-    if (cam.calib && cam.calib.active) { try { calibTick(grid); } catch (e) {} }
+    if (cam.calib && cam.calib.active) {
+      try { calibTick(grid.calibrationPanel || grid); } catch (e) { frameError("calibration", e); }
+    }
     const fpsNow = performance.now();
     if (!cam.tmax) cam.tmax = { grab: 0, scan: 0, paint: 0, outside: 0 };
+    if (cam.executedAt) { const dg = fpsNow - tickStart; if (dg > cam.tmax.grab) cam.tmax.grab = dg; }
     if (cam.lastEnd && cam.executedAt) {
       // 前回の処理終了から今回の開始までの空白。ここが大きいと、
       // 遅いのはOCRではなく他の処理（画面の再描画やAIの探索）ということになる。
@@ -3414,7 +4153,6 @@ function recommend(state) {
     }
     // 枠の描き直しは毎フレームやると（SVGの組み直しとレイアウト再計算で）
     // 読み取り本体より重くなる。見た目には十分な12fps程度に間引く。
-    if (cam.executedAt) { const dg = performance.now() - fpsNow; if (dg > cam.tmax.grab) cam.tmax.grab = dg; }
     const paint = (g, force) => {
       if (!force && fpsNow - (cam.paintedAt || 0) < 80) return;
       cam.paintedAt = fpsNow; drawPreview(g); draw();
@@ -3463,7 +4201,18 @@ function recommend(state) {
           } catch (e) {}
         }
       }
-      if (strictFound && tg && !cam.executedAt) cam.executedAt = now0;
+      // 自動開始は「監視を作った時点ですでに見えていた古い数字」では行わない。
+      // 対象マスが2コマ空になった後、新しい表示が現れたときだけ実行済みにする。
+      if (tg && !cam.executedAt) {
+        if (!strictFound) {
+          cam.preEmpty[i] = (cam.preEmpty[i] || 0) + 1;
+          if (cam.preEmpty[i] >= 2) cam.ready[i] = true;
+        } else if (cam.ready[i]) {
+          cam.executedAt = now0; cam.missReported = false; cam.votes = {}; cam.diag = {};
+          cam.lowStreak = {}; cam.scanFrames = 0; cam.hit = {}; cam.probe = {};
+          cam.tape = []; cam.tapeFrozen = false; cam.gapMax = 0;
+        }
+      }
       // 実機のダメージ表示は数秒残るため、次の手が始まった直後に同じ数字を
       // もう一度読んでしまう。いちど読んだマスは「表示が消えた」のを確認するまで封じる。
       // 表示が2コマ続けて消えたら「次の表示」に世代を進める。
@@ -3535,7 +4284,10 @@ function recommend(state) {
       let label = "";
       if (t) {
         if (r && Object.keys(r.scores).length) {
-          if (!cam.executedAt) cam.executedAt = now0;
+          if (!cam.executedAt) {
+            found.push({ box: g.box, label: cam.ready[i] ? "新しい表示待ち" : "古い表示が消えるのを待っています" });
+            continue;
+          }
           cam.lowStreak[i] = 0;
           // フレームごとに勝者を決めず、候補ごとの一致度を足し込んでいく。
           // 1枚だと「2」と「3」が0.001差で入れ替わるので、数枚ぶんならすと安定する。
@@ -3707,7 +4459,7 @@ function recommend(state) {
     paint(grid, done.length > 0);
     if (cam.active) {
       const elapsed = cam.executedAt ? now0 - cam.executedAt : 0;
-      if (!cam.executedAt) reason("waiting", "監視準備", `${cam.targets.map((t) => t.letter).join("・")} を監視中。「この手を実行した」後に判定します。`);
+      if (!cam.executedAt) reason("waiting", "監視準備", `${cam.targets.map((t) => t.letter).join("・")} の古い表示が消え、新しい数字が出るのを待っています。`);
       else if (causes.outside.length) reason("error", "候補外", `${causes.outside.join("・")} は温度から計算した候補と一致しません。スクショで正解を指定できます。`);
       else if (causes.low.length) reason("error", "低信頼度", `${causes.low.join("・")} の数字らしい輪郭は見つかりましたが、桁または形を確定できません。`);
       else if (causes.locked.length) reason("warning", "前の表示待ち", `${causes.locked.join("・")} は前回の数字が消えるのを待っています。`);
@@ -3779,7 +4531,11 @@ function recommend(state) {
       delete cam.votes[dn.idx];
       cam.targets = cam.targets.filter((x) => x.idx !== dn.idx);
       cam.readIdx[dn.idx] = true;
-      cam.readEpoch[dn.idx] = cam.epoch[dn.idx] || 0;   // この表示は消費済み
+      if (dn.lastCall) {
+        // 表示が消えた瞬間の最終投票で採用した場合、すでに「消えた」を確認済み。
+        // 新しい世代を再び封じると、このマスの次の表示を永久に読めなくなる。
+        delete cam.readEpoch[dn.idx]; cam.emptyRun[dn.idx] = 2;
+      } else cam.readEpoch[dn.idx] = cam.epoch[dn.idx] || 0;   // この表示は消費済み
       delete cam.off[dn.idx];
     }
     cam.active = cam.targets.length > 0;
@@ -3817,11 +4573,12 @@ function recommend(state) {
       }).join("");
       const fit = cam.calibFit(true);
       const got = Object.keys(hits).sort().join("・") || "なし";
+      const current = V.GRID;
       if (calStat) {
         calStat.innerHTML = cam.calib.active
-          ? `<b>${cam.calib.letter} を待っています。</b>実機で ${cam.calib.letter} を1回たたいてください。`
+          ? `<b>${cam.calib.letter} を待っています。</b>${(cam.calib.baselineFrames || 0) < 2 ? "通常画面を記録中です。" : `実機で ${cam.calib.letter} を1回たたいてください。`}`
           : fit.ok
-            ? `取得済み: ${got}／計算結果 横 ${fit.x0.toFixed(3)}〜${fit.x1.toFixed(3)}・縦 ${fit.y0.toFixed(3)}〜${fit.y1.toFixed(3)}（現在の設定は横 0.335〜0.681）。「この結果で枠を確定」で反映します。`
+            ? `取得済み: ${got}／計算結果 横 ${fit.x0.toFixed(3)}〜${fit.x1.toFixed(3)}・縦 ${fit.y0.toFixed(3)}〜${fit.y1.toFixed(3)}（現在は横 ${current[0].toFixed(3)}〜${current[2].toFixed(3)}・縦 ${current[1].toFixed(3)}〜${current[3].toFixed(3)}）。「この結果で枠を確定」で反映します。`
             : `取得済み: ${got}／${fit.why}`;
       }
     }
@@ -3943,7 +4700,7 @@ function recommend(state) {
 </script>
 <script>(function () {
   "use strict";
-  const APP_VERSION = "2026.08.18-35";
+  const APP_VERSION = "2026.08.20-38";
   const AI = window.AmatsuyuAI;
   const $ = (s) => document.querySelector(s);
   const L = AI.LETTERS, Z = AI.ZONES;
@@ -4202,8 +4959,7 @@ function recommend(state) {
       $("#applyButton").disabled = true; $("#quickPlay").hidden = true;
       return;
     }
-    const stopBetter = pickIdx === 0 && done && ranked[0].prob != null && ranked[0].prob <= p
-      && (p >= 0.70 || state.focus < AI.SKILLS.nerai.cost || state.temp <= 200);
+    const stopBetter = pickIdx === 0 && done && ranked[0].prob != null && ranked[0].prob <= p;
     if (stopBetter) {
       markTargets([]);
       $("#actionName").textContent = "しあげる";
@@ -4311,15 +5067,19 @@ function recommend(state) {
     const cand = AI.outcomeCandidates(state, rec);
     if (!cand.length) { C.unwatch(); return; }
     const targets = cand.map((c) => ({ idx: c.idx, letter: c.letter, candidates: dmgList(c) }));
+    const watchToken = `pre:${runId}:${stateSig()}:${rec.skill}:${rec.targets.join(",")}`;
+    const expectedRunId = runId, expectedLogIndex = log.length;
     const applyRead = (idx, dmg) => {
+      if (runId !== expectedRunId || C.watchToken !== watchToken) return false;
       const c = cand.find((x) => x.idx === idx);
-      if (!c) return;
-      if (pending && pending.picked[idx] != null) return;   // このマスは入力済み
+      if (!c) return false;
+      if (pending && pending.picked[idx] != null) return false;   // このマスは入力済み
       if (!pending) {
         applyRecommended();               // 最初の1マスで手を確定させる
         autoAdvancedAt = Date.now();      // 直後の手動実行を止めるための印
         setTimeout(() => render(), AUTO_GUARD_MS + 60);
       }
+      if (!pending || pending.logIndex !== expectedLogIndex) return false;
       state.values[idx] = Math.max(0, c.before + dmg);
       markFresh(idx);
       const snap = isSnapDamage(c, dmg);
@@ -4331,27 +5091,39 @@ function recommend(state) {
       }
       offOffer = null;
       render();
+      return true;
     };
     // 誤読スクショを訂正したときは、学習だけでなく盤面と実戦ログも差分修正する。
     C.onCorrect = (idx, oldDmg, newDmg) => {
-      const delta = newDmg - oldDmg; if (!delta) return;
+      // 後続手まで進んだ後の古い画像を直すと、現在盤面の別結果まで巻き戻してしまう。
+      // 画像を採った実戦・手番が今も最新である場合だけ盤面へ反映する。
+      if (runId !== expectedRunId || expectedLogIndex !== log.length - 1 || !log[expectedLogIndex]) {
+        C.notice("古いOCR画像の正解は学習しましたが、現在の手番とは異なるため盤面には反映しませんでした。");
+        return false;
+      }
+      const h = log[expectedLogIndex], rows = h.results || [];
+      const row = rows.find((x) => x.idx === idx && x.damage === oldDmg);
+      if (!row || state.values[idx] !== row.after) {
+        C.notice("OCR後に盤面が編集されているため、正解は学習だけに使い、現在値は変更しませんでした。");
+        return false;
+      }
+      const delta = newDmg - oldDmg;
+      if (!delta) return true;
       state.values[idx] = Math.max(0, state.values[idx] + delta);
-      let hit = -1;
-      for (let j = log.length - 1; j >= 0 && hit < 0; j--) {
-        const rows = log[j].results || [];
-        const row = rows.find((x) => x.idx === idx && x.damage === oldDmg);
-        if (row) { row.damage = newDmg; row.after = Math.max(0, row.after + delta); row.source = "camera-corrected"; hit = j; }
-      }
-      if (hit >= 0) for (let j = hit; j < log.length; j++) {
-        if (j > hit && log[j].before && log[j].before.values) log[j].before.values[idx] = Math.max(0, log[j].before.values[idx] + delta);
-        if (log[j].after && log[j].after.values) log[j].after.values[idx] = Math.max(0, log[j].after.values[idx] + delta);
-      }
+      row.damage = newDmg; row.after = Math.max(0, row.after + delta); row.source = "camera-corrected";
+      const c = cand.find((x) => x.idx === idx), newSnap = !!c && isSnapDamage(c, newDmg);
+      row.snap = newSnap;
+      state.crits[idx] = newSnap ? true : !!(h.before && h.before.crits && h.before.crits[idx]);
+      if (pending && pending.logIndex === expectedLogIndex) pending.picked[idx] = row.after;
+      h.after = serialState(state);
       markFresh(idx); render();
+      return true;
     };
     offOffer = null;
-    C.watch(targets, applyRead);
+    C.watch(targets, applyRead, watchToken);
     // 候補に無い値を読み取ったときは、そのまま反映できるボタンを出す
     C.onOff = (idx, dmg) => {
+      if (runId !== expectedRunId || C.watchToken !== watchToken) return;
       const c = cand.find((x) => x.idx === idx);
       if (!c) return;
       offOffer = { idx: idx, letter: c.letter, dmg: dmg, apply: () => applyRead(idx, dmg) };
@@ -4361,8 +5133,8 @@ function recommend(state) {
 
   // 実機に出るダメージ値の候補（通常・会心すり抜け・本会心をすべて含む）
   function dmgList(c) {
-    return Array.from(new Set([].concat(c.dmgNormal || [], c.dmgCrit || [], c.dmgSnap || [])))
-      .filter((d) => d > 0).sort((a, b) => a - b);
+    return Array.from(new Set([].concat(c.dmgNormal || [], c.dmgCrit || [], c.dmgSnap || [], c.dmgZero || [])))
+      .filter((d) => Number.isFinite(d) && d >= 0).sort((a, b) => a - b);
   }
   // 読み取ったダメージが「本会心で基準値に止まった」ものかを判定する
   function isSnapDamage(c, d) {
@@ -4379,10 +5151,14 @@ function recommend(state) {
     const C = window.ForgeCam;
     if (C && C.stream) {
       const left = pending.cand.filter((c) => pending.picked[c.idx] == null);
+      const pendingToken = pending.ocrToken || (pending.ocrToken = `pending:${runId}:${pending.logIndex}:${pending.label}`);
+      const expectedRunId = runId, expectedLogIndex = pending.logIndex;
       if (left.length) C.watch(left.map((c) => ({ idx: c.idx, letter: c.letter, candidates: dmgList(c) })),
         (idx, dmg) => {
+          if (runId !== expectedRunId || !pending || pending.ocrToken !== pendingToken
+            || pending.logIndex !== expectedLogIndex || C.watchToken !== pendingToken) return false;
           const c = pending.cand.find((x) => x.idx === idx);
-          if (!c) return;
+          if (!c || pending.picked[idx] != null) return false;
           state.values[idx] = Math.max(0, c.before + dmg);
           const snap = isSnapDamage(c, dmg);
           if (snap) setCrit(idx, true);
@@ -4390,7 +5166,8 @@ function recommend(state) {
           pending.picked[idx] = state.values[idx];
           if (pending.cand.every((x) => pending.picked[x.idx] != null)) pending = null;
           render();
-        });
+          return true;
+        }, pendingToken);
     }
     const rows = pending.cand.map((c) => {
       const done = pending.picked[c.idx] != null;
@@ -4550,7 +5327,8 @@ function recommend(state) {
     state.step += 1;
     log[log.length - 1].after = serialState(state);
     if (!sk.utility && cand.length) {
-      pending = { label: AI.actionLabel(rec), cand, picked: {}, logIndex: log.length - 1 };
+      pending = { label: AI.actionLabel(rec), cand, picked: {}, logIndex: log.length - 1,
+        ocrToken: `pending:${runId}:${log.length - 1}:${rec.skill}:${rec.targets.join(",")}` };
     }
     pickIdx = 0; pickSig = "";
     if (!autoBusy) autoSkipped = 0;
