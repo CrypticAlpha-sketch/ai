@@ -1,14 +1,13 @@
 <!doctype html>
-<!-- 超あまつゆ Forge  version 2026.09.08-42 -->
+<!-- 超あまつゆ Forge  version 2026.08.20-39 -->
 <html lang="ja">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#e9edf4">
+<meta name="theme-color" content="#17110d">
 <meta name="description" content="超あまつゆのいと専用・実機入力型の鍛冶手順アシスタント">
 <title>超あまつゆ Forge AI</title>
 <style>
-
 :root{
   color-scheme:light;
   --paper:#fff;--mist:#f2f4f6;--sink:#e9edf1;--ink:#111519;--slate:#5c6672;--rule:#dfe4e9;
@@ -70,7 +69,7 @@ button,input{font-family:inherit}
   .glass,.topbar,.rail,.meters,.mass,.menu-pop{background:rgba(255,255,255,.93)}
 }
 
-
+  --num:ui-monospace,"SF Mono","Cascadia Mono","Roboto Mono",Menlo,monospace;
 /* ---------- 骨格 ----------
    画面の主役は常にひとつ。いま何をすべきかを最大の文字で示し、
    参照値はその周りに小さく置く。文字は 44 / 30 / 14 / 11 の4段階だけを使う。 */
@@ -478,481 +477,78 @@ body.drawer-open #drawer{transform:none}
   .flags{margin-left:0}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-/* Liquid workbench — visual layer. */
-:root {
-  --paper:#fbfcfe; --mist:#edf1f6; --sink:#d9e0e8; --ink:#111820; --slate:#465361;
-  --rule:rgba(43,62,85,.13); --ember:#e9513e; --jade:#18764c; --crimson:#b52f2d; --azure:#245fb2;
-  --num:Inter,"Helvetica Neue",Arial,"Hiragino Sans","Yu Gothic",sans-serif;
-  --glass:rgba(255,255,255,.48); --glass-md:rgba(255,255,255,.63); --glass-lg:rgba(255,255,255,.94);
-  --glass-line:rgba(255,255,255,.76); --glass-line-soft:rgba(255,255,255,.47);
-  --blur-sm:blur(12px) saturate(140%); --blur-md:blur(28px) saturate(155%); --blur-lg:blur(44px) saturate(155%);
-  --edge:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -1px 1px rgba(255,255,255,.36);
-  --lift:0 8px 24px -16px rgba(32,54,82,.24),0 2px 5px -3px rgba(30,44,67,.1);
-  --lift-lg:0 24px 64px -24px rgba(30,49,77,.28);
-  --ease-liquid:cubic-bezier(.22,.8,.25,1);
-  font-family:Inter,"Helvetica Neue",Arial,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
-  font-feature-settings:normal;
-}
-body{background:#e9edf4;font-size:13px;line-height:1.45;color:var(--ink)}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(120deg,#fff1 0%,#fff4 46%,#fff0 100%)}
-.scene{display:block;background:radial-gradient(ellipse at 3% 4%,#f9cbcd80,transparent 49%),radial-gradient(ellipse at 96% 80%,#a8d7f37a,transparent 55%),radial-gradient(ellipse at 58% 8%,#f9dcc461,transparent 46%)}
-.scene i{animation:none;opacity:.35;filter:blur(85px)}
-.scene i:nth-child(1){background:#f2acb5;width:40vw;height:44vh;left:-17vw;top:-10vh}
-.scene i:nth-child(2){background:#a9d6f7;width:47vw;height:56vh;right:-17vw;bottom:-8vh}
-.scene i:nth-child(3){background:#f6d2b4;width:32vw;height:38vh;left:38%;top:-18vh}
-.app{height:100dvh;max-width:1060px;margin:auto;padding:10px 16px 8px;gap:9px}
-button,input,summary{-webkit-tap-highlight-color:transparent}
-button{touch-action:manipulation}button:disabled{cursor:default}
-:focus-visible{outline:3px solid var(--azure);outline-offset:3px}
-input:focus-visible{outline-offset:0}
-[hidden]{display:none!important}
-.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.ui-icon{width:18px;height:18px;display:inline-block;flex:none;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
-.topbar{padding:0 5px;min-height:34px;gap:12px;align-items:center;background:transparent;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;z-index:50}
-.wordmark{font-size:19px;font-weight:800;letter-spacing:-.035em;color:var(--ink)}
-.wordmark em{color:inherit;font-weight:750;letter-spacing:-.025em}
-.brand-caption{font-size:10px;color:var(--slate);white-space:nowrap}
-.chip,.tool-button,.ocr-pill,.picker,.input-tabs,.result-tab,.nudge,.cand,.meter-controls,.setup>summary{border:1px solid var(--glass-line);background:var(--glass);box-shadow:var(--edge),var(--lift);backdrop-filter:var(--blur-sm);-webkit-backdrop-filter:var(--blur-sm)}
-.chip{min-height:34px;border-radius:12px;font-size:12px;color:var(--ink);padding:6px 12px}
-.chip:hover{transform:none;background:rgba(255,255,255,.85)}
-.ocr-pill{display:flex;align-items:center;gap:8px;min-height:32px;padding:5px 11px;border-radius:100px;color:var(--ink);font-size:11px;cursor:pointer;white-space:nowrap}
-.ocr-pill::before{content:"";width:8px;height:8px;border-radius:50%;background:#738190;box-shadow:0 0 0 3px #fff5}
-.ocr-pill[data-kind=success]::before{background:#31b57d}.ocr-pill[data-kind=waiting]::before{background:#5b86b6}
-.ocr-pill[data-kind=warning]::before{background:#c18413}.ocr-pill[data-kind=error]::before{background:var(--crimson)}
-.menu>summary{width:34px;height:34px;display:grid;place-items:center;padding:0;border-radius:50%;color:var(--ink);background:#ffffff70;border:1px solid #ffffff9c;box-shadow:var(--edge),var(--lift)}
-.menu-pop{top:43px;min-width:255px;padding:10px;border-radius:19px;background:#f7f9fdf5;border:1px solid #fff;box-shadow:var(--lift-lg);gap:6px}
-.menu-pop .chip{text-align:left;color:var(--ink);font-size:13px;min-height:38px}
-.menu-pop .danger{color:var(--crimson)}
-.menu-separator{height:1px;margin:3px 4px;background:var(--rule)}
-.scroll{padding:0 1px 3px;overflow-x:hidden;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#9aa9bc66 transparent;scroll-padding:10px}
-.hero{padding:0;margin:0;max-width:none;display:grid;grid-template-columns:minmax(0,1fr);gap:9px;justify-items:stretch}
-.hero>*{width:100%;min-width:0}
-.recommendation-panel,.meters,.phase-row,.board-shell,.input-shell,.tool-dock,.capture-details,.setup{border:1px solid var(--glass-line);background:var(--glass);box-shadow:var(--edge),var(--lift);backdrop-filter:var(--blur-md);-webkit-backdrop-filter:var(--blur-md);border-radius:23px}
-.recommendation-panel{padding:14px 19px 12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px 16px;position:relative}
-.recommendation-panel::before{content:"";position:absolute;left:0;top:22px;bottom:22px;width:3px;border-radius:3px;background:linear-gradient(#f88677,#e9513e70)}
-.hero-kick{grid-column:1;grid-row:1;justify-content:flex-start;gap:8px}
-.section-index{font-size:12px;font-weight:750;color:#c43c2e;font-variant-numeric:tabular-nums}
-.nextkick,.rec-kicker{font-size:12px;font-weight:700;color:var(--ink);letter-spacing:.025em}
-.picker{grid-column:2;grid-row:1/span 2;align-self:start;display:flex;gap:6px;border-radius:100px;padding:4px}
-.picker button{width:34px;height:34px;border-radius:50%;color:var(--ink);font-size:14px}
-.picker button:hover:not(:disabled){background:#fff;box-shadow:var(--edge),var(--lift)}
-.picker button:disabled{color:#707a86;opacity:.45}
-#pickLabel{min-width:54px;font-size:12px;font-weight:650;color:var(--ink);font-family:var(--num)}
-#actionName{grid-column:1;grid-row:2;font-size:clamp(33px,4.9vw,52px);line-height:1.11;letter-spacing:-.045em;text-align:left;font-weight:800;margin:0;color:var(--ink);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.action-targets{font-size:.81em;line-height:1.08;color:#d64838;letter-spacing:-.01em;padding:7px 17px 9px;border-radius:18px;background:linear-gradient(145deg,#ffffffda,#fff5);border:1px solid #ffffffd9;box-shadow:var(--edge),0 8px 25px -16px #d6553d70;white-space:nowrap}
-.hero[data-mode=result] #actionName{color:var(--ink)}
-.hero[data-mode=result] .nextkick{color:var(--azure)}
-.action-meta{grid-column:1;grid-row:3;justify-content:flex-start;gap:4px 12px;align-self:center;font-size:12px;color:var(--ink);font-weight:550}
-.action-meta>span{background:none;padding:0;border-radius:0;white-space:nowrap}
-.action-meta>span+span{border-left:1px solid #35495e2c;padding-left:12px}
-.action-meta>span[data-ui-target]{display:none}
-.act{grid-column:2;grid-row:3/span 2;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin:0;max-width:390px}
-.primary-button,.ghost-button{border-radius:15px;min-height:46px;font-size:14px;font-weight:700;line-height:1.3;padding:10px 15px;box-shadow:var(--edge),var(--lift)}
-.primary-button{flex:none;background:linear-gradient(165deg,#343e4b,#141e2a);border:1px solid #414d5c;color:#fff;min-width:215px;box-shadow:inset 0 1px 1px #ffffff55,0 8px 19px -10px #11263a80}
-.primary-button::before{display:none}.primary-button:hover:not(:disabled){background:linear-gradient(165deg,#283546,#111a25);transform:translateY(-1px);filter:none;box-shadow:inset 0 1px 1px #ffffff55,0 9px 22px -10px #11263a85}
-#applyButton::after{content:"→";font-size:22px;margin-left:12px;vertical-align:-1px}
-.primary-button:disabled{background:#e6ebf0;color:#4a5665;border-color:#cbd3dc;box-shadow:none;opacity:.75}
-.ghost-button{background:#ffffff80;color:var(--ink);border:1px solid #ffffffd0;min-width:0}
-.ghost-button:hover:not(:disabled){transform:translateY(-1px);background:#ffffffd9}
-.ghost-button:disabled{opacity:.45}.hero[data-mode=result] .act .ghost-button{font-size:13px;min-height:42px}
-#undoButton{order:-1;font-size:12px;padding:9px 13px;min-height:43px}
-#hudOff{flex-basis:100%;min-height:36px;padding:7px 12px;background:#e7f1fe;color:#1b569a}
-.reason-details{grid-column:1;grid-row:4;min-width:0;color:var(--slate);font-size:11px;line-height:1.65}
-.reason-details>summary{cursor:pointer;list-style:none;display:flex;gap:5px;align-items:baseline}
-.reason-details>summary::-webkit-details-marker{display:none}
-.reason-details>summary::after{content:"⌄";flex:none;font-size:15px;color:#526478}
-.reason-preview{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.reason-details[open]{grid-column:1/-1;grid-row:auto;background:#ffffff7a;padding:8px 10px;border-radius:12px}
-.reason-details[open]>summary::after{content:"⌃"}
-#actionReason{font-size:12px;line-height:1.75;margin:6px 0 0;max-width:none;color:#354352;text-align:left}
-.picked-note{grid-column:1/-1;margin:0;font-size:11px;text-align:left;color:#a34524}
-.meters{display:grid;grid-template-columns:1fr 1fr 1.16fr;gap:0;padding:12px 17px;margin:0;width:100%;position:relative;z-index:1;align-items:stretch;flex:none}
-.meter,.stat{padding:0 17px;border:0;background:none;border-radius:0;box-shadow:none;gap:2px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;min-width:0}
-.meter:first-child{padding-left:0}.stat:last-child{padding-right:0}.meter+.meter,.meter+.stat{border-left:1px solid var(--rule)}
-.meter>span:first-child,.stat>span:first-child{font-size:11px;letter-spacing:0;color:var(--slate);font-weight:550}
-.meter-readout{display:flex;align-items:center;gap:4px;min-width:0;width:100%;line-height:1.1}
-.meter input{font-family:var(--num);font-size:36px;font-weight:750;letter-spacing:-.035em;text-align:left;background:none;padding:0;border:0;border-radius:7px;color:var(--ink);width:3.4ch;flex:0 1 3.4ch;height:42px;line-height:1;font-variant-numeric:tabular-nums}
-.meter input:focus{background:#ffffffb3}.meter-unit{font-family:var(--num);font-size:19px;font-weight:650;letter-spacing:-.04em}
-#tempInput{width:4.35ch;flex-basis:4.35ch}
-#focusMax{font-family:var(--num);font-size:16px;white-space:nowrap;font-weight:500}
-.meter-controls{display:flex;align-items:center;gap:2px;padding:3px;border-radius:100px;margin-left:auto}
-.meter-controls .nudge{border:0;background:#ffffff66;box-shadow:none;min-width:29px;width:29px;height:30px;min-height:30px;font-size:12px;padding:0;border-radius:50%;color:var(--ink)}
-.meter-controls .nudge:hover{background:#fff}
-.stat.great{max-width:none;position:relative}
-.stat.great>b,.stat.great.idle>b{color:var(--ink);font-size:36px;font-weight:750;line-height:1.1;letter-spacing:-.025em;font-family:var(--num)}
-#probNote{font-size:10px;max-width:none;line-height:1.4;color:var(--slate)}
-.goal-label{position:absolute;right:0;top:20px;font-size:10px;color:#465260;white-space:nowrap}
-.ui-meter{height:4px;border-radius:100px;background:#a8b7c237;position:relative;width:100%;overflow:visible;margin-top:3px}
-.ui-meter>i{height:100%;display:block;background:#374352;border-radius:inherit;width:0}
-.ui-meter.goal::after{content:"";position:absolute;left:80%;top:-3px;height:10px;width:2px;background:var(--ember);border-radius:2px}
-.phase-row{display:flex;align-items:center;justify-content:space-between;gap:7px;padding:8px 14px;border-radius:100px;min-height:42px;flex-wrap:wrap}
-.phase-context{display:flex;align-items:center;gap:10px;min-width:0}
-#stepLabel{font-size:13px;padding:0;border:0;color:var(--ink);font-weight:750;font-family:var(--num)}
-#phaseBadge{font-size:10px;color:var(--slate);display:inline}
-#skipFixed{font-size:10px;padding:4px 10px;min-height:27px;border-radius:100px;box-shadow:var(--edge)}
-.turn-context{display:flex;align-items:center;gap:4px;white-space:nowrap;color:var(--slate);font-size:10px}
-.effect{font-size:11px;font-weight:650}
-.flags{margin:0;display:flex;flex-direction:row;gap:12px;align-items:center}
-.flag{font-size:10px;gap:6px;color:var(--ink);flex-direction:row-reverse}
-.flag input{appearance:none;-webkit-appearance:none;width:31px;height:18px;background:#acb6c4;border:1px solid #ffffffb3;border-radius:20px;position:relative;box-shadow:inset 0 1px 3px #29394e15;cursor:pointer;flex:none}
-.flag input::before{content:"";position:absolute;width:14px;height:14px;left:1px;top:1px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #28364c30;transition:transform .15s}
-.flag input:checked{background:#eb6958}.flag input:checked::before{transform:translateX(13px)}
-.board-shell{padding:9px 10px 10px;position:relative}
-.section-heading{display:flex;align-items:center;gap:8px;min-height:25px;padding:0 7px 7px;position:relative}
-.section-heading h2{font-size:13px;line-height:1.25;margin:0;font-weight:750}
-.section-hint{font-size:10px;color:var(--slate);margin-left:5px}
-.forge-board,.hero .forge-board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;width:100%;max-width:none}
-.mass{position:relative;border:1px solid #ffffff9c;border-radius:16px;padding:10px 11px;display:grid;grid-template-columns:minmax(92px,1fr) 66px minmax(112px,1.25fr);grid-template-rows:20px 49px 20px;gap:3px 8px;background:#ffffff54;box-shadow:inset 0 1px 1px #ffffff94;backdrop-filter:none;-webkit-backdrop-filter:none;overflow:hidden;transition:background .18s,border-color .18s}
-.mass::before{display:block;background:linear-gradient(155deg,#ffffff3d,transparent 60%)}
-.mass-top,.mass-edit{display:contents;opacity:1}
-.mass-letter{grid-column:1;grid-row:1;font-family:var(--num);font-size:21px;font-weight:750;color:var(--ink);line-height:1}
-.mass.priority-mass .mass-letter::after{display:none}
-.mass-zone{grid-column:3;grid-row:1;align-self:center;min-width:0;color:var(--ink);font-family:var(--num);font-weight:650;font-size:12px;overflow:visible;white-space:nowrap}
-.mass-zone::before{content:"成功範囲 ";font-size:10px;font-weight:500;letter-spacing:-.025em}
-.mass-flag{grid-column:1/span 2;grid-row:1;justify-self:end;align-self:center;font-size:9px;letter-spacing:0;line-height:1.1;color:var(--slate);max-width:calc(100% - 30px);text-align:right}
-.mass-value{grid-column:1;grid-row:2;text-align:left;padding:0;font-family:var(--num);font-size:47px;line-height:1;font-weight:750;letter-spacing:-.045em;align-self:center;color:var(--ink)}
-.mass:not(.waiting)>.mass-value{display:none}
-.mass-edit input[type=number]{grid-column:1;grid-row:2;width:100%;min-width:0;height:51px;min-height:0;margin:0;padding:0;align-self:center;text-align:left;font-family:var(--num);font-size:47px;font-weight:750;letter-spacing:-.045em;line-height:1;color:var(--ink);border:0;border-radius:7px;background:transparent;box-shadow:none;z-index:2}
-.mass-edit input[type=number]:focus{background:#ffffffbd;outline:2px solid var(--azure);outline-offset:2px}
-.mass.waiting .mass-edit input[type=number]{grid-column:1/span 2;grid-row:3;font-size:12px;letter-spacing:0;height:22px;width:68px;padding:1px 5px;border:1px solid #76879b55;background:#ffffff80}
-.mass-edit>.nudge{grid-row:2;grid-column:2;width:31px;height:33px;min-width:0;min-height:0;font-size:17px;border-radius:50%;padding:0;background:#ffffff91;border:1px solid #fff9;align-self:center;color:var(--ink);box-shadow:var(--edge),0 3px 7px -4px #47647f33}
-.mass-edit>.nudge:first-child{justify-self:start}.mass-edit>.nudge[data-d="1"]{justify-self:end}
-.mass-edit>.nudge:hover{background:#fff}
-.crit-toggle{grid-column:3;grid-row:3;justify-self:end;align-self:center;font-size:10px;color:#394b5e;gap:5px;margin:0}
-.crit-toggle input{width:15px;height:15px;margin:0;accent-color:#229565}
-.mass-bar{grid-column:3;grid-row:2;align-self:center;height:5px;background:#71869b2b;border-radius:3px;overflow:visible;margin-bottom:0;position:relative}
-.mass-bar::before{content:"";position:absolute;left:var(--range-start,83%);width:var(--range-width,9%);min-width:3px;height:9px;top:-2px;background:#83b399;border-radius:2px}
-.mass-bar i{position:absolute;left:0;top:0;height:100%;background:transparent!important;border-radius:0;transition:none}
-.mass-bar i::after{content:"";position:absolute;right:-3px;top:-1px;width:7px;height:7px;background:var(--ink);border-radius:50%;box-shadow:0 0 0 1.5px #fff9}
-.mass-bar::after{content:"0";position:absolute;left:0;top:10px;color:#526273;font-family:var(--num);font-size:9px;line-height:1}
-.mass-forecast{grid-column:1/span 2;grid-row:3;font-size:10px;font-weight:550;align-self:center;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mass.waiting .mass-forecast{display:none}
-.mass.in-zone,.mass.fresh{background:#ffffff78;border-color:#ffffffc7}
-.mass.in-zone .mass-letter,.mass.in-zone .mass-value{color:var(--ink)}
-.mass.in-zone .mass-flag,.mass.fresh .mass-flag{color:#176942}
-.mass.critical{box-shadow:inset 0 1px 1px #fff9}
-.mass.targeted{border:1px solid #ffffffc7;padding:10px 11px;background:linear-gradient(115deg,#ffdedbc4,#fff4f194);box-shadow:var(--edge),0 3px 12px -8px #cf5c454d;animation:none;transform:none}
-.mass.targeted::after,.mass.waiting::after{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:3px;background:#ef7968}
-.mass.targeted .mass-letter{color:#d44635}.mass.targeted .mass-value,.mass.targeted .mass-edit input{color:var(--ink)}
-.mass.targeted .mass-letter::after{content:"対象";display:inline-block;font-family:inherit;font-size:9px;font-weight:650;letter-spacing:0;margin-left:8px;vertical-align:3px;padding:3px 6px;border-radius:30px;background:#f6786320;color:#bc3c2d;width:auto;height:auto}
-.mass.targeted .mass-flag{color:var(--slate)}
-.mass.waiting{border:1px solid #b0ccea;background:#eaf2fcbd;padding:10px 11px;box-shadow:var(--edge);animation:none}
-.mass.waiting::after{background:#5a8cc6}.mass.waiting .mass-value{color:var(--ink)}
-.mass.over,.mass.bad-crit{background:#fff5f0b3;border:1px solid #dba49a;padding:10px 11px}
-.mass.over .mass-value,.mass.over .mass-edit input{color:var(--ink)}
-.mass.over .mass-flag,.mass.bad-crit .mass-flag{color:#a62721;font-weight:700}
-.mass.over .mass-flag::before{content:"△ ";font-size:12px}
-.forecast-details{margin-left:auto;font-size:10px}
-.forecast-details>summary{cursor:pointer;color:#415267;list-style:none;border-radius:20px;padding:3px 7px;background:#ffffff6e}
-.forecast-details>summary::-webkit-details-marker{display:none}
-.forecast-details[open] .forecast{display:grid;position:absolute;z-index:10;top:30px;right:0;width:min(420px,85vw);border:1px solid #fff;border-radius:16px;background:#f9fbfff5;box-shadow:var(--lift-lg);padding:14px;gap:8px;font-size:12px;color:var(--ink);backdrop-filter:var(--blur-lg)}
-.forecast div{display:grid;gap:3px;border:0;padding:0}.forecast .why{font-size:10px}
-.forecast-details:not(:has(#forecast>div)){display:none}
-.input-shell{padding:10px 14px 12px;min-height:55px}
-.input-shell .section-heading{padding:0 1px 7px;min-height:23px}
-.input-idle{font-size:11px;color:var(--slate);margin:0;line-height:1.65}
-.input-shell:has(#resultEntry:not([hidden])) .input-idle,.input-shell:has(#quickPlay:not([hidden])) .input-idle{display:none}
-#resultEntry{display:block;padding:0;border:0;background:none;border-radius:0;box-shadow:none}
-.result-tabs{display:flex;align-items:center;gap:3px;border:1px solid #fffc;background:#ffffff57;border-radius:100px;padding:3px;width:max-content;max-width:100%;flex-wrap:wrap;margin:0 0 7px;box-shadow:var(--edge)}
-.result-tab{min-height:30px;min-width:58px;padding:4px 11px;border:0;background:none;box-shadow:none;color:var(--slate);cursor:pointer;border-radius:100px;font-weight:650;font-size:12px}
-.result-tab[aria-selected=true]{background:#ffffffdf;color:var(--ink);box-shadow:var(--edge),0 3px 8px -5px #263b575c}
-.result-tab[data-done=true]{color:#156c46}
-.cand-row{border:0;padding:0;background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;gap:6px;border-radius:0}
-.cand-row.done{opacity:1}.cand-row.done .cand{opacity:.72}
-.cand-head{gap:8px;align-items:center}.cand-head b{font-size:15px;color:var(--ink);font-family:var(--num)}
-.cand-head span{font-size:10px;color:var(--slate)}
-.cand-sub{font-size:10px;color:#75532c;font-weight:600}
-.cand-list{gap:5px;flex-wrap:wrap}
-.cand{min-height:43px;min-width:56px;padding:5px 10px;border-radius:12px;background:#ffffffe0;color:var(--ink);box-shadow:var(--edge),0 5px 12px -8px #50678652}
-.cand::before{background:linear-gradient(#ffffff47,transparent)}
-.cand b{font-size:18px;color:var(--ink);font-family:var(--num);font-weight:750}
-.cand i{font-size:10px;font-style:normal;color:#364657}.cand i::before{content:"合計 ";font-size:9px}
-.cand.crit{background:#fffbf2e8;border-color:#fff6e3}.cand.crit b{color:var(--ink)}
-.cand:hover{background:#fff;border-color:#8ba8cb;transform:translateY(-1px)}
-.cand.on{background:#e1f3e8;border-color:#70aa8d}
-.cand.snapbtn,.cand.other{min-width:0;min-height:31px;padding:5px 11px;font-size:10px;border-radius:100px;background:#ffffff8c;color:var(--ink)}
-.cand.snapbtn{color:#196542}
-#resultEntry>.section-head{margin-top:7px}.section-head .hint{font-size:10px}
-.section-head .ghost-button{font-size:10px;min-height:30px;padding:5px 12px}
-details.quick{border:0;padding:0;background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;border-radius:0}
-details.quick>summary{font-size:10px;padding:2px 0 7px;color:var(--slate);font-weight:500}
-details.quick[open]>summary::before{transform:rotate(90deg)}
-#quickPlay{padding:0;gap:6px}#quickPlay>.rec-kicker{display:none}
-#quickPlay .cand{min-height:43px;min-width:56px;padding:5px 10px}#quickPlay .cand b{font-size:18px}
-#quickPlay .cand.snapbtn,#quickPlay .cand.other{min-height:31px;min-width:0}
-.cand-row,#quickPlay{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:5px 12px}
-.cand-row.ui-has-critical,#quickPlay.ui-has-critical{grid-template-columns:repeat(2,minmax(0,1fr))}
-.cand-head{grid-column:1/-1;grid-row:1}
-.ui-normal-label{grid-column:1;grid-row:2;font-size:10px;color:var(--slate);font-weight:550}
-.ui-normal{grid-column:1;grid-row:3}
-.cand-row>.cand-sub,#quickPlay>.cand-sub{grid-column:2;grid-row:2}
-.ui-critical{grid-column:2;grid-row:3}
-.ui-result-actions{grid-column:1/-1;grid-row:4}
-.cand-row>.hint,#quickPlay>.hint{grid-column:1/-1;grid-row:5}
-.ui-normal,.ui-critical{max-height:94px;overflow-y:auto;overscroll-behavior:contain;align-content:start;padding:1px 2px 4px;scrollbar-width:thin;scrollbar-color:#8a9eaf80 transparent}
-.hero[data-mode=result] #actionName{font-size:31px}
-.hero[data-mode=result] .recommendation-panel{padding-top:11px;padding-bottom:11px;gap:5px 14px}
-.hero[data-mode=result] .reason-preview{-webkit-line-clamp:1}
-.hint{font-size:10px;line-height:1.6;color:var(--slate)}
-.tool-dock{display:flex;align-items:center;gap:5px;padding:5px;margin-top:9px;border-radius:100px;position:relative;z-index:20}
-.tool-button{display:flex;justify-content:center;align-items:center;gap:7px;flex:1;min-width:0;min-height:36px;border-radius:100px;padding:6px 10px;color:var(--ink);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
-.tool-button:first-child{background:#ffffffba}.tool-button:hover{background:#ffffffe6;transform:translateY(-1px)}
-.tool-dock .menu{flex:1;min-width:0}.tool-dock .menu>summary{width:100%;height:36px;font-size:11px;display:flex;border-radius:100px;padding:6px 10px;gap:7px;justify-content:center;white-space:nowrap;font-weight:600;background:#ffffff73}
-.tool-dock .menu-pop{top:auto;bottom:45px;min-width:190px}
-.utility-foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-height:30px;padding:4px 8px 0;color:var(--slate);font-size:10px}
-.text-button{border:0;background:transparent;display:inline-flex;align-items:center;gap:5px;color:var(--slate);padding:3px;min-height:27px;font-size:10px;cursor:pointer}
-.text-button:hover{color:var(--ink)}
-.text-button .ui-icon{width:14px;height:14px}
-#uiSavedStatus{margin-left:auto;font-size:10px;color:var(--slate)}
-.ver{font-size:9px;color:var(--slate);padding-left:8px;border-left:1px solid var(--rule)}
-.capture-details{margin-top:8px;border-radius:17px;background:#ffffffe0}
-.capture-details:not([open]){display:none}
-.capture-details>summary{cursor:pointer;padding:9px 14px;font-size:12px;font-weight:650}
-.rail{padding:7px 14px 12px;gap:4px;background:none;border:0;box-shadow:none;position:relative;z-index:1;backdrop-filter:none;-webkit-backdrop-filter:none}
-.ocr-state,.ocr-state b{font-size:11px}.ocr-state span{font-size:11px;line-height:1.7;color:#33485b}
-#camStatus{font-size:10px;color:#42556a}.rail-side{gap:5px}.rail-side .chip{font-size:10px;min-height:30px}
-#camNotice{font-size:12px;line-height:1.7;border:1px solid #f0c69f;border-radius:14px;margin:0 0 9px;padding:10px 14px;color:#713e12;background:#fff5e9f2}
-#camShots{border:0;background:none;padding:8px 14px}.shot-actions button{color:var(--ink)}
-.setup{margin-top:8px;overflow:hidden}
-.setup:not([open]){display:none}
-.setup>summary{font-size:12px;color:var(--ink);padding:11px 15px;border:0;border-radius:0;box-shadow:none}
-.setup-body{padding:0 14px 14px}.setup-close{float:right;border:0;background:#fff;border-radius:100px;padding:5px 11px;min-height:30px;cursor:pointer;font-size:11px;color:var(--ink);margin:0 0 8px 8px}
-.cambar{gap:5px}.cambar button{font-size:11px;min-height:34px}.stage-empty span{font-size:11px}
-.calib>summary,.calib-body .hint{font-size:11px}
-.validation-card{padding:8px 5px;border-top:1px solid var(--rule);margin-top:5px;color:var(--slate)}
-.validation-card b{font-size:11px;color:var(--ink)}.validation-card p{font-size:10px;line-height:1.65;margin:3px 0}
-#drawer{z-index:65;width:min(410px,94vw);background:#f5f8fff5;border-color:#fff;border-radius:23px 0 0 23px;box-shadow:var(--lift-lg);padding:18px;transform:translateX(calc(100% + 50px))}
-body.drawer-open #drawer{transform:translateX(0)}
-#drawer h3{font-size:13px;margin:17px 0 8px}.drawer-head b{font-size:15px}.drawer-head button{width:34px;height:34px;border-radius:50%;background:#fff9}
-.history li,.alt-list li{font-size:12px;border-radius:12px;padding:10px 11px;background:#fff8;line-height:1.6}
-.history li small,.alt-list li small{font-size:10px}.alt-list li{align-items:flex-start;flex-wrap:wrap}
-.alt-list li.current{background:#ffe5dd99;border-color:#e69b8b}.alt-list li:focus-visible{outline:2px solid var(--azure)}
-.drawer-actions .ghost-button{font-size:11px;padding:9px 10px;min-height:37px}.saved-note,.autoskip,#drawer .hint{font-size:11px;line-height:1.75}
-.modal{width:min(700px,calc(100vw - 26px));max-height:calc(100dvh - 32px);overflow:auto;border-radius:24px}
-.modal-card{padding:24px;background:#f9fbfff5}.modal h2{font-size:22px}.modal-lead,.threshold-note,.route-table,.bench-input span{font-size:12px}
-.modal-close{width:35px;height:35px;font-size:24px}.modal .bench-actions{display:flex;flex-wrap:wrap;gap:8px}.modal .bench-actions>button{font-size:12px;min-width:0;flex:1;white-space:nowrap}
-.benchmark-result{flex-wrap:wrap}.benchmark-result>p,.benchmark-result>.validation-evidence{width:100%;flex-basis:100%;font-size:11px}
-.validation-evidence summary{cursor:pointer;font-weight:650}.benchmark-result strong{font-family:var(--num)}
-.benchmark-scale i em{left:80%}.ocr-table{font-size:12px}.learn-panel p{font-size:11px}.learn-actions button{font-size:11px;min-height:34px}
-@supports not (backdrop-filter:blur(1px)){.recommendation-panel,.meters,.phase-row,.board-shell,.input-shell,.tool-dock,.menu-pop{background:#f8fafdf2}}
-[data-glass=off] .scene{display:none}[data-glass=off] body{background:#edf0f4}
-[data-glass=off] .recommendation-panel,[data-glass=off] .meters,[data-glass=off] .phase-row,[data-glass=off] .board-shell,[data-glass=off] .input-shell,[data-glass=off] .tool-dock{background:#fff;border-color:#b4bfcb;box-shadow:none}
-[data-glass=off] .mass{background:#fff;border-color:#bbc6d2}[data-glass=off] .mass.targeted{background:#ffe8e0;border-color:#d86b55}
-[data-glass=off] .mass.waiting{background:#e6f0ff;border-color:#547fb1}
-@media(min-width:1100px){.app{padding-top:14px}.mass{grid-template-rows:22px 55px 21px}.mass-edit input[type=number],.mass-value{font-size:52px}.recommendation-panel{padding-top:18px;padding-bottom:16px}}
-@media(min-width:681px) and (max-height:1100px){
- .app{gap:7px}.hero{gap:7px}.recommendation-panel{padding-top:12px;padding-bottom:10px}.board-shell{padding:7px 9px 8px}.section-heading{padding-bottom:6px;min-height:23px}
- .mass,.mass.targeted,.mass.waiting,.mass.over,.mass.bad-crit{grid-template-rows:19px 44px 18px;padding-top:9px;padding-bottom:9px}
- .mass-edit input[type=number],.mass-value{font-size:44px}.mass-edit input[type=number]{height:46px}.meters{padding-top:9px;padding-bottom:9px}.phase-row{padding-top:6px;padding-bottom:6px;min-height:38px}
- .tool-dock{margin-top:7px}.utility-foot{min-height:26px;padding-top:2px}
-}
-@media(max-width:850px){
- .app{padding:9px 11px 6px;gap:8px}.brand-caption{display:none}.wordmark{font-size:18px}
- .recommendation-panel{padding:12px 15px;gap:6px 10px}.act{gap:7px;max-width:300px}.primary-button{min-width:184px;font-size:12px;padding:10px 12px}.ghost-button{font-size:12px}#undoButton{font-size:11px;padding:8px 10px}
- #actionName{font-size:38px}.action-targets{padding:6px 12px;font-size:.8em}.action-meta{font-size:10px;gap:4px 8px}.action-meta>span+span{padding-left:8px}.reason-details{font-size:10px}
- .meters{padding:10px 13px;grid-template-columns:1fr 1fr 1.12fr}.meter,.stat{padding-left:12px;padding-right:12px}.meter input,.stat.great>b{font-size:32px}.meter-unit{font-size:15px}#focusMax{font-size:13px}.meter-controls{padding:2px;gap:0}.meter-controls .nudge{width:25px;min-width:25px;height:28px;min-height:28px;font-size:11px}.goal-label{font-size:9px;top:18px}
- .phase-context{gap:7px}#phaseBadge{display:none}.flags{gap:9px}.phase-row{padding:7px 11px}.turn-context{font-size:9px}.flag{font-size:9px}
- .mass,.mass.targeted,.mass.waiting,.mass.over,.mass.bad-crit{padding:9px;grid-template-columns:minmax(80px,1fr) 61px minmax(99px,1.15fr);grid-template-rows:19px 46px 20px;gap:3px 6px}.mass-edit input[type=number],.mass-value{font-size:43px}.mass-zone{font-size:11px}.mass-zone::before{font-size:9px}.mass-edit>.nudge{width:29px;height:32px}.mass-flag{font-size:8px}.mass-letter{font-size:19px}.mass.targeted .mass-letter::after{font-size:8px;padding:3px 5px;margin-left:6px;vertical-align:2px}.mass-forecast{font-size:9px}.crit-toggle{font-size:9px}
- .tool-button,.tool-dock .menu>summary{font-size:10px;gap:5px;padding:5px 8px}.tool-button .ui-icon{width:15px;height:15px}.utility-foot{gap:7px}
-}
-@media(max-width:680px){
- .topbar{gap:8px}.wordmark{font-size:16px}.ocr-pill{font-size:10px;padding:5px 8px}.topbar .spacer{margin-left:auto}
- .recommendation-panel{grid-template-columns:minmax(0,1fr) auto}.hero-kick{grid-column:1}.picker{grid-row:1;gap:2px}.picker button{width:28px;height:28px}#pickLabel{min-width:42px;font-size:10px}
- #actionName{grid-column:1/-1;grid-row:2;font-size:36px;gap:10px}.action-meta{grid-column:1/-1;grid-row:3;font-size:11px}.reason-details{grid-column:1/-1;grid-row:4;font-size:11px}.act{grid-column:1/-1;grid-row:5;max-width:none;justify-content:flex-end;padding-top:3px}.primary-button{flex:1;min-width:0;font-size:13px}.act .ghost-button{min-height:43px}.reason-details[open]{grid-row:4}
- .meters{grid-template-columns:1fr 1fr;padding:11px 12px;gap:7px 0}.meter{padding:0 10px}.meter:first-child{padding-left:0}.meter:nth-child(2){padding-right:0}.stat.great{grid-column:1/-1;padding:8px 0 0;border-left:0;border-top:1px solid var(--rule);display:grid;grid-template-columns:1fr auto;gap:0 8px}.stat.great>span:first-child{grid-column:1}.stat.great>b{grid-column:2;grid-row:1/span 2;font-size:30px}.stat.great .goal-label{position:static;grid-column:1;grid-row:2}.stat.great #probNote{grid-column:1/-1;margin-top:2px}.stat.great .ui-meter{grid-column:1/-1}
- .phase-row{border-radius:17px;gap:8px}.phase-context{flex-wrap:wrap}#stepLabel{font-size:12px}.turn-context{margin-left:auto}.flags{width:100%;justify-content:flex-end}.flag{font-size:11px}.section-hint{font-size:9px}.section-heading{gap:6px}
- .mass,.mass.targeted,.mass.waiting,.mass.over,.mass.bad-crit{grid-template-columns:minmax(0,1fr) 63px;grid-template-rows:20px 48px 19px 18px 23px;padding:9px;gap:3px 5px}
- .mass-letter{grid-column:1;grid-row:1}.mass-flag{grid-column:2;grid-row:1;max-width:100%;font-size:8px}.mass-zone{grid-column:1/-1;grid-row:3;font-size:11px}.mass-zone::before{font-size:10px}.mass-bar{grid-column:1/-1;grid-row:4}.mass-bar::after{display:none}.mass-edit input[type=number],.mass-value{grid-column:1;grid-row:2;font-size:43px}.mass-edit>.nudge{grid-column:2;grid-row:2}.mass-forecast{grid-column:1;grid-row:5;font-size:9px}.crit-toggle{grid-column:2;grid-row:5;font-size:9px}.mass.waiting .mass-edit input[type=number]{grid-row:5;grid-column:1}
- .mass.targeted .mass-letter::after{margin-left:5px;vertical-align:2px}.forecast-details{font-size:9px}.input-shell{padding:10px 11px}.cand{min-width:54px;padding:5px 8px}.cand-head span{font-size:10px}.input-shell .section-hint{display:none}
- .tool-dock{border-radius:20px;flex-wrap:wrap;padding:6px}.tool-button{flex:1 1 28%;font-size:10px}.tool-dock .menu{flex:1 1 25%}.utility-foot{font-size:9px;gap:3px 8px}#uiSavedStatus{font-size:9px}.ver{font-size:8px}.utility-foot .text-button{font-size:9px}
- .rail{grid-template-columns:1fr}.rail-side{grid-column:1;grid-row:auto;justify-content:flex-end}.brand-caption{display:none}
-}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
-
-/* State changes never resize the workbench. Overflow stays in the input area. */
-:root{--rec-height:156px;--meter-height:90px;--phase-height:42px;--cell-height:99px;--input-height:270px}
-.scroll{scrollbar-gutter:stable;overflow-anchor:none;scroll-behavior:auto}
-.hero{gap:7px;align-content:start}
-.recommendation-panel,.hero[data-mode=result] .recommendation-panel{
-  height:var(--rec-height);min-height:var(--rec-height);max-height:var(--rec-height);
-  grid-template-columns:minmax(0,1fr) 322px;grid-template-rows:18px 52px 21px 24px;
-  align-content:center;padding:11px 16px;gap:4px 12px;z-index:5;
-}
-.picker{grid-row:1;align-self:center;justify-self:end;height:32px;align-items:center;padding:2px}
-.picker button{height:28px;width:30px}
-#actionName,.hero[data-mode=result] #actionName{grid-column:1/-1;grid-row:2;height:52px;min-width:0;font-size:42px;line-height:1.1;flex-wrap:nowrap;white-space:nowrap;gap:12px}
-.action-targets{flex:none;padding:6px 14px 8px}
-.action-meta{height:21px;min-width:0;flex-wrap:nowrap;overflow:hidden;white-space:nowrap;font-size:11px}
-.act{height:48px;grid-row:3/span 2;align-self:center;flex-wrap:nowrap;gap:10px;max-width:none;width:100%}
-.primary-button{min-width:0;flex:1;font-size:12px;min-height:46px;height:46px;padding:8px 10px}
-#applyButton::after{font-size:18px;margin-left:5px}
-#undoButton,.hero[data-mode=result] #undoButton{flex:none;width:88px;min-height:46px;height:46px;font-size:11px}
-.reason-details,.reason-details[open]{grid-column:1;grid-row:4;padding:0;background:none;position:relative;height:24px;font-size:11px;border-radius:0}
-.reason-details>summary{height:24px;align-items:center;overflow:hidden}
-.reason-preview,.hero[data-mode=result] .reason-preview{display:block;-webkit-line-clamp:unset;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.reason-details[open] #actionReason{position:absolute;z-index:55;top:27px;left:0;width:min(580px,80vw);max-height:240px;overflow:auto;padding:14px 17px;margin:0;border:1px solid #fff;border-radius:16px;background:#f8fbfff7;box-shadow:var(--lift-lg);backdrop-filter:var(--blur-lg)}
-.picked-note{position:absolute;top:12px;left:128px;right:170px;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:18px}
-.meters{height:var(--meter-height);min-height:var(--meter-height);max-height:var(--meter-height);padding:8px 16px}
-.meter,.stat{height:72px;position:relative;justify-content:flex-start;gap:1px}
-.meter>span:first-child,.stat>span:first-child{height:16px;line-height:16px;white-space:nowrap}
-.meter-readout{height:42px;flex:none}
-.stat.great>b,.stat.great.idle>b{height:37px;line-height:37px;flex:none;font-size:34px}
-#probNote{display:block;height:14px;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;margin:0}
-.ui-meter{position:absolute;bottom:1px;left:17px;right:17px;width:auto;height:3px;margin:0}
-.meter:first-child .ui-meter{left:0}.stat:last-child .ui-meter{right:0}
-.ui-meter[hidden]{display:block!important;visibility:hidden}
-.phase-row{height:var(--phase-height);min-height:var(--phase-height);max-height:var(--phase-height);flex-wrap:nowrap;padding:6px 12px}
-.phase-context{min-width:0;white-space:nowrap}.flags{flex:none}.turn-context{flex:none}
-#phaseBadge{display:none}#stepLabel{font-size:12px}#skipFixed{font-size:9px}
-.board-shell{padding:7px 9px 8px}
-.board-shell>.section-heading{height:26px;min-height:26px;padding:0 6px 6px}
-.forge-board,.hero .forge-board{grid-auto-rows:var(--cell-height);align-items:stretch}
-.mass,.mass.targeted,.mass.waiting,.mass.over,.mass.bad-crit{
-  height:var(--cell-height);min-height:var(--cell-height);max-height:var(--cell-height);
-  grid-template-rows:17px 42px 18px;padding-top:7px;padding-bottom:7px;row-gap:2px;
-}
-.mass-edit input[type=number],.mass-value{font-size:42px;height:42px}
-.mass.waiting .mass-edit input[type=number]{height:20px;font-size:12px}
-.mass-flag{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.input-shell{height:var(--input-height);min-height:var(--input-height);max-height:var(--input-height);display:grid;grid-template-rows:24px 38px minmax(0,1fr);gap:6px;padding:8px 13px 10px;overflow:hidden}
-.input-shell>.section-heading{height:24px;min-height:24px;padding:0 1px}
-.ocr-feedback{display:grid;grid-template-columns:85px minmax(0,1fr) 124px 78px 78px;gap:7px;align-items:center;min-width:0;padding:0 2px 6px;border-bottom:1px solid var(--rule);color:var(--slate)}
-.ocr-feedback>strong{font-size:11px;white-space:nowrap;color:var(--ink)}
-.ocr-feedback>span{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ocr-feedback>button,.ocr-feedback #hudOff{min-width:0;min-height:31px;height:31px;padding:4px 8px;margin:0;font-size:10px;white-space:nowrap;border-radius:10px;border:1px solid #ffffffbd;background:#ffffffa6;box-shadow:var(--edge);color:var(--ink);cursor:pointer;line-height:1.2}
-.ocr-feedback #hudOff[hidden]{display:block!important;visibility:hidden}
-.ocr-feedback #hudOff{color:#24579a;background:#e7f1fe}
-.ocr-feedback #uiOcrRetry{background:#253747;color:#fff;border-color:#253747}
-.ocr-feedback[data-kind=error]>strong{color:#a73524}.ocr-feedback[data-kind=warning]>strong{color:#8c5714}.ocr-feedback[data-kind=success]>strong{color:#156c46}
-.input-viewport{min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-gutter:stable;overflow-anchor:none;padding:0 3px 1px 0}
-.result-tabs{height:32px;min-height:32px;flex-wrap:nowrap;margin-bottom:5px;padding:1px 3px}
-.result-tab{min-height:28px;height:28px;padding:2px 10px}
-.cand-row,#quickPlay{gap:4px 12px}
-.ui-normal,.ui-critical{height:52px;max-height:52px;min-height:52px;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;padding:1px 2px 5px;scrollbar-gutter:auto}
-.ui-normal .cand,.ui-critical .cand{flex:0 0 auto;scroll-snap-align:start}
-.ui-result-actions{min-height:33px;align-items:center;gap:10px}
-#resultEntry>.section-head{margin-top:5px;min-height:30px}
-.input-viewport:has(#resultEntry:not([hidden]))>.quick{display:none}
-.input-viewport:has(#quickPlay[hidden])>.quick{display:none}
-.input-viewport:has(.quick[open]):has(#quickPlay:not([hidden]))>.input-idle{display:none}
-.input-shell .input-idle{padding-top:32px;text-align:center}
-.input-viewport:has(.quick:not([open]))>.input-idle{display:block}
-.ocr-pill{width:124px;min-width:124px;max-width:124px;height:32px;overflow:hidden;font-size:10px}
-.ocr-pill::before{flex:none}.ocr-pill>span{overflow:hidden;text-overflow:ellipsis}
-#camNotice{position:fixed;z-index:80;left:50%;bottom:22px;transform:translateX(-50%);width:min(700px,calc(100vw - 40px));max-height:160px;overflow:auto;margin:0;box-shadow:var(--lift-lg)}
-.capture-details[open]{position:fixed;z-index:60;left:50%;bottom:60px;transform:translateX(-50%);width:min(920px,calc(100vw - 32px));max-height:60dvh;overflow:auto;box-shadow:var(--lift-lg);background:#f7fafff7}
-.tool-dock{height:44px;min-height:44px;max-height:44px;padding:4px;margin-top:7px}
-.utility-foot{height:28px;min-height:28px;max-height:28px;flex-wrap:nowrap;padding-top:0}
-@media(min-width:681px) and (max-height:990px){:root{--input-height:220px}.app{padding-top:6px;gap:5px}.topbar{min-height:32px}.hero{gap:5px}.tool-dock{margin-top:5px}}
-@media(min-width:681px) and (max-width:850px){
- .recommendation-panel,.hero[data-mode=result] .recommendation-panel{grid-template-columns:minmax(0,1fr) 292px}
- #actionName,.hero[data-mode=result] #actionName{font-size:38px}.ocr-feedback{grid-template-columns:80px minmax(0,1fr) 114px 68px 70px;gap:5px}
- .phase-row{gap:6px}.flags{gap:7px}.phase-context{gap:7px}.meter-controls{position:absolute;right:6px;bottom:4px}.meter-readout{padding-bottom:5px}.meter input{font-size:30px}
-}
-@media(max-width:680px){
- :root{--rec-height:213px;--meter-height:160px;--phase-height:75px;--cell-height:126px;--input-height:290px}
- .recommendation-panel,.hero[data-mode=result] .recommendation-panel{grid-template-columns:minmax(0,1fr) auto;grid-template-rows:20px 52px 23px 23px 48px;padding:10px 13px}
- #actionName,.hero[data-mode=result] #actionName{font-size:clamp(24px,6vw,36px);gap:8px}.action-targets{font-size:.75em;padding:6px 9px}
- .action-meta,.reason-details,.reason-details[open]{grid-column:1/-1}.act{grid-column:1/-1;grid-row:5;padding:0;height:48px}
- .picked-note{left:122px;right:135px;font-size:8px}
- .meters{padding:9px 12px;grid-template-columns:1fr 1fr;grid-template-rows:67px 64px;gap:8px 0}.meter{height:67px}.stat.great{height:64px;display:grid;grid-template-columns:1fr auto;grid-template-rows:17px 16px 14px;padding:5px 0 0}.stat.great>b{grid-row:1/span 2;height:35px;line-height:35px;font-size:30px}.stat.great #probNote{grid-row:3}.stat .ui-meter{left:0;bottom:0}.stat.great .goal-label{top:auto}
- .phase-row{flex-wrap:wrap;padding:8px 11px}.phase-context{flex-wrap:nowrap}.flags{height:22px;width:100%;justify-content:flex-end}.turn-context{margin-left:auto}
- .mass,.mass.targeted,.mass.waiting,.mass.over,.mass.bad-crit{grid-template-rows:17px 38px 16px 8px 18px;padding:7px;row-gap:3px}
- .mass-edit input[type=number],.mass-value{font-size:38px}.mass.waiting .mass-edit input[type=number]{font-size:12px}
- .ocr-feedback{grid-template-columns:76px minmax(0,1fr) 65px 66px;gap:5px}.ocr-feedback>span{display:none}.ocr-feedback #hudOff{grid-column:2;font-size:9px;padding:3px}
- .ocr-pill{width:110px;min-width:110px;max-width:110px}.utility-foot .ver{display:none}
- .tool-dock{overflow-x:auto;justify-content:flex-start}.tool-button,.tool-dock .menu{flex:none}.tool-button{min-width:108px}
-}
-
 </style>
 </head>
 <body>
   <div class="scene" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="app">
+
     <header class="topbar">
-      <span class="wordmark">超あまつゆ <em>Forge AI</em></span>
-      <span class="brand-caption">DQX 鍛冶サポート・非公式</span>
+      <span class="wordmark">超あまつゆ <em>Forge</em></span>
+      <span id="stepLabel">基本手順 1 / 11</span>
+      <span id="phaseBadge">基本手順</span>
       <span class="spacer"></span>
-      <button id="uiOcr" class="ocr-pill" type="button" data-kind="waiting" aria-controls="uiCaptureDetails"><span id="uiOcrText">OCR待機</span></button>
+      <button id="skipFixed" class="chip" type="button">基本手順を抜ける</button>
+      <button id="toggleLog" class="chip" type="button">ログ</button>
       <details class="menu">
-        <summary aria-label="設定と検証"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3 1-2h4l1 2 2 1 2 0 2 3-1 2v2l1 2-2 3h-2l-2 1-1 2h-4l-1-2-2-1H5l-2-3 1-2V9L3 7l2-3h2z"/><circle cx="12" cy="10" r="3"/></svg></summary>
+        <summary aria-label="その他">⋯</summary>
         <div class="menu-pop">
-          <button id="openBenchmark" class="chip" type="button">AI検証 <b id="headlineRate">—</b></button>
-          <button id="openOcrTest" class="chip" type="button">OCR精度診断</button>
-          <button id="glassToggle" class="chip" type="button">高コントラストに切り替え</button>
-          <div class="menu-separator"></div>
-          <button id="resetButton" class="chip danger" type="button">最初からやり直す</button>
-          <aside class="validation-card" aria-label="AIの検証結果"><b id="validationTitle">大成功率の目標 80%以上</b><p id="validationDetail">開始集中力253・内蔵モデルで検証します。</p></aside>
+          <button id="openBenchmark" class="chip" type="button">検証を実行 <b id="headlineRate">—</b></button>
+          <button id="openOcrTest" class="chip" type="button">OCR診断</button>
+          <button id="glassToggle" class="chip" type="button">ガラス表現を切る</button>
+          <button id="resetButton" class="chip" type="button">最初からやり直す</button>
+          <span class="tag ver" id="appVersion">v2026.08.20-39</span>
         </div>
       </details>
     </header>
+
+    <div class="rail">
+      <div id="ocrState" class="ocr-state" data-kind="waiting"><b>OCR待機</b><span>とくぎ実行後、対象マスを監視します。</span></div>
+      <span id="camStatus">待機中</span>
+      <span class="rail-side">
+        <button id="camCopy" class="chip" type="button" title="いまの診断内容を書き出します">診断をコピー</button>
+        <button id="camTape" class="chip" type="button" title="取りこぼした瞬間の映像を画像にして保存します" hidden>映像を保存</button>
+        <button id="camOpen" type="button">画面を取り込む</button>
+      </span>
+    </div>
+
+    <p id="camNotice" hidden></p>
+    <div id="camShots" hidden></div>
+
     <div class="scroll">
-      <p id="camNotice" role="status" hidden></p>
       <main class="hero" id="hero" data-mode="play">
-        <section class="recommendation-panel" aria-label="推奨する一手">
-          <div class="hero-kick"><span class="section-index" aria-hidden="true">01</span><span class="nextkick" id="nextKick">次の一手</span></div>
-          <div class="picker" aria-label="推奨手の候補">
-            <button id="pickPrev" type="button" aria-label="前の候補">❮</button><span id="pickLabel">1 / 1</span><button id="pickNext" type="button" aria-label="次の候補">❯</button>
+        <div class="hero-kick">
+          <span class="nextkick" id="nextKick">次の一手</span>
+          <div class="picker">
+            <button id="pickPrev" type="button" aria-label="前の候補">◀</button>
+            <span id="pickLabel">1 / 1</span>
+            <button id="pickNext" type="button" aria-label="次の候補">▶</button>
           </div>
-          <h2 id="actionName">火力上げ</h2>
-          <div id="actionMeta" class="action-meta"></div>
-          <details class="reason-details" id="uiReasonDetails"><summary aria-label="推奨理由の全文を表示"><span class="reason-preview" id="uiReasonPreview"></span></summary><p id="actionReason"></p></details>
-          <p class="picked-note" id="pickedNote" hidden>AIの一番手ではなく、選び直した候補を表示しています。</p>
-          <div class="act">
-            <button id="applyButton" class="primary-button" type="button"><span id="applyLabel">この手を実行した</span></button>
-            <button id="undoButton" class="ghost-button" type="button">1手戻す</button>
-          </div>
-        </section>
-        <section class="meters" aria-label="現在の状態">
-          <label class="meter"><span>温度</span><span class="meter-readout">
-            <input min="0" aria-label="温度" id="tempInput" type="number" inputmode="numeric" step="50" value="1000"><span class="meter-unit">℃</span>
-            <span class="meter-controls"><button class="nudge" data-temp="-50" type="button" aria-label="温度を50度下げる">−50</button><button class="nudge" data-temp="50" type="button" aria-label="温度を50度上げる">＋50</button></span>
-          </span></label>
-          <label class="meter"><span>集中力</span><span class="meter-readout">
-            <input min="0" aria-label="集中力" id="focusInput" type="number" inputmode="numeric" value="253"><b id="focusMax">/ 253</b>
-            <span class="meter-controls"><button class="nudge" data-focus="-1" type="button" aria-label="集中力を1減らす">−</button><button class="nudge" data-focus="1" type="button" aria-label="集中力を1増やす">＋</button></span>
-          </span><span class="ui-meter" aria-hidden="true"><i id="uiFocusFill"></i></span></label>
-          <div class="stat great"><span>いま仕上げた場合の大成功率</span><b id="probNow">—</b><span class="goal-label">目標 80%以上</span><small id="probNote"></small><span id="uiChanceTrack" class="ui-meter goal" aria-hidden="true" hidden><i id="uiChanceFill"></i></span></div>
-        </section>
-        <section class="phase-row" aria-label="進行とターン効果">
-          <div class="phase-context"><span id="stepLabel">基本手順 1 / 11</span><span id="phaseBadge">基本手順</span><button id="skipFixed" class="chip" type="button">基本手順を抜ける</button></div>
-          <span class="turn-context"><span>効果</span><b class="effect" id="turnEffect">初手・効果なし</b></span>
-          <span class="flags"><label class="flag"><input id="hepaCharged" type="checkbox">必殺チャージ中</label><label class="flag"><input id="hepaActive" type="checkbox">ヘパイトス直後</label></span>
-        </section>
-        <section class="board-shell" aria-labelledby="uiBoardTitle">
-          <div class="section-heading"><span class="section-index" aria-hidden="true">02</span><h2 id="uiBoardTitle">鍛冶盤</h2><span class="section-hint">数値をクリックして修正</span><details class="forecast-details"><summary>予測の詳細 ⌄</summary><div id="forecast" class="forecast"></div></details></div>
-          <div id="board" class="forge-board" role="group" aria-label="AからFの鍛冶マス"></div>
-        </section>
-        <section class="input-shell" aria-labelledby="uiResultTitle">
-          <div class="section-heading"><span class="section-index" aria-hidden="true">03</span><h2 id="uiResultTitle">結果入力</h2><span class="section-hint">実機に出たダメージを選択</span></div>
-          <div class="ocr-feedback" id="uiOcrFeedback" data-kind="waiting">
-            <strong id="uiOcrStateLabel">OCR待機</strong><span id="uiOcrStateDetail">画面を取り込むと自動で読み取ります。</span>
-            <button id="hudOff" class="ghost-button" type="button" hidden></button>
-            <button id="uiOcrInspect" type="button">状況・画像</button><button id="uiOcrRetry" type="button" title="未反映の対象を再読取します。読み取り済みの表示は二重反映しません。">再読取 ↻</button>
-          </div>
-          <div class="input-viewport">
-          <p class="input-idle">数値の入力が必要になると、ここに候補が表示されます。</p>
-          <div id="resultEntry" hidden></div>
-          <details class="quick" open><summary>実機を見ながら1タップで実行＋入力</summary><div id="quickPlay" hidden></div></details>
-          </div>
-        </section>
+        </div>
+
+        <h2 id="actionName">火力上げ</h2>
+        <div id="actionMeta" class="action-meta"></div>
+        <p class="picked-note" id="pickedNote" hidden>AIの一番手ではなく、選び直した候補を表示しています。</p>
+
+        <div id="board" class="forge-board" aria-label="AからFの鍛冶マス"></div>
+
+        <div id="resultEntry" hidden></div>
+
+        <div class="act">
+          <button id="applyButton" class="primary-button" type="button"><span id="applyLabel">この手を実行した</span></button>
+          <button id="hudOff" class="ghost-button" type="button" hidden></button>
+          <button id="undoButton" class="ghost-button" type="button">1手戻す</button>
+        </div>
+
+        <div id="forecast" class="forecast"></div>
+        <p id="actionReason"></p>
+        <details class="quick"><summary>実機を見ながら1タップで実行＋入力</summary><div id="quickPlay" hidden></div></details>
         <span hidden id="nextName"></span><span hidden id="nextMeta"></span>
       </main>
-      <nav class="tool-dock" aria-label="取り込みと記録">
-        <button id="camOpen" class="tool-button" type="button"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/><rect x="7" y="7" width="10" height="10" rx="2"/></svg><span>画面を取り込む</span></button>
-        <button id="uiSetup" class="tool-button" type="button" aria-controls="setupPanel"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3H3v4m14-4h4v4M3 17v4h4m14-4v4h-4M8 8h8v8H8z"/></svg><span>読み取り枠・校正</span></button>
-        <button id="toggleLog" class="tool-button" type="button"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span>進行ログ</span></button>
-        <button id="uiCandidates" class="tool-button" type="button"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>候補一覧</span></button>
-        <details class="menu"><summary aria-label="ログの書き出し"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M4 15v6h16v-6"/></svg><span>JSON / CSV</span></summary><div class="menu-pop"><button class="chip" type="button" data-ui-click="exportJson">JSONを書き出す</button><button class="chip" type="button" data-ui-click="exportCsv">CSVを書き出す</button></div></details>
-      </nav>
-      <footer class="utility-foot"><button id="validationOpen" class="text-button" type="button"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10m7 10V4m7 16V7"/></svg>AI検証 1,000回</button><button class="text-button" type="button" data-ui-click="openOcrTest"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="m15 15 6 6"/></svg>OCR精度診断</button><span id="uiSavedStatus">進行を自動保存</span><span class="ver" id="appVersion">v2026.09.08-42</span></footer>
-      <details class="capture-details" id="uiCaptureDetails"><summary>読み取り状況と診断</summary>
-        <div class="rail"><div id="ocrState" role="status" aria-live="polite" class="ocr-state" data-kind="waiting"><b>OCR待機</b><span>とくぎ実行後、対象マスを監視します。</span></div><span id="camStatus">待機中</span><span class="rail-side"><button id="camCopy" class="chip" type="button" title="いまの診断内容を書き出します">診断をコピー</button><button id="camTape" class="chip" type="button" title="取りこぼした瞬間の映像を画像にして保存します" hidden>映像を保存</button></span></div>
-        <div id="camShots" hidden></div>
-      </details>
-      <details class="setup" id="setupPanel">
-        <summary>読み取り枠の調整・校正</summary>
-        <div class="setup-body"><button id="uiSetupClose" class="setup-close" type="button">閉じる ×</button>
+
+      <details class="setup" id="setupPanel" open>
+        <summary>画面の取り込みと枠合わせ</summary>
+        <div class="setup-body">
           <div class="cambar">
             <button id="camAuto" type="button">枠を自動調整</button>
             <button id="camReset" type="button">枠リセット</button>
@@ -985,9 +581,31 @@ body.drawer-open #drawer{transform:translateX(0)}
           </div>
         </div>
       </details>
-
     </div>
+
+    <div class="meters">
+      <label class="meter"><span>温度 ℃</span>
+        <span class="io-row">
+          <button class="nudge" data-temp="-50" type="button">−</button>
+          <input id="tempInput" type="number" inputmode="numeric" step="50" value="1000">
+          <button class="nudge" data-temp="50" type="button">＋</button>
+        </span></label>
+      <label class="meter"><span>集中力 <b id="focusMax">/ 253</b></span>
+        <span class="io-row">
+          <button class="nudge" data-focus="-1" type="button">−</button>
+          <input id="focusInput" type="number" inputmode="numeric" value="253">
+          <button class="nudge" data-focus="1" type="button">＋</button>
+        </span></label>
+      <span class="stat"><span>このターン</span><b class="effect" id="turnEffect">初手・効果なし</b></span>
+      <span class="stat great"><span>大成功率</span><b id="probNow">—</b><small id="probNote"></small></span>
+      <span class="flags">
+        <label class="flag"><input id="hepaCharged" type="checkbox">必殺チャージ中</label>
+        <label class="flag"><input id="hepaActive" type="checkbox">ヘパイトス直後</label>
+      </span>
+    </div>
+
   </div>
+
   <aside id="drawer" aria-label="候補とログ">
     <div class="drawer-head"><b>候補と進行ログ</b><button id="closeDrawer" type="button" aria-label="閉じる">×</button></div>
     <h3>手の候補（タップで切り替え）</h3>
@@ -1003,8 +621,8 @@ body.drawer-open #drawer{transform:translateX(0)}
     <h3>動作</h3>
     <label class="autoskip"><input id="autoSkipToggle" type="checkbox" checked>基本手順のなかの火力上げは自動で進める（冷やしこみ・必殺・アドリブ帯は自動化しません）</label>
     <h3>バージョン</h3>
-    <p class="hint">超あまつゆ Forge <b>v2026.09.07-41</b><br>
-      UI：高さ固定のリキッドグラス表示。OCR：桁ごとの判別差・新しい複数フレームを確認、薄い数字の検出と再読取を改善。AI推奨手の計算は v2026.09.07-41 と同一です。</p>
+    <p class="hint">超あまつゆ Forge <b>v2026.08.20-39</b><br>
+      主な変更：画面を「次の一手」中心に再設計／盤面を指示書化（対象マスが光り、結果待ちは「?」）／二重加算の防止／読み取り判定の緩和。</p>
     <h3>使い方</h3>
     <p class="hint">緑のマス目が鉱石の3×2からズレていたら、映像上のオレンジの丸をドラッグして<b>板（羊皮紙）の外周4隅</b>に合わせてください。位置はこのブラウザに記憶されます。とくぎの説明枠が板に重なると読み取りを邪魔するので、カーソルを外しておくと安定します。</p>
     <p class="hint">AIは隠れた基準値を一切参照せず、画面上のたたき値・温度・集中力・本会心状態だけで判断します。非公式の練習・判断支援ツールです。</p>
@@ -1014,18 +632,18 @@ body.drawer-open #drawer{transform:translateX(0)}
   <dialog id="benchmarkDialog" class="modal">
     <form method="dialog" class="modal-card">
       <button class="modal-close" value="close" aria-label="閉じる">×</button>
-      <p class="eyebrow">AI VALIDATION</p>
-      <h2>AIの大成功率を検証</h2>
+      <p class="eyebrow">MONTE CARLO VALIDATION</p>
+      <h2>1,000回の大成功率を実測</h2>
       <p class="modal-lead">同じ基本手順＋AIアドリブを、隠れ基準値・威力乱数・会心・必殺チャージを変えて再現します。固定シードなので結果は再現可能です。</p>
       <label class="bench-input"><span>開始集中力</span><input id="benchmarkFocus" type="number" value="253" min="150" max="400"></label>
       <div class="bench-actions">
         <button id="runBenchmark" type="button" class="primary-button">1,000回を実行</button>
-        <button id="optimizeRoutes" type="button" class="ghost-button">固定ルートを比較</button><button id="cancelBenchmark" type="button" class="ghost-button" hidden>計算を中止</button>
+        <button id="optimizeRoutes" type="button" class="ghost-button">固定ルートを比較</button>
       </div>
       <div class="benchmark-progress"><i id="benchmarkProgress"></i></div>
       <div id="benchmarkResult" class="benchmark-result idle"><strong>—</strong><span>まだ実行していません</span></div>
       <div class="benchmark-scale"><span>0%</span><i><b id="benchmarkBar"></b><em></em></i><span>100%</span></div>
-      <p class="threshold-note">目標は大成功率80%以上。表示は内蔵モデルのシミュレーション結果です。</p>
+      <p class="threshold-note">金色の線が目標の70%。</p>
       <div id="failureBreakdown" class="fail-grid" hidden></div>
       <div id="routeResults"></div>
     </form>
@@ -1761,62 +1379,38 @@ function fastRolloutAction(state) {
 
 function monteCarloRerank(state, rows) {
   if (!P.monteCarloEndgame || state.temp > P.monteCarloTemp || rows.length < 2) return rows;
-  const roots=rows.slice(0,Math.max(2,P.monteCarloRoots|0));
-  const maxSamples=Math.max(48,P.monteCarloSamples|0), seed=observableSeed(state);
-  const samples=roots.map(()=>[]), wins=roots.map(()=>0);
-  const policyCache=new Map();
-  const rolloutAction=s=>{
-    // Policies use public state only. Configuration and AI parameters are fixed
-    // during this synchronous comparison, so a local cache cannot go stale.
-    const key=[s.values.join(','),s.crits.map(Number).join(''),s.temp,s.focus,s.step,s.hasActed?1:0,s.hepaCharged?1:0,s.hepaActive?1:0,s.fixedRoute].join('|');
-    if(policyCache.has(key))return policyCache.get(key);
-    const a=fastRolloutAction(s);policyCache.set(key,a);return a;
-  };
-  let active=roots.map((_,i)=>i), prior=0;
-  for(const stage of [...new Set([Math.min(48,maxSamples),Math.min(128,maxSamples),maxSamples])]) {
-    for(let k=prior;k<stage;k++) for(const ri of active) {
-      const rng=C.mulberry32((seed+Math.imul(k,2654435761))>>>0);
-      let s=C.cloneState(state);
-      s.ideals=ZONES.map(([lo,hi],i)=>s.crits[i]?s.values[i]:C.randInt(rng,lo,hi));
-      s.finished=false;s.history=[];
-      s=C.applyAction(s,roots[ri].action,rng);
-      for(let guard=0;guard<35&&!s.finished;guard++) {
-        const a=rolloutAction(s);if(!a||a.skill==='finish')break;
-        s=C.applyAction(s,a,rng);
+  const roots = rows.slice(0, Math.max(2, P.monteCarloRoots | 0)), n = Math.max(6, P.monteCarloSamples | 0);
+  const wins = new Array(roots.length).fill(0);
+  const baseSeed = observableSeed(state);
+  for (let k = 0; k < n; k++) {
+    for (let ri = 0; ri < roots.length; ri++) {
+      // すべての候補を同じ仮想基準値・同じ乱数列で比較する（共通乱数法）。
+      // 候補ごとに別乱数を使う旧実装は、少数サンプル時に「手の差」より
+      // 「たまたま割り当てられた乱数の差」を順位へ混ぜていた。
+      const rng = C.mulberry32((baseSeed + k * 2654435761) >>> 0);
+      let s = C.cloneState(state);
+      // 本会心済みだけは基準値が表示値に確定する。それ以外は範囲内一様から生成し、
+      // 実戦の隠れ値やシミュレーター内部の ideals はコピーしない。
+      s.ideals = ZONES.map(([lo, hi], i) => s.crits[i] ? s.values[i] : C.randInt(rng, lo, hi));
+      s.finished = false;
+      s = C.applyAction(s, roots[ri].action, rng);
+      for (let guard = 0; guard < 35 && !s.finished; guard++) {
+        const a = fastRolloutAction(s);
+        if (!a || a.skill === "finish") break;
+        s = C.applyAction(s, a, rng);
       }
-      const value=P.monteCarloExactFinish?(greatChance(s.values,s.crits)||0):+C.grade(s).great;
-      samples[ri].push(value);wins[ri]+=value;
+      if (P.monteCarloExactFinish) {
+        const p = greatChance(s.values, s.crits);
+        wins[ri] += p == null ? 0 : p;
+      } else if (C.grade(s).great) wins[ri]++;
     }
-    prior=stage;
-    let best=active[0];for(const ri of active) if(wins[ri]>wins[best])best=ri;
-    // Paired common-random-number differences; eliminate only clearly inferior
-    // roots. Close decisions receive all 256 trials. No success-rate floor.
-    active=active.filter(ri=>{
-      if(ri===best)return true;
-      let sum=0,sum2=0;
-      for(let k=0;k<stage;k++){const d=samples[ri][k]-samples[best][k];sum+=d;sum2+=d*d;}
-      const mean=sum/stage,variance=Math.max(0,(sum2-sum*sum/stage)/(stage-1));
-      return mean+2.58*Math.sqrt(variance/stage)>=-.01;
-    });
-    if(active.length===1)break;
   }
-  const kept=new Set(active);
-  roots.forEach((r,i)=>{r.prob=wins[i]/samples[i].length;r.score=1000*r.prob;
-    r.monteCarlo=samples[i].length;r.retained=kept.has(i);});
-  roots.sort((a,b)=>Number(b.retained)-Number(a.retained)||b.prob-a.prob||b.heuristic-a.heuristic);
+  roots.forEach((row, i) => { row.prob = wins[i] / n; row.score = row.prob * 1000; row.monteCarlo = n; });
+  roots.sort((a, b) => b.prob - a.prob || b.heuristic - a.heuristic);
   return roots.concat(rows.slice(roots.length));
 }
 
 function searchedMoves(state) {
-  if (state.hepaActive && P.forceCho4) {
-    const id=state.focus>=18?'cho4':state.focus>=12?'yon':null;
-    if(id) {
-      const candidates=QUAD_BLOCKS.map(block=>({action:C.action(id,block,'確定会心を4マスに活用'),heuristic:evalAction(state,C.action(id,block,''))}));
-      candidates.sort((a,b)=>b.heuristic-a.heuristic);
-      return candidates.map(r=>({...r,prob:futureGreatProb(projectAction(state,r.action).state),score:r.heuristic,depth:1,fixed:false}));
-    }
-  }
-
   const fixed = fixedFor(state), depth = searchDepthFor(state);
   const allIn = state.values.every((v, i) => v >= ZONES[i][0] && v <= ZONES[i][1]);
   const outside = state.values.reduce((n, v, i) => n + (v < ZONES[i][0] || v > ZONES[i][1] ? 1 : 0), 0);
@@ -2481,20 +2075,47 @@ function fixedStep(state) {
   return protectFixedAction(state, chosen);
 }
 
+function recommend(state) {
+  if (state.finished) return { skill: "finish", targets: [], reason: "終了" };
+  const fixed = fixedFor(state);
+  if (state.step < fixed.length) return fixedStep(state);
+  if (state.hepaActive && P.forceCho4) {
+    // 確定会心中はダメージが基準値で頭打ちになるため、はみ出しが起こらない。
+    // よって打撃数が最大の技（超4連）を最も会心が乗るブロックへ撃つのが常に有利。
+    const id = SKILLS.cho4.cost <= state.focus ? "cho4" : (SKILLS.yon.cost <= state.focus ? "yon" : null);
+    if (id) {
+      let bb = null, bs = -Infinity;
+      for (const blk of QUAD_BLOCKS) { const sc = evalAction(state, C.action(id, blk, "")); if (sc > bs) { bs = sc; bb = blk; } }
+      // どのブロックも評価不能でも、まだ本会心になっていないマスが多い側へ撃つ。
+      // 確定会心を単発技で使うより取りこぼしが少ない。
+      if (!bb) {
+        let bn = -1;
+        for (const blk of QUAD_BLOCKS) {
+          if (unreachedIndices(state).length && !blk.some((i) => !state.crits[i] && state.values[i] < ZONES[i][0])) continue;
+          const n = blk.filter((i) => !state.crits[i] && state.values[i] <= ZONES[i][1]).length;
+          if (n > bn) { bn = n; bb = blk; }
+        }
+      }
+      if (bb) return C.action(id, bb, `確定会心を${bb.map((i) => LETTERS[i]).join("・")}の${SKILLS[id].name}に使用`);
+    }
+  }
+  const ranked = searchedMoves(state), best = ranked[0];
+  const stopP = greatChance(state.values, state.crits);
+  const forcedStop = state.focus < SKILLS.tataku.cost || state.temp <= 0;
+  const confidentStop = best && stopP != null && stopP >= best.prob;
+  if (!best || forcedStop || confidentStop)
+    return { skill: "finish", targets: [], reason: "現在の大成功確率が、3～5手探索で見つかった続行ルート以上のためしあげる" };
+  return best.action;
+}
+
+
+
   Object.assign(P, {"wFocusShort": 15, "effDamage": 5.2, "finishCost": 7, "aimCost": 16, "aimSnap": 0.434, "baseSnapFuture": 0.04, "costWeight": 0.5, "bandBonus": 26, "bandPriority": 2.4, "offSchedule": 55, "doubleTurnAim": 15, "doubleTurnWaste": 10, "minSnapP": 0.18, "hepaHold": 0, "aimHitCost": 20, "maxShots": 2.5, "effRatio": 0.68, "arriveDouble": 8, "arriveHalf": 6, "fineGap": 14, "tekagenPenalty": 12, "hepaReady": 40, "forceCho4": true, "hepaHitValue": 400, "reachMid": -200, "reachGap": 0, "reachSpread": 14, "smartHeatTarget": false, "maxFailP": 0.1, "maxFailPLate": 0.34, "riskTempFloor": 350, "riskFocusFloor": 26, "arriveAim": 55, "pairMaxFail": 0.06, "pairSnapMin": 0.3, "hepaOffBeat": 600, "arriveHepa": 60, "hepaHoldBack": 0, "chargeValue": 0, "hepaBoost": 0, "wTempShort": 400, "hitsPerAction": 1.2,
     "structuredSchedule": true, "scheduleFocusWeight": 2, "schedulePairBias": 0.2,
     "scheduleRetryValue": 0.8, "narrowAimPenalty": 35, "wideAimBonus": 30,
     "monteCarloEndgame": true, "monteCarloSamples": 24, "monteCarloTemp": 750,
     "monteCarloRoots": 5, "monteCarloExactFinish": true, "hardReachReservePerCell": 5});
 
-function recommend(state) {
-  if (state.finished || state.focus < 5 || state.temp <= 0) return {skill:'finish',targets:[],reason:'終了'};
-  const best=rankMoves(state)[0], p=greatChance(state.values,state.crits);
-  if (!best || (p!=null && p>=best.prob-1e-10)) return {skill:'finish',targets:[],reason:'続行候補と比較し、ここでしあげます'};
-  return best.action;
-}
-Object.assign(P,{monteCarloSamples:256,monteCarloRoots:7,monteCarloExactFinish:false,
-  exactAllIn:true,exactLastCell:true,exactLastCellFocus:35,scheduledSingleFallback:true});
   function simulateOne(options) {
     const o = options || {};
     const rng = o.rng || mulberry32(o.seed == null ? 1 : o.seed);
@@ -2568,8 +2189,7 @@ Object.assign(P,{monteCarloSamples:256,monteCarloRoots:7,monteCarloExactFinish:f
   }
   // 候補手を評価順に並べる（固定手順中は固定手順を返す）
   function rankMoves(state) {
-    if(state.finished || state.focus<5 || state.temp<=0) return [];
-    return searchedMoves(state).filter(r=>SKILLS[r.action.skill] && SKILLS[r.action.skill].cost<=state.focus);
+    return searchedMoves(state);
   }
   // 推奨手を実機で撃ったときの、対象マスごとの上昇量と本会心確率
   // 本会心が100%にならない理由（目標値を通り過ぎている／2倍でも届かない）
@@ -2650,7 +2270,7 @@ Object.assign(P,{monteCarloSamples:256,monteCarloRoots:7,monteCarloExactFinish:f
       for (let dd = snapLo - v; dd <= snapHi - v; dd++) if (dd > 0) dmgSnap.push(dd);
       // すでに隠れ基準値へ届いているマスへの会心は、変化0になる可能性がある。
       const dmgZero = v >= lo && v <= hi ? [0] : [];
-      // 0ダメージは基準値を超えている場合にも生じるため本会心とは断定しない。
+      if (dmgZero.length) dmgSnap.unshift(0); // 正の打撃で変化0なら、すでに基準値に止まっている
       return { idx: i, letter: LETTERS[i], before: v, zone: [lo, hi],
         normal, crit, snapRange: snapLo <= snapHi ? [snapLo, snapHi] : null,
         dmgNormal, dmgCrit, dmgSnap, dmgZero, rawMin, rawMax };
@@ -2663,13 +2283,7 @@ Object.assign(P,{monteCarloSamples:256,monteCarloRoots:7,monteCarloExactFinish:f
     const t = a.targets && a.targets.length ? " → " + a.targets.map((i) => LETTERS[i]).join("・") : "";
     return name + t;
   }
-  function wilsonInterval(wins,n) {
-    if(!n)return {low:0,high:1};
-    const z=1.959963984540054,p=wins/n,d=1+z*z/n;
-    const center=(p+z*z/(2*n))/d,half=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/d;
-    return {low:Math.max(0,center-half),high:Math.min(1,center+half)};
-  }
-  return { wilsonInterval, LETTERS, ZONES, GREAT_TOLERANCE, PRIORITY, SKILLS, DEFAULT_CFG,
+  return { LETTERS, ZONES, GREAT_TOLERANCE, PRIORITY, SKILLS, DEFAULT_CFG,
     VERTICAL_PAIRS, HORIZONTAL_PAIRS, DIAGONAL_PAIRS, FIXED, FIXED_ROUTES, DEFAULT_AUTO_ROUTE, routeById, fixedFor, fixedLength,
     calcDamage, turnEffect, createState, cloneState,
     applyAction, recommend, resolveTargets, grade, simulateOne, benchmark, snapLimit, hepaPlan,
@@ -3150,10 +2764,10 @@ Object.assign(P,{monteCarloSamples:256,monteCarloRoots:7,monteCarloExactFinish:f
   function digitProfile(store, v) {
     if (!v) return null;
     const hit = profCache.get(v);
-    if (hit && hit.store === store && hit.gen === storeGen) return hit.p;
+    if (hit && hit.gen === storeGen) return hit.p;
     const p = new Array(10);
     for (let d = 0; d <= 9; d++) p[d] = matchDigit(v, store[d]);
-    profCache.set(v, { store, gen: storeGen, p: p });
+    profCache.set(v, { gen: storeGen, p: p });
     return p;
   }
   function digitScore(store, v) {
@@ -3184,28 +2798,15 @@ Object.assign(P,{monteCarloSamples:256,monteCarloRoots:7,monteCarloExactFinish:f
   // 候補読みと食い違ったら「候補リストのほうが間違っている」と判断できる。
   function bestFree(store, vecs) {
     let text = "", tot = 0;
-    const digits = [];
     for (const v of vecs) {
       if (!v) return null;
       const prof = digitProfile(store, v);
       let bd = -9, bc = null;
       for (let d = 0; d <= 9; d++) if (prof[d] > bd) { bd = prof[d]; bc = d; }
       if (bc == null) return null;
-      let runner = -9, runnerDigit = null;
-      for (let d = 0; d <= 9; d++) if (d !== bc && prof[d] > runner) {
-        runner = prof[d]; runnerDigit = d;
-      }
-      const fourSix = (bc === 4 && runnerDigit === 6) || (bc === 6 && runnerDigit === 4);
-      const margin = bd - runner;
-      // 全桁平均が高くても、1桁の4/6の接戦を他の桁で埋め合わせない。
-      digits.push({ digit: bc, score: bd, runner: runnerDigit, margin, fourSix,
-        clear: bd >= 0.66 && margin >= (fourSix ? 0.035 : 0.025) });
       text += bc; tot += bd;
     }
-    return { text, score: tot / vecs.length, digits,
-      minDigit: Math.min(...digits.map(d => d.score)),
-      minMargin: Math.min(...digits.map(d => d.margin)),
-      clear: digits.length > 0 && digits.every(d => d.clear) };
+    return { text: text, score: tot / vecs.length };
   }
 
   /* ---------- テンプレート辞書 ---------- */
@@ -3507,45 +3108,6 @@ Object.assign(P,{monteCarloSamples:256,monteCarloRoots:7,monteCarloExactFinish:f
     frameErrors: 0, frameErrorAt: 0,
     tape: [], tapeFrozen: false, tapeW: 0, tapeH: 0
   };
-// A physical damage display survives recommendation changes and manual execution.
-// Rearm only after a continuous, sufficiently long blank interval. Never use
-// the next action's candidate digit lengths as evidence that the display ended.
-class DisplayGate {
-  constructor() { this.reset(); }
-  reset() { this.cells = Array.from({length:6}, () => ({epoch:0, consumed:-1,
-    emptySince:null, emptyFrames:0, clear:false, ready:false, lastAt:null})); }
-  observe(i, visible, now) {
-    const s = this.cells[i];
-    if (s.lastAt === now) return {...s, justCleared:false};
-    if (s.lastAt != null && (now < s.lastAt || now - s.lastAt > 300)) {
-      s.emptySince = null; s.emptyFrames = 0;
-    }
-    s.lastAt = now;
-    let justCleared = false;
-    if (visible) { s.emptySince = null; s.emptyFrames = 0; s.clear = false; }
-    else {
-      if (s.emptySince == null) s.emptySince = now;
-      s.emptyFrames++;
-      if (!s.clear && s.emptyFrames >= 3 && now - s.emptySince >= 120) {
-        s.epoch++; s.clear = true; s.ready = true; justCleared = true;
-      }
-    }
-    return {...s, justCleared};
-  }
-  locked(i) { const s = this.cells[i]; return s.consumed >= s.epoch; }
-  consume(i, epoch = this.cells[i].epoch) {
-    const s = this.cells[i];
-    if (epoch <= s.consumed) return false;
-    s.consumed = epoch;
-    if (epoch === s.epoch) s.ready = false;
-    return true;
-  }
-}
-
-  const displayGate = new DisplayGate();
-  cam.__DisplayGate = DisplayGate;
-  cam.displayGate = displayGate;
-  cam.consumeCell = (i) => displayGate.consume(i);
   window.ForgeCam = cam;
   cam.__tickOnce = function (grid) { cam.__testGrid = grid; try { tick(); } finally { cam.__testGrid = null; } };
 
@@ -3553,13 +3115,11 @@ class DisplayGate {
   const MAX_STORED_SAMPLES = 500, MAX_IMPORT_SAMPLES = 500, MAX_IMPORT_BYTES = 25 * 1024 * 1024;
   const VECTOR_LEN = V.CW * V.CH;
 
-  function status(t) { const el = $("#camStatus"); if (el && el.textContent !== t) el.textContent = t; }
+  function status(t) { const el = $("#camStatus"); if (el) el.textContent = t; }
   function reason(kind, title, detail) {
     const el = $("#ocrState"); if (!el) return;
-    const nextKind = kind || "waiting", html = `<b>${title}</b><span>${detail}</span>`;
-    el.hidden = false;
-    if (el.dataset.kind !== nextKind) el.dataset.kind = nextKind;
-    if (el.innerHTML !== html) el.innerHTML = html;
+    el.hidden = false; el.dataset.kind = kind || "waiting";
+    el.innerHTML = `<b>${title}</b><span>${detail}</span>`;
   }
   // パネル非表示のときでも見える通知行（取り込み停止・エラー用）
   function notice(t) { const el = $("#camNotice"); if (!el) return; el.textContent = t || ""; el.hidden = !t; }
@@ -3572,7 +3132,7 @@ class DisplayGate {
     return !!(target && Array.isArray(target.guarded) && target.guarded.some((x) => +x === +val));
   }
   function lastEvidenceAccept(L) {
-    if (!L || !L.precisionOK || (L.guarded && !L.guardOK)) return false;
+    if (!L || (L.guarded && !L.guardOK)) return false;
     const classic = L.nb >= 3 && L.mean >= L.floor - 0.08
       && L.leadAdj >= (L.risky ? 0.05 : 0.02);
     // 実測5〜16fpsでは、複数マス表示の末尾が2コマしか取れないことがある。
@@ -3587,48 +3147,6 @@ class DisplayGate {
   }
   cam.__guardedValue = guardedValue;
   cam.__lastEvidenceAccept = lastEvidenceAccept;
-
-  // 古い薄いコマを無期限に平均しない。直近8枚・700msの実フレームだけを比較する。
-  function addEvidence(v, r, now) {
-    v.frames = (v.frames || []).filter(f => now - f.at <= 700);
-    v.frames.push({ at: now, scores: r.scores, free: r.free });
-    if (v.frames.length > 8) v.frames.shift();
-    v.n = v.frames.length; v.acc = {}; v.cnt = {}; v.freeAcc = {}; v.freeN = {};
-    for (const f of v.frames) {
-      for (const k of Object.keys(f.scores)) {
-        v.acc[k] = (v.acc[k] || 0) + f.scores[k]; v.cnt[k] = (v.cnt[k] || 0) + 1;
-      }
-      if (f.free) {
-        const k = f.free.text;
-        v.freeAcc[k] = (v.freeAcc[k] || 0) + f.free.score; v.freeN[k] = (v.freeN[k] || 0) + 1;
-      }
-    }
-  }
-  function preciseEvidence(v, value, finalFrame = false) {
-    const fs = v.frames || [], same = f => f.free && +f.free.text === +value && f.free.clear;
-    const clearN = fs.filter(same).length, last = fs[fs.length - 1];
-    if (!last || !same(last)) return false;
-    if (clearN >= 2 && clearN / fs.length >= 0.6) return true;
-    // 表示が消えた時だけ救済。全桁が極めて鮮明で競合が離れた単独フレームに限定。
-    return finalFrame && fs.length === 1 && last.free.minDigit >= 0.94 && last.free.minMargin >= 0.12;
-  }
-  cam.__preciseEvidence = preciseEvidence;
-  cam.__addEvidence = addEvidence;
-
-  function claimFrame(source, key) {
-    if (key == null) return false;
-    const keys = cam.frameKeys || (cam.frameKeys = {});
-    if (keys[source] != null && key <= keys[source]) return false;
-    keys[source] = key;
-    if (cam.evidenceSource && cam.evidenceSource !== source) {
-      // フレーム時計の違う経路を混ぜると同じ映像を複数票として数えるため、票だけを捨てる。
-      cam.votes = {};
-      for (const s of displayGate.cells) { s.emptySince = null; s.emptyFrames = 0; }
-    }
-    cam.evidenceSource = source;
-    return true;
-  }
-  cam.__claimFrame = claimFrame;
   function vw() { return cam.video.videoWidth || 1280; }
   function vh() { return cam.video.videoHeight || 720; }
 
@@ -3846,7 +3364,6 @@ class DisplayGate {
 
   function startFrameLoop() {
     stopFrameLoop();
-    cam.frameKeys = {}; cam.evidenceSource = "";
     cam.frameMode = "timer";
     cam.lastTickAt = performance.now(); cam.lastMediaTime = -1;
     const track = cam.stream ? cam.stream.getVideoTracks()[0] : null;
@@ -3868,9 +3385,7 @@ class DisplayGate {
     cam.timer = setInterval(() => {
       if (!cam.stream || !cam.video) return;
       // Processor / rVFC が正常なら触らず、止まった場合だけ video から救済する。
-      const gap = performance.now() - cam.lastTickAt;
-      if (gap < (cam.reader ? 500 : 80)) return;
-      if (gap > 1400 && cam.active) reason("error", "映像更新停止", "新しい映像が届いていません。再読取を押すか、共有元のゲーム画面を確認してください。");
+      if (performance.now() - cam.lastTickAt < 80) return;
       const mt = cam.video.currentTime;
       if (mt === cam.lastMediaTime) return;
       try { tick(); } catch (e) { frameError("timer", e); }
@@ -3931,8 +3446,6 @@ class DisplayGate {
     cam.lock = {}; cam.off = {}; cam.readIdx = {}; cam.cleared = {};
     cam.epoch = {}; cam.readEpoch = {}; cam.emptyRun = {};
     cam.watchToken = ""; cam.preEmpty = {}; cam.ready = {};
-    displayGate.reset(); cam.votes = {}; cam.sig = ""; cam.unresolved = {};
-    cam.executedAt = 0; cam.frameKeys = {}; cam.evidenceSource = "";
     cam.measuredFps = 0; cam.fpsFrames = 0; cam.fpsStarted = 0;
     stopFrameLoop();
     if (cam.stream) { cam.stream.getTracks().forEach((t) => t.stop()); cam.stream = null; }
@@ -4191,7 +3704,6 @@ class DisplayGate {
         cam.readIdx = {}; cam.off = {}; cam.seen = {}; cam.lowStreak = {}; cam.executedAt = 0;
         cam.missReported = false; cam.diag = {}; cam.cleared = {}; cam.preEmpty = {}; cam.ready = {};
         cam.targetCount = list.length;
-        cam.unresolved = {}; cam.watchStartedAt = Date.now();
       }
     }
     cam.watchToken = token;
@@ -4200,31 +3712,20 @@ class DisplayGate {
     if (cam.active) {
       const letters = list.map((t) => t.letter).join("・");
       status(`${letters} のダメージ表示を待っています`);
-      reason("waiting", "監視準備", `${letters} の古い表示が消え、新しい数字が出るのを待ちます。同じマスへの次の手も、表示の切り替わりを確認して1回だけ反映します。`);
+      reason("waiting", "監視準備", `${letters} の古い表示が消え、新しい数字が出るのを待ちます。手動実行時は「この手を実行した」で直ちに開始できます。`);
     }
     draw();
   };
   cam.unwatch = function () { cam.active = false; cam.targets = []; cam.votes = {}; cam.sig = ""; cam.watchToken = ""; cam.preEmpty = {}; cam.ready = {}; cam.readIdx = {}; cam.off = {}; cam.executedAt = 0; cam.targetCount = 0; reason("waiting", "OCR待機", "次の数値入力が必要なときに自動で監視します。"); draw(); };
   cam.markExecuted = function () {
     cam.executedAt = Date.now(); cam.missReported = false; cam.seen = {}; cam.lowStreak = {}; cam.votes = {}; cam.diag = {}; cam.cleared = {};
-    cam.preEmpty = {};
+    cam.preEmpty = {}; cam.ready = {};
     cam.scanFrames = 0; cam.hit = {}; cam.probe = {};
     cam.tmax = { grab: 0, scan: 0, paint: 0, outside: 0 };
     cam.tape = []; cam.tapeFrozen = false;
     cam.gapMax = 0;
-    cam.unresolved = {};
     const letters = cam.targets.map((t) => t.letter).join("・");
     if (letters) reason("waiting", "表示待ち", `${letters} の数字表示を30fpsで待っています。`);
-  };
-
-  cam.retry = function () {
-    if (!cam.stream) { notice("「画面を取り込む」でゲーム画面を共有してください。"); return; }
-    if (cam.video) cam.video.play().catch(() => {});
-    if (!cam.active) { reason("waiting", "OCR待機", "未反映の対象はありません。次の推奨手を監視します。"); return; }
-    // 読み取り済み表示のロックは維持。未反映の対象だけ今から読み直す。
-    cam.markExecuted();
-    notice("");
-    reason("waiting", "再読取中", `${cam.targets.map(t => t.letter).join("・")} を再確認しています。読み取り済みの表示は二重反映しません。`);
   };
 
   // 画面取り込みは再取得のたびに共有ダイアログが出るので、自動では取り直さない
@@ -4651,13 +4152,6 @@ class DisplayGate {
     let grid = cam.__testGrid || null;
     if (!grid) {
       if (!ensureAlive(!!frame)) return;
-      let source = frame ? "track" : "video";
-      let key = frame ? frame.timestamp : cam.video.currentTime;
-      if (!frame && typeof cam.video.getVideoPlaybackQuality === "function") {
-        const quality = cam.video.getVideoPlaybackQuality();
-        if (quality && quality.totalVideoFrames > 0) { key = quality.totalVideoFrames; source = "video-decoded"; }
-      }
-      if (!claimFrame(source, key)) return;
       try { grid = grabGrid(frame); } catch (e) { frameError("grab", e); return; }
     }
     if (!grid) return;
@@ -4695,7 +4189,6 @@ class DisplayGate {
       if (!force && fpsNow - (cam.paintedAt || 0) < 80) return;
       cam.paintedAt = fpsNow; drawPreview(g); draw();
     };
-    const batchRead = cam.onRead, batchToken = cam.watchToken;
     const found = [], done = [], causes = { miss: [], locked: [], low: [], outside: [], reading: [] };
     const tScan0 = performance.now();
     const fnote = {};
@@ -4705,7 +4198,7 @@ class DisplayGate {
     // 封じ中のマスも見続ける。見ていないと「消えた」を確認できず、
     // 次の手に封じを持ち越して1手ぶん丸ごと取りこぼす。
     // まだ「消えた」を見届けていないマスも走査対象に残す。
-    const pendingClear = [0, 1, 2, 3, 4, 5].filter((i) => displayGate.locked(i));
+    const pendingClear = [0, 1, 2, 3, 4, 5].filter((i) => cam.readEpoch[i] != null && cam.readEpoch[i] === (cam.epoch[i] || 0));
     const scanIdx = cam.active
       ? cam.targets.map((t) => t.idx).concat(pendingClear.filter((x) => !cam.targets.some((t) => t.idx === x)))
       : [0, 1, 2, 3, 4, 5];
@@ -4722,14 +4215,14 @@ class DisplayGate {
       const strictFound = gs.length > 0;
       // 演出で数字が薄い・欠けている瞬間は通常条件で拾えないため、監視対象だけ
       // 緩和条件でもう一度探す。採用は後段の候補照合と投票を必ず通す。
-      if (!gs.length && tg && !displayGate.locked(i)) gs = V.scanCell(grid, i, minD, true, null, false, wantLens);
+      if (!gs.length && tg && cam.executedAt) gs = V.scanCell(grid, i, minD, true, null, false, wantLens);
       // 桁が1つ足りないまま読むと、108 が 18 になって2桁候補に化ける。
       // 候補にもっと長い桁数があるなら、空洞の 0 や細い 1 も拾える設定で
       // もう一度だけ探し、長いまとまりが見つかったらそちらを使う。
       // いちばん緩い設定での探索は、これまで「まとまりは見つかったが桁が足りないとき」
       // だけ動いていた。実測では数字が大きすぎて1つも見つからない場面があり、
       // そのときこそ必要なのに動かず、検出0のまま終わっていた。
-      if (tg && !displayGate.locked(i)) {
+      if (tg && cam.executedAt) {
         const maxLen = tg.candidates.reduce((m, c) => Math.max(m, String(c).length), 0);
         const bestLen = gs.reduce((m, g0) => Math.max(m, g0.count || 0), 0);
         if (!gs.length || bestLen < maxLen) {
@@ -4740,44 +4233,42 @@ class DisplayGate {
           } catch (e) {}
         }
       }
-      // Presence is detected independently of the current skill/candidates.
-      // A lingering 3-digit display must not look blank when the next skill
-      // expects 1 or 2 digits. Fading glyphs also keep the old display locked.
-      let presence = gs.length > 0;
-      if (!presence) {
-        presence = V.scanCell(grid, i, 1, true, null, true, [1,2,3]).length > 0;
-      }
-      const priorEpoch = displayGate.cells[i].epoch;
-      const cycle = displayGate.observe(i, presence, fpsNow);
-      cam.epoch[i] = cycle.epoch;
-      cam.ready[i] = cycle.ready;
-      if (cycle.justCleared) {
-        const old = cam.votes[i];
-        if (tg && old && old.last && !displayGate.locked(i)
-            && displayGate.cells[i].consumed < priorEpoch && lastEvidenceAccept(old.last)) {
-          const L = old.last;
-          done.push({idx:i, letter:L.letter, val:L.val, vecs:L.vecs, box:L.box, url:old.pendingShot && old.pendingShot.url,
-            lead:L.leadAdj, confidence:L.mean, candidates:L.candidates,
-            onCorrect:cam.onCorrect, lastCall:true, displayEpoch:priorEpoch});
-        } else if (tg && old && old.pendingShot && displayGate.cells[i].consumed < priorEpoch) {
-          const ps = old.pendingShot;
-          addShot(ps.url, ps.letter, `確認待ち ${ps.predicted}`, false,
-            { idx:i, predicted:ps.predicted, vecs:ps.vecs, candidates:ps.candidates,
-              confidence:ps.confidence, reason:"ambiguous-digits", onApply:cam.onRead, onCorrect:cam.onCorrect });
-          cam.unresolved = cam.unresolved || {}; cam.unresolved[i] = true;
+      // 自動開始は「監視を作った時点ですでに見えていた古い数字」では行わない。
+      // 対象マスが2コマ空になった後、新しい表示が現れたときだけ実行済みにする。
+      if (tg && !cam.executedAt) {
+        if (!strictFound) {
+          cam.preEmpty[i] = (cam.preEmpty[i] || 0) + 1;
+          if (cam.preEmpty[i] >= 2) cam.ready[i] = true;
+        } else if (cam.ready[i]) {
+          cam.executedAt = now0; cam.missReported = false; cam.votes = {}; cam.diag = {};
+          cam.lowStreak = {}; cam.scanFrames = 0; cam.hit = {}; cam.probe = {};
+          cam.tape = []; cam.tapeFrozen = false; cam.gapMax = 0;
         }
-        delete cam.votes[i];
-        delete cam.readEpoch[i];
       }
-      if (displayGate.locked(i)) {
+      // 実機のダメージ表示は数秒残るため、次の手が始まった直後に同じ数字を
+      // もう一度読んでしまう。いちど読んだマスは「表示が消えた」のを確認するまで封じる。
+      // 表示が2コマ続けて消えたら「次の表示」に世代を進める。
+      if (!gs.length) {
+        cam.emptyRun[i] = (cam.emptyRun[i] || 0) + 1;
+        if (cam.emptyRun[i] === 2) {
+          cam.epoch[i] = (cam.epoch[i] || 0) + 1;
+          // 消える寸前まで貯めた票を、ここで最後に一度だけ判定する。
+          // コマ単位で決めずに全コマぶんの証拠で決める、いちばん条件の良い瞬間。
+          const vLast = cam.votes[i], tLast = tg;
+          if (tLast && vLast && vLast.last && cam.readEpoch[i] !== cam.epoch[i]) {
+            const L = vLast.last;
+            if (lastEvidenceAccept(L)) {
+              done.push({ idx: i, letter: L.letter, val: L.val, vecs: L.vecs, box: L.box, lead: L.leadAdj,
+                confidence: L.mean, candidates: L.candidates, onCorrect: cam.onCorrect, lastCall: true });
+            }
+          }
+        }
+      } else cam.emptyRun[i] = 0;
+      // 前に読んだ世代のままなら、いま見えているのは読み終わった表示。絶対に採用しない。
+      if (cam.readEpoch[i] != null && cam.readEpoch[i] === (cam.epoch[i] || 0)) {
         causes.locked.push("ABCDEF"[i]);
-        if (gs.length) found.push({box:gs[0].box, label:"前の表示が消えるのを待っています"});
+        if (gs.length) found.push({ box: gs[0].box, label: "表示が消えるのを待っています" });
         continue;
-      }
-      if (tg && !cam.executedAt && cycle.ready && presence) {
-        cam.executedAt = now0; cam.missReported = false; cam.diag = {};
-        cam.lowStreak = {}; cam.scanFrames = 0; cam.hit = {}; cam.probe = {};
-        cam.tape = []; cam.tapeFrozen = false; cam.gapMax = 0;
       }
       // 何コマ見て、何コマで数字らしきものが見つかったか。
       // 取りこぼしの原因が「見つけられない」のか「見つけたが決められない」のかを分ける。
@@ -4833,11 +4324,18 @@ class DisplayGate {
           // フレームごとに勝者を決めず、候補ごとの一致度を足し込んでいく。
           // 1枚だと「2」と「3」が0.001差で入れ替わるので、数枚ぶんならすと安定する。
           const v = (cam.votes[i] = cam.votes[i] || { n: 0, acc: {}, cnt: {}, freeAcc: {}, freeN: {}, vecs: null, t0: now0 });
-          v.vecs = r.vecs;
+          v.n++; v.vecs = r.vecs;
           // 桁数が合わなかったフレームでは、その候補は採点されない。
           // 全フレーム数で割ると、演出の光でブレた数コマのせいで平均が落ちて
           // いつまでも確定しなくなるので、候補ごとに採点された回数で割る。
-          addEvidence(v, r, now0);
+          for (const k of Object.keys(r.scores)) {
+            v.acc[k] = (v.acc[k] || 0) + r.scores[k];
+            v.cnt[k] = (v.cnt[k] || 0) + 1;
+          }
+          if (r.free) {
+            v.freeAcc[r.free.text] = (v.freeAcc[r.free.text] || 0) + r.free.score;
+            v.freeN[r.free.text] = (v.freeN[r.free.text] || 0) + 1;
+          }
           const mean = (k) => v.acc[k] / v.cnt[k];
           let best = null, second = null;
           for (const k of Object.keys(v.acc)) {
@@ -4850,16 +4348,14 @@ class DisplayGate {
           const frameBest = r.scores[best] == null ? -9 : r.scores[best];
           if (v.bestFrameScore == null || frameBest > v.bestFrameScore) { v.bestFrameScore = frameBest; v.bestVecs = r.vecs; }
           // 同じ候補が何コマ連続で1位を保っているか
-          const frameWinner = Object.keys(r.scores).reduce((a, b) => r.scores[b] > r.scores[a] ? b : a);
-          if (v.lastBest === frameWinner) v.streak = (v.streak || 1) + 1; else { v.lastBest = frameWinner; v.streak = 1; }
+          if (v.lastBest === best) v.streak = (v.streak || 1) + 1; else { v.lastBest = best; v.streak = 1; }
           label = `${best}（${v.cnt[best]}枚 ${meanBest.toFixed(2)}）`;
 
           // 候補に縛らない読みのほうが明らかに良く、候補側の一致度も低いときは
           // 候補リスト自体が間違っている。すり替わりを防ぐため採用しない。
           let freeTop = null;
           for (const k of Object.keys(v.freeAcc))
-            if (freeTop === null || v.freeN[k] > v.freeN[freeTop]
-                || (v.freeN[k] === v.freeN[freeTop] && v.freeAcc[k] > v.freeAcc[freeTop])) freeTop = k;
+            if (freeTop === null || v.freeAcc[k] / v.freeN[k] > v.freeAcc[freeTop] / v.freeN[freeTop]) freeTop = k;
           const freeMean = freeTop === null ? -9 : v.freeAcc[freeTop] / v.freeN[freeTop];
           // 候補読みの平均は、数字が出かけ・消えかけの薄いコマまで含めて割るため下がる。
           // 一方、自由読みの平均はその値が1位になったコマだけで割るので必ず高く出る。
@@ -4890,7 +4386,7 @@ class DisplayGate {
             // わずかな差で決め打ちせず、はっきり離れるまで待つ。
             // 黙って別の数字を入れるより、読めないままのほうが害が小さい。
             // 一致度がそこそこ止まりのときだけ厳しくする。はっきり読めているなら待たない。
-            const risky = second !== null && V.confusable(+best, +second);
+            const risky = second !== null && meanBest < 0.88 && V.confusable(+best, +second);
             const need = risky ? 0.04 : 0.012;
             const shown = now0 - (v.t0 || now0);
             // 一致度は全桁の平均なので、候補どうしが一部の桁しか違わないと差が薄まる。
@@ -4914,7 +4410,7 @@ class DisplayGate {
               || (nb >= 1 && meanBest >= 0.91 && leadAdj >= 0.08 && r.free && String(+r.free.text) === String(+best) && r.free.score >= 0.91);
             // 候補に縛らない読みが、候補内の同じ値で何枚も高い一致度を出しているなら、
             // 薄いコマに引きずられた平均が伸びなくても採用してよい。
-            const freeSure = freeInCand && v.freeN[freeTop] >= 3 && freeMean >= 0.86 && preciseEvidence(v, freeTop);
+            const freeSure = freeInCand && v.freeN[freeTop] >= 3 && freeMean >= 0.86;
             // 複数マス技は表示時間内に得られるコマ数が少ない。候補読みと自由読みが
             // 同じ値で一致している2コマは、片方だけの2コマより安全なので早めに確定する。
             const multiAgree = cam.targetCount > 1 && freeInCand && +freeTop === +best
@@ -4927,15 +4423,13 @@ class DisplayGate {
               && meanBest >= 0.58 && leadAdj >= (risky ? 0.08 : 0.05);
             const conflict = (sure || stable) && freeSure && +best !== +freeTop;
             const chosen = (sure || stable || multiAgree) ? +best : +freeTop;
-            const precisionOK = preciseEvidence(v, chosen);
             const chosenGuarded = guardedValue(t, chosen);
             const freeSameN = freeTop !== null && +freeTop === chosen ? v.freeN[freeTop] : 0;
             // 本会心専用候補は独立系の自由読みが2枚一致、または双方が極めて鮮明な1枚に限る。
             const guardOK = !chosenGuarded || (freeTop !== null && +freeTop === chosen
               && ((freeSameN >= 2 && freeMean >= 0.88)
                 || (freeSameN >= 1 && freeMean >= 0.94 && meanBest >= 0.94)));
-            cam.diag[i] = { letter: g.letter, val: +best, score: meanBest, n: nb, lead: leadAdj,
-              minDigit: r.free && r.free.minDigit, minMargin: r.free && r.free.minMargin, precisionOK };
+            cam.diag[i] = { letter: g.letter, val: +best, score: meanBest, n: nb, lead: leadAdj };
             if (fnote[i]) { fnote[i].v = +best; fnote[i].s = meanBest; fnote[i].d = String(best).length; }
             const lastGuarded = guardedValue(t, +best);
             const lastFreeN = freeTop !== null && +freeTop === +best ? v.freeN[freeTop] : 0;
@@ -4943,25 +4437,23 @@ class DisplayGate {
               && ((lastFreeN >= 2 && freeMean >= 0.88)
                 || (lastFreeN >= 1 && freeMean >= 0.94 && meanBest >= 0.94)));
             v.last = { val: +best, mean: meanBest, nb: nb, leadAdj: leadAdj, floor: floor, risky: risky,
-              precisionOK: preciseEvidence(v, best, true),
               freeTop: freeTop, freeN: lastFreeN, freeMean: freeMean, guarded: lastGuarded, guardOK: lastGuardOK,
               vecs: v.bestVecs || v.vecs, box: g.box, letter: g.letter, candidates: t.candidates.slice() };
-            if (!precisionOK) label = `${best}? 桁ごとの形を確認中`;
-            else if (conflict) label = `${+best}? ${+freeTop}? 判別中`;
+            if (conflict) label = `${+best}? ${+freeTop}? 判別中`;
             else if (chosenGuarded && !guardOK) label = `${chosen}? 本会心候補を独立照合中`;
             else if (!sure && !stable && risky && nb >= 5) label = `${best}? ${second}? 判別中`;
-            if (!conflict && guardOK && precisionOK && (sure || stable || freeSure || multiAgree)) {
+            if (!conflict && guardOK && (sure || stable || freeSure || multiAgree)) {
               const val = chosen;
               done.push({ idx: i, letter: g.letter, val: val, vecs: v.bestVecs || v.vecs, box: g.box, lead: lead,
-                confidence: (sure || stable) ? meanBest : freeMean, candidates: t.candidates.slice(), onCorrect: cam.onCorrect, displayEpoch: cycle.epoch });
+                confidence: (sure || stable) ? meanBest : freeMean, candidates: t.candidates.slice(), onCorrect: cam.onCorrect });
             } else {
               causes.reading.push(g.letter);
               // 確定できないまま数字が消えると手動入力になり、手本も増えない。
               // 一番よく見えたコマを控えておき、取りこぼし時に「正解/訂正」を出す。
-              if (nb >= 1 && (!v.pendingShot || frameBest > v.pendingShot.confidence + 0.03)) {
+              if (!v.pendingShot && nb >= 3) {
                 try {
                   v.pendingShot = { url: cropShot(grid, g.box), letter: g.letter, idx: i, predicted: String(+best),
-                    vecs: r.vecs, candidates: t.candidates.slice(), confidence: frameBest };
+                    vecs: v.bestVecs || v.vecs, candidates: t.candidates.slice(), confidence: meanBest };
                 } catch (e) {}
               }
             }
@@ -5018,22 +4510,13 @@ class DisplayGate {
     paint(grid, done.length > 0);
     if (cam.active) {
       const elapsed = cam.executedAt ? now0 - cam.executedAt : 0;
-      const timedOut = elapsed >= 2200 && done.length < cam.targets.length;
-      const unresolved = cam.targets.filter(t => (cam.unresolved || {})[t.idx]).map(t => t.letter);
-      if (cam.missReported) reason("error", "要確認", "自動反映を保留しています。画像で数値を確認するか、表示中なら再読取してください。");
-      else if (!timedOut && unresolved.length) reason("error", "画像で確認", `${unresolved.join("・")} は数字の判別がつかず、画像を残しました。「状況・画像」で確認して入力できます。`);
-      else if (!cam.executedAt) {
-        const ready = cam.targets.every(t => displayGate.cells[t.idx].ready);
-        reason(ready ? "waiting" : "warning", ready ? "監視中" : "表示切替待ち",
-          ready ? "実機で打つと、対象マスの新しいダメージを自動で読み取ります。"
-            : "前の表示が消えるのを確認中です。すでに実機で打った場合は「再読取」を押してください。");
-      }
-      else if (!timedOut && causes.outside.length) reason("error", "候補外", `${causes.outside.join("・")} は温度から計算した候補と一致しません。スクショで正解を指定できます。`);
-      else if (!timedOut && causes.low.length) reason("error", "低信頼度", `${causes.low.join("・")} の輪郭は検出しましたが、桁の形を確定できません。`);
-      else if (!timedOut && causes.locked.length) reason("warning", "前の表示待ち", `${causes.locked.join("・")} は前回の数字が消えるのを待っています。`);
-      else if (!timedOut && causes.reading.length) reason("warning", "判別中", `${causes.reading.join("・")} を桁ごとに照合中です。4・6などの僅差は自動反映しません。`);
-      else if (!timedOut && causes.miss.length) reason("waiting", "表示待ち", `${causes.miss.join("・")} のダメージ表示を監視しています。`);
-      else if (timedOut && !cam.missReported) {
+      if (!cam.executedAt) reason("waiting", "監視準備", `${cam.targets.map((t) => t.letter).join("・")} の古い表示が消え、新しい数字が出るのを待っています。`);
+      else if (causes.outside.length) reason("error", "候補外", `${causes.outside.join("・")} は温度から計算した候補と一致しません。スクショで正解を指定できます。`);
+      else if (causes.low.length) reason("error", "低信頼度", `${causes.low.join("・")} の数字らしい輪郭は見つかりましたが、桁または形を確定できません。`);
+      else if (causes.locked.length) reason("warning", "前の表示待ち", `${causes.locked.join("・")} は前回の数字が消えるのを待っています。`);
+      else if (causes.reading.length) reason("warning", "判別中", `${causes.reading.join("・")} の複数フレームを比較しています。`);
+      else if (causes.miss.length && elapsed < 4500) reason("waiting", "表示待ち", `${causes.miss.join("・")} の数字表示を30fpsで待っています。通常画面は失敗画像として保存しません。`);
+      else if (causes.miss.length && !cam.missReported) {
         cam.missReported = true;
         const fpsTxt = cam.measuredFps ? cam.measuredFps.toFixed(1) : "計測中";
         const gapTxt = cam.gapMax ? Math.round(cam.gapMax) + "ms" : "-";
@@ -5084,21 +4567,18 @@ class DisplayGate {
           targets: cam.targets.map((x) => x.letter + "[" + x.candidates.join(",") + "]"),
           tmax: Object.assign({}, cam.tmax)
         };
-        reason("error", "要確認",
-          `${cam.targets.map(t => t.letter).join("・")} を自動反映できませんでした（監視 ${cam.scanFrames || 0}コマ・実測 ${fpsTxt}fps・最大フレーム間隔 ${gapTxt}）。`
+        reason("error", "読み取りなし",
+          `${causes.miss.join("・")} で数字表示を確認できませんでした（監視 ${cam.scanFrames || 0}コマ・実測 ${fpsTxt}fps・最大フレーム間隔 ${gapTxt}）。`
           + (notes.length ? notes.join("／") + "。下の画像で「正解」を押すと手本が増えます。" : "")
           + (slow ? "映像が途切れています。ドラクエ10をウィンドウ／ボーダレスにして、このブラウザが完全に隠れないように置いてください。"
                   : notes.length ? "" : "枠位置を確認し、数値は手動入力してください。"));
       }
     }
     // 読み取れたマスをまとめて反映（1フレームに複数マスでも取りこぼさない）
-    const accepted = [];
     for (const dn of done) {
-      dn.gateBefore = {...displayGate.cells[dn.idx]};
-      dn.targetBefore = cam.targets.find(t => t.idx === dn.idx);
-      dn.votesBefore = cam.votes[dn.idx];
-      if (cam.watchToken !== batchToken || !displayGate.consume(dn.idx, dn.displayEpoch)) continue;
-      accepted.push(dn);
+      addShot(cropShot(grid, dn.box), dn.letter, dn.val + (dn.snap ? "（本会心）" : ""), true,
+        { idx: dn.idx, predicted: String(dn.val), vecs: dn.vecs, reason: "accepted", candidates: dn.candidates,
+          confidence: dn.confidence, onCorrect: dn.onCorrect });
       delete cam.votes[dn.idx];
       cam.targets = cam.targets.filter((x) => x.idx !== dn.idx);
       cam.readIdx[dn.idx] = true;
@@ -5108,40 +4588,14 @@ class DisplayGate {
         delete cam.readEpoch[dn.idx]; cam.emptyRun[dn.idx] = 2;
       } else cam.readEpoch[dn.idx] = cam.epoch[dn.idx] || 0;   // この表示は消費済み
       delete cam.off[dn.idx];
-      if (cam.unresolved) delete cam.unresolved[dn.idx];
     }
     cam.active = cam.targets.length > 0;
     cam.lastEnd = performance.now();
     if (done.length) draw();
-    if (accepted.length) {
-      const committed = [];
-      for (const dn of accepted) {
-        let applied = false, threw = false;
-        try { applied = !!batchRead && batchRead(dn.idx, dn.val) !== false; }
-        catch (e) { threw = true; frameError("apply", e); }
-        if (!applied) {
-          // 拒否された読みを「成功・消費済み」にしない。同じ手なら再試行を許可する。
-          if (!threw && cam.watchToken === batchToken) {
-            displayGate.cells[dn.idx] = dn.gateBefore;
-            if (dn.targetBefore && !cam.targets.some(t => t.idx === dn.idx)) cam.targets.push(dn.targetBefore);
-            if (dn.votesBefore) cam.votes[dn.idx] = dn.votesBefore;
-            delete cam.readIdx[dn.idx]; delete cam.readEpoch[dn.idx];
-            cam.active = cam.targets.length > 0;
-          }
-          reason("warning", "反映を再確認", threw
-            ? "反映処理でエラーが起きました。重複加算を避けるため、盤面と実機の値を確認してください。"
-            : "入力状態が変わったため反映を保留しました。未反映の対象を再読取します。");
-          continue;
-        }
-        committed.push(dn);
-        addShot(dn.url || cropShot(grid, dn.box), dn.letter, dn.val + (dn.snap ? "（本会心）" : ""), true,
-          { idx:dn.idx, predicted:String(dn.val), vecs:dn.vecs, reason:"accepted", candidates:dn.candidates,
-            confidence:dn.confidence, onCorrect:dn.onCorrect });
-      }
-      if (committed.length) {
-        status(committed.map(x => `${x.letter} = ${x.val}`).join(" / ") + " を反映しました");
-        reason("success", "読み取り成功", committed.map(x => `${x.letter}=${x.val}`).join(" / ") + " を盤面へ反映しました。");
-      }
+    if (done.length) {
+      status(done.map((x) => `${x.letter} = ${x.val}`).join(" / ") + " を読み取りました");
+      reason("success", "読み取り成功", done.map((x) => `${x.letter}=${x.val}`).join(" / ") + "。正しければ下のスクショで「正解」を押すと学習します。");
+      for (const dn of done) if (cam.onRead) cam.onRead(dn.idx, dn.val);
     }
   }
 
@@ -5297,7 +4751,7 @@ class DisplayGate {
 </script>
 <script>(function () {
   "use strict";
-  const APP_VERSION = "2026.09.08-42";
+  const APP_VERSION = "2026.08.20-39";
   const AI = window.AmatsuyuAI;
   const $ = (s) => document.querySelector(s);
   const L = AI.LETTERS, Z = AI.ZONES;
@@ -5311,46 +4765,10 @@ class DisplayGate {
   let pending = null; // 直前の一手の結果入力待ち
   let lastRec = null;   // 固定バー用に、いま表示している推奨手を控えておく
   // 何番目の候補を採用するか。盤面が変わったら先頭に戻す
-  let pickIdx = 0, pickSig = "", rankedNow = [], interactionRevision = 0;
+  let pickIdx = 0, pickSig = "", rankedNow = [];
   function stateSig() {
-    return interactionRevision + "|" + state.values.join(",") + "|" + state.temp + "|" + state.focus + "|" + state.step
-      + "|" + state.fixedRoute + "|" + state.hasActed + "|" + JSON.stringify(state.cfg)
+    return state.values.join(",") + "|" + state.temp + "|" + state.focus + "|" + state.step
       + "|" + state.crits.map((c) => (c ? 1 : 0)).join("") + "|" + (state.hepaCharged ? 1 : 0) + (state.hepaActive ? 1 : 0);
-  }
-  // A cached, dedicated worker keeps planning off the camera's frame loop.
-  const planCache = new Map();
-  let planWorker = null, workerFailed = false, requestedPlan = "", queuedPlan = null;
-  function plannerRows() {
-    const sig = stateSig();
-    if (planCache.has(sig)) { queuedPlan=null; return planCache.get(sig); }
-    if (!workerFailed && window.Worker) {
-      try {
-        if (!planWorker) {
-          const code = document.scripts[0].textContent + '\nself.onmessage=function(e){try{self.postMessage({sig:e.data.sig,rows:self.AmatsuyuAI.rankMoves(e.data.state)});}catch(err){self.postMessage({sig:e.data.sig,error:String(err)});}};';
-          const url = URL.createObjectURL(new Blob([code],{type:"text/javascript"}));
-          planWorker = new Worker(url); URL.revokeObjectURL(url);
-          planWorker.onmessage = e => {
-            if (e.data.error) { planWorker.terminate(); planWorker=null; workerFailed=true; requestedPlan=""; queuedPlan=null; render(); return; }
-            if (e.data.sig===requestedPlan) requestedPlan="";
-            planCache.set(e.data.sig,e.data.rows);
-            if (planCache.size>24) planCache.delete(planCache.keys().next().value);
-            if (queuedPlan && queuedPlan.sig!==e.data.sig) {
-              const next=queuedPlan; queuedPlan=null; requestedPlan=next.sig;
-              planWorker.postMessage(next);
-            } else queuedPlan=null;
-            if (e.data.sig===stateSig() && !pending) render();
-          };
-          planWorker.onerror = () => { planWorker.terminate(); planWorker=null; workerFailed=true; requestedPlan=""; queuedPlan=null; render(); };
-        }
-        if (requestedPlan!==sig) {
-          const request={sig,state:{...serialState(state),cfg:{...state.cfg},ideals:[0,0,0,0,0,0],history:[],finished:false}};
-          if (requestedPlan) queuedPlan=request;
-          else { requestedPlan=sig; planWorker.postMessage(request); }
-        } else queuedPlan=null;
-        return null;
-      } catch(e) { workerFailed=true; if(planWorker) planWorker.terminate(); planWorker=null; }
-    }
-    const rows=AI.rankMoves(state); planCache.set(sig,rows); return rows;
   }
   function setPick(i) {
     if (!rankedNow.length) return;
@@ -5426,7 +4844,6 @@ class DisplayGate {
     try { localStorage.setItem(RUNS_KEY, JSON.stringify(runs.slice(0, 50))); } catch (e) {}
   }
   function recordOutcome(idx, before, after, snap, source) {
-    if (source !== "camera" && window.ForgeCam) window.ForgeCam.consumeCell(idx);
     const li = pending && pending.logIndex != null ? pending.logIndex : log.length - 1;
     const h = log[li]; if (!h) return;
     h.results = h.results || [];
@@ -5463,17 +4880,6 @@ class DisplayGate {
     saveSession();
   }
 
-  function editBoardValue(i,value) {
-    interactionRevision++; snapshot(); const before=state.values[i]; state.values[i]=Math.max(0,Math.round(value));
-    if(state.values[i]!==before) state.crits[i]=false;
-    if(pending) {
-      const c=pending.cand.find(c=>c.idx===i);
-      if(c) {recordOutcome(i,c.before,state.values[i],false,"board"); pending.picked[i]=state.values[i];}
-      if(pending.cand.every(c=>pending.picked[c.idx]!=null)) pending=null;
-    }
-    if(window.ForgeCam) window.ForgeCam.consumeCell(i);
-    markFresh(i); render();
-  }
   function renderBoard() {
     const waiting = {};
     if (pending) for (const c of pending.cand) if (pending.picked[c.idx] == null) waiting[c.idx] = true;
@@ -5504,9 +4910,9 @@ class DisplayGate {
     $("#board").querySelectorAll(".mass").forEach((el) => {
       const i = +el.dataset.index;
       const input = el.querySelector('input[type="number"]');
-      input.addEventListener("change", () => editBoardValue(i, +input.value || 0));
+      input.addEventListener("change", () => { snapshot(); state.values[i] = Math.max(0, +input.value || 0); render(); });
       el.querySelectorAll(".nudge").forEach((b) => b.addEventListener("click", () => {
-        editBoardValue(i, state.values[i] + (+b.dataset.d));
+        snapshot(); state.values[i] = Math.max(0, state.values[i] + (+b.dataset.d)); render();
       }));
       el.querySelector('input[type="checkbox"]').addEventListener("change", (e) => {
         snapshot(); setCrit(i, e.target.checked); render();
@@ -5525,9 +4931,12 @@ class DisplayGate {
     const hero = $("#hero");
     if (!hero) return;
     const mode = pending ? "result" : "play";
-    // 表示モードだけ切り替え、ユーザーが見ている位置は保つ。
+    // 実行と結果入力を行き来したときは、主役ゾーンの先頭に戻す。
+    // 見出しが画面外に出たまま次の指示が始まらないようにする。
     if (hero.dataset.mode !== mode) {
       hero.dataset.mode = mode;
+      const sc = document.querySelector(".scroll");
+      if (sc) sc.scrollTop = 0;
     }
   }
 
@@ -5545,19 +4954,7 @@ class DisplayGate {
       return;
     }
     const bad = state.values.some((v, i) => v > Z[i][1]);
-    const ranked = plannerRows();
-    if (!ranked) {
-      if(window.ForgeCam && window.ForgeCam.active) window.ForgeCam.unwatch();
-      rankedNow=[]; markTargets([]); renderPicker(null);
-      $("#actionName").textContent="次の一手を計算中";
-      $("#actionMeta").innerHTML=""; $("#actionReason").textContent="盤面から、次の候補を比較しています。";
-      $("#applyButton").disabled=true; $("#applyLabel").textContent="計算中";
-      $("#forecast").innerHTML=""; $("#quickPlay").hidden=true;
-      const current=AI.greatChance(state.values,state.crits);
-      $("#probNow").textContent=current==null?"—":(current*100).toFixed(1)+"%";
-      $("#probNote").textContent=current==null?"全マスを範囲内へ":"隠れ基準値を一様とした推定";
-      return;
-    }
+    const ranked = AI.rankMoves(state);
     rankedNow = ranked;
     const sig = stateSig();
     if (sig !== pickSig) { pickSig = sig; pickIdx = 0; }
@@ -5613,11 +5010,11 @@ class DisplayGate {
       $("#applyButton").disabled = true; $("#quickPlay").hidden = true;
       return;
     }
-    const stopBetter = pickIdx === 0 && done && ranked[0].prob != null && ranked[0].prob <= p + 1e-10;
+    const stopBetter = pickIdx === 0 && done && ranked[0].prob != null && ranked[0].prob <= p;
     if (stopBetter) {
       markTargets([]);
       $("#actionName").textContent = "しあげる";
-      $("#actionReason").textContent = `全6マスが成功範囲内です。比較した続行候補より、ここでしあげる推定確率が高い局面です（推定大成功率 ${(p * 100).toFixed(1)}%）。`;
+      $("#actionReason").textContent = `全6マスが成功範囲内です。これ以上打つと誤差が悪化するため、ここでしあげるのが最善です（推定大成功率 ${(p * 100).toFixed(1)}%）。`;
       $("#actionMeta").innerHTML = "<span>全マス成功範囲</span>";
       $("#forecast").innerHTML = "";
       $("#applyButton").disabled = true; $("#quickPlay").hidden = true;
@@ -5637,7 +5034,7 @@ class DisplayGate {
             : "この盤面なら4マスすべて本会心にできます。";
         } else note += "　※必殺は確定会心を活かせる場面まで温存します。";
       }
-      if (rec.skill === "hepa") note += `　次は${state.temp - 50}℃・${AI.turnEffect(state.temp-50,true).label}。会心は確定しますが、本会心で止まるかは各マスの残り値によります。`;
+      if (rec.skill === "hepa") note += `　次の手は${state.temp - 50}℃の倍ターンです。超4連打ちを撃つと4マスすべて確定会心になります。`;
       $("#actionReason").textContent = note;
       $("#actionMeta").innerHTML = `<span>消費 ${sk.cost}</span><span>${state.temp}℃・${eff.label}</span>`
         + (rec.targets.length ? `<span>対象 ${rec.targets.map((i) => L[i]).join("・")}</span>` : "")
@@ -5658,7 +5055,7 @@ class DisplayGate {
     }
     $("#altList").innerHTML = ranked.slice(0, 8).map((x, k) =>
       `<li data-rank="${k}" class="${k === pickIdx ? "current" : ""}"><b>${k + 1}. ${AI.actionLabel(x.action)}</b>` +
-      `<small>消費 ${AI.SKILLS[x.action.skill].cost}${x.prob != null ? " ・探索 " + (x.prob * 100).toFixed(1) + "% / " + x.depth + "手の推定" : ""}</small></li>`
+      `<small>消費 ${AI.SKILLS[x.action.skill].cost}${x.prob != null ? " ・探索 " + (x.prob * 100).toFixed(1) + "% / " + x.depth + "手" : ""}</small></li>`
     ).join("");
     renderPicker(ranked);
   }
@@ -5730,7 +5127,7 @@ class DisplayGate {
       if (!c) return false;
       if (pending && pending.picked[idx] != null) return false;   // このマスは入力済み
       if (!pending) {
-        applyRecommended("camera");       // 同じ監視トークンのまま手を確定
+        applyRecommended();               // 最初の1マスで手を確定させる
         autoAdvancedAt = Date.now();      // 直後の手動実行を止めるための印
         setTimeout(() => render(), AUTO_GUARD_MS + 60);
       }
@@ -5799,7 +5196,7 @@ class DisplayGate {
   }
   // 読み取ったダメージが「本会心で基準値に止まった」ものかを判定する
   function isSnapDamage(c, d) {
-    if (d === 0 || !c.dmgSnap || c.dmgSnap.indexOf(d) < 0) return false;
+    if (!c.dmgSnap || c.dmgSnap.indexOf(d) < 0) return false;
     if ((c.dmgNormal || []).indexOf(d) >= 0) return false;
     if ((c.dmgCrit || []).indexOf(d) >= 0) return false;
     return true;
@@ -5949,8 +5346,8 @@ class DisplayGate {
     autoBusy = true;
     let n = 0;
     while (n < 12) {
-      const ranked = plannerRows();
-      if (!ranked || !ranked.length) break;
+      const ranked = AI.rankMoves(state);
+      if (!ranked.length) break;
       if (state.step >= AI.fixedLength(state)) break;           // 選択中の固定手順のあいだだけ
       if (ranked[0].action.skill !== "karyoku") break;           // 火力上げ以外は自動化しない
       const sk = AI.SKILLS[ranked[0].action.skill];
@@ -5964,11 +5361,10 @@ class DisplayGate {
     if (n) { autoSkipped = n; render(); }
   }
 
-  function applyRecommended(source) {
-    if (pending) return;
+  function applyRecommended() {
     if (!autoBusy) autoPaused = false;
-    const ranked = plannerRows();
-    if (!ranked || !ranked.length) return;
+    const ranked = AI.rankMoves(state);
+    if (!ranked.length) return;
     const rec = ranked[Math.max(0, Math.min(pickIdx, ranked.length - 1))].action;
     const sk = AI.SKILLS[rec.skill];
     if (!sk || sk.cost > state.focus) return;
@@ -5991,18 +5387,17 @@ class DisplayGate {
     log[log.length - 1].after = serialState(state);
     if (!sk.utility && cand.length) {
       pending = { label: AI.actionLabel(rec), cand, picked: {}, logIndex: log.length - 1,
-        ocrToken: (window.ForgeCam && window.ForgeCam.watchToken) || `pending:${runId}:${log.length - 1}:${rec.skill}:${rec.targets.join(",")}` };
+        ocrToken: `pending:${runId}:${log.length - 1}:${rec.skill}:${rec.targets.join(",")}` };
     }
     pickIdx = 0; pickSig = "";
     if (!autoBusy) autoSkipped = 0;
     render();
     // render() の中の watch() が監視状態を作り直すので、実行の印はそのあとで立てる
-    if (pending && source !== "camera") { const C = window.ForgeCam; if (C && C.stream && C.markExecuted) C.markExecuted(); }
+    if (pending) { const C = window.ForgeCam; if (C && C.stream && C.markExecuted) C.markExecuted(); }
   }
 
   function undo() {
     if (!undoStack.length) return;
-    interactionRevision++;
     pending = null;
     const s = JSON.parse(undoStack.pop());
     Object.assign(state, { values: s.values, temp: s.temp, focus: s.focus, maxFocus: s.maxFocus || state.maxFocus, crits: s.crits,
@@ -6018,7 +5413,7 @@ class DisplayGate {
   $("#applyButton").addEventListener("click", () => {
     if (Date.now() - autoAdvancedAt < AUTO_GUARD_MS) {
       // OCRがすでに1手進めている。ここで実行すると1回の打撃が2手ぶんになる。
-      (window.ForgeCam && window.ForgeCam.notice)("OCRが読み取って1手進めました。二重に進まないよう、いまの操作は無視しました。");
+      notice("OCRが読み取って1手進めました。二重に進まないよう、いまの操作は無視しました。");
       render();
       return;
     }
@@ -6064,7 +5459,7 @@ class DisplayGate {
   const applyGlass = (on) => {
     document.documentElement.dataset.glass = on ? "on" : "off";
     const b = $("#glassToggle");
-    if (b) b.textContent = on ? "高コントラストに切り替え" : "標準の表示に戻す";
+    if (b) b.textContent = on ? "ガラス表現を切る" : "ガラス表現を戻す";
   };
   let glassOn = true;
   try { glassOn = localStorage.getItem(GLASS_KEY) !== "off"; } catch (e) {}
@@ -6086,7 +5481,7 @@ class DisplayGate {
   window.addEventListener("beforeunload", saveSession);
   $("#resetButton").addEventListener("click", () => {
     if (!confirm("最初からやり直しますか？")) return;
-    interactionRevision++; archiveSession("reset");
+    archiveSession("reset");
     const mf = state.maxFocus; state = fresh(); state.focus = mf; state.maxFocus = mf; log = []; undoStack = []; pending = null;
     runId = "run-" + Date.now().toString(36); startedAt = new Date().toISOString();
     render();
@@ -6105,23 +5500,7 @@ class DisplayGate {
     render();
   }));
 
-  $("#validationOpen").addEventListener("click", () => $("#openBenchmark").click());
   $("#openBenchmark").addEventListener("click", () => { $("#benchmarkFocus").value = state.maxFocus; $("#benchmarkDialog").showModal(); });
-  let activeBenchJob = null;
-  function beginBenchmark() {
-    const job = { cancelled: false, abort: null }; activeBenchJob = job;
-    $("#cancelBenchmark").hidden = false; $("#benchmarkFocus").disabled = true;
-    return job;
-  }
-  function endBenchmark(job) {
-    if (activeBenchJob === job) activeBenchJob = null;
-    $("#cancelBenchmark").hidden = true; $("#benchmarkFocus").disabled = false;
-  }
-  $("#cancelBenchmark").addEventListener("click", () => {
-    if (!activeBenchJob) return;
-    activeBenchJob.cancelled = true;
-    if (activeBenchJob.abort) activeBenchJob.abort();
-  });
   function mergeBench(parts) {
     const out = { trials: 0, great: 0, allIn: 0, focusTotal: 0, critTotal: 0,
       failures: { errorOver: 0, below: 0, over: 0, focusOut: 0, tempOut: 0, noMove: 0 } };
@@ -6134,31 +5513,24 @@ class DisplayGate {
     out.averageFocusUsed = out.focusTotal / out.trials; out.averageCrits = out.critTotal / out.trials;
     return out;
   }
-  async function benchmarkBatched(total, options, progress, job = null) {
-    const abortError = () => { const e = new Error("検証を中止しました"); e.name = "AbortError"; return e; };
-    const checkCancelled = () => { if (job && job.cancelled) throw abortError(); };
-    checkCancelled();
+  async function benchmarkBatched(total, options, progress) {
     const parts = [], batch = 10;
     // 単一HTMLのAI本体をBlob Workerへ渡し、画面とカメラを止めずに並列計算する。
     if (window.Worker && window.Blob && window.URL && document.scripts[0]) {
-      let workerUrl=null, cancelled=false; const pool=[], rejectors=[];
-      if (job) job.abort = () => { cancelled=true; pool.forEach(w=>w.terminate()); rejectors.forEach(reject=>reject(abortError())); };
       try {
         const workerCode = document.scripts[0].textContent + `\nself.onmessage=function(e){try{self.postMessage({ok:1,result:self.AmatsuyuAI.benchmark(e.data.n,e.data.options)});}catch(err){self.postMessage({ok:0,error:String(err&&err.stack||err)});}};`;
-        const url = URL.createObjectURL(new Blob([workerCode], { type: "text/javascript" })); workerUrl=url;
+        const url = URL.createObjectURL(new Blob([workerCode], { type: "text/javascript" }));
         const tasks = []; for (let done = 0; done < total; done += batch) tasks.push({ n: Math.min(batch, total - done), done });
         let cursor = 0, finished = 0;
         const count = Math.min(tasks.length, Math.max(1, Math.min(4, navigator.hardwareConcurrency || 2)));
         await Promise.all(Array.from({ length: count }, () => new Promise((resolve, reject) => {
-          const w = new Worker(url); pool.push(w); rejectors.push(reject);
+          const w = new Worker(url);
           const send = () => {
-            if (cancelled) return;
             if (cursor >= tasks.length) { w.terminate(); resolve(); return; }
             const t = tasks[cursor++];
             w.postMessage({ n: t.n, options: { ...options, seed: (options.seed || 20260814) + t.done * 9973 } });
           };
           w.onmessage = (e) => {
-            if (cancelled) return;
             if (!e.data || !e.data.ok) { w.terminate(); reject(new Error(e.data && e.data.error || "worker error")); return; }
             parts.push(e.data.result); finished += e.data.result.trials;
             if (progress) progress(Math.min(1, finished / total)); send();
@@ -6166,20 +5538,16 @@ class DisplayGate {
           w.onerror = (e) => { w.terminate(); reject(e.error || new Error(e.message)); };
           send();
         })));
+        URL.revokeObjectURL(url);
         return mergeBench(parts);
-      } catch (e) {
-        if (job && job.cancelled) throw abortError();
-        parts.length=0; if(progress)progress(0);
-      } finally { cancelled=true; pool.forEach(w=>w.terminate()); if(workerUrl)URL.revokeObjectURL(workerUrl); if(job)job.abort=null; }
+      } catch (e) { /* file://等でWorkerが使えない場合は下の分割計算へ */ }
     }
     for (let done = 0; done < total; done += batch) {
-      checkCancelled();
       const n = Math.min(batch, total - done);
       parts.push(AI.benchmark(n, { ...options, seed: (options.seed || 20260814) + done * 9973 }));
       if (progress) progress(Math.min(1, (done + n) / total));
       await new Promise((r) => setTimeout(r, 0));
     }
-    checkCancelled();
     return mergeBench(parts);
   }
   function showFailures(b) {
@@ -6189,36 +5557,25 @@ class DisplayGate {
     host.innerHTML = rows.map(([n, v]) => `<div><b>${v || 0}</b>${n}</div>`).join("");
   }
   $("#runBenchmark").addEventListener("click", async () => {
-    const btn = $("#runBenchmark"), other = $("#optimizeRoutes"), focus = Math.min(400,Math.max(150,Math.round(+$("#benchmarkFocus").value || 253)));
-    const job=beginBenchmark();
+    const btn = $("#runBenchmark"), other = $("#optimizeRoutes"), focus = Math.max(150, +$("#benchmarkFocus").value || 253);
     btn.disabled = other.disabled = true; btn.textContent = "計算中 0%"; $("#routeResults").innerHTML = "";
-    try {
     const b = await benchmarkBatched(1000, { focus, seed: 20260814, fixedRoute: activeRoute }, (p) => {
       $("#benchmarkProgress").style.width = `${p * 100}%`; btn.textContent = `計算中 ${Math.round(p * 100)}%`;
-    }, job);
+    });
     const pct = b.rate * 100, res = $("#benchmarkResult"), route = AI.routeById(activeRoute);
-    res.className = `benchmark-result ${b.rate >= .8 ? "pass" : "fail"}`;
+    res.className = `benchmark-result ${b.rate >= .7 ? "pass" : "fail"}`;
     res.innerHTML = `<strong>${pct.toFixed(1)}%</strong><span>${b.great} / ${b.trials.toLocaleString()}回 大成功<br>${route.name}・全マス成功範囲 ${(b.allInRate * 100).toFixed(1)}%<br>平均本会心 ${b.averageCrits.toFixed(2)}マス・平均消費集中力 ${b.averageFocusUsed.toFixed(1)}</span>`;
-    const ci=AI.wilsonInterval(b.great,b.trials);
-    res.insertAdjacentHTML("beforeend",`<p class="threshold-note">95%区間 ${(ci.low*100).toFixed(1)}〜${(ci.high*100).toFixed(1)}%・${b.rate>=.8?"標本の80%目標を達成":"80%目標は未達"}<br>開始集中力 ${focus} / シード 20260814 / 内蔵モデル。実機の成功率を保証する値ではありません。</p>`);
-    $("#validationTitle").textContent=`検証 ${pct.toFixed(1)}% / 目標80%`;
-    $("#validationDetail").textContent=`${b.great}/${b.trials}回・集中力${focus}・${route.name}・内蔵モデル`;
     $("#benchmarkBar").style.width = `${pct}%`; $("#headlineRate").textContent = `${pct.toFixed(1)}%`; showFailures(b);
-    } catch(e) {
-      $("#benchmarkResult").className="benchmark-result fail";
-      $("#benchmarkResult").textContent=e.name==="AbortError"?"検証を中止しました。途中の結果は成功率に含めていません。":"検証を完了できませんでした。再実行してください。";
-    } finally { endBenchmark(job); btn.disabled = other.disabled = false; btn.textContent = "もう一度1,000回を実行"; }
+    btn.disabled = other.disabled = false; btn.textContent = "もう一度1,000回を実行";
   });
   $("#optimizeRoutes").addEventListener("click", async () => {
-    const btn = $("#optimizeRoutes"), other = $("#runBenchmark"), focus = Math.min(400,Math.max(150,Math.round(+$("#benchmarkFocus").value || 253))), rows = [];
-    const job=beginBenchmark();
+    const btn = $("#optimizeRoutes"), other = $("#runBenchmark"), focus = Math.max(150, +$("#benchmarkFocus").value || 253), rows = [];
     btn.disabled = other.disabled = true; btn.textContent = "比較中 0%"; $("#routeResults").innerHTML = "";
-    try {
     for (let i = 0; i < AI.FIXED_ROUTES.length; i++) {
       const route = AI.FIXED_ROUTES[i];
       const b = await benchmarkBatched(200, { focus, seed: 20260814, fixedRoute: route.id }, (p) => {
         const q = (i + p) / AI.FIXED_ROUTES.length; $("#benchmarkProgress").style.width = `${q * 100}%`; btn.textContent = `比較中 ${Math.round(q * 100)}%`;
-      }, job);
+      });
       rows.push({ route, b });
     }
     rows.sort((a, b) => b.b.rate - a.b.rate || b.b.allInRate - a.b.allInRate);
@@ -6226,275 +5583,12 @@ class DisplayGate {
     if (!log.length) { state.fixedRoute = activeRoute; state.step = 0; }
     $("#routeResults").innerHTML = `<table class="route-table"><thead><tr><th>固定ルート</th><th>大成功</th><th>範囲内</th></tr></thead><tbody>${rows.map((x, i) =>
       `<tr class="${i === 0 ? "best" : ""}"><td>${i === 0 ? "✓ " : ""}${x.route.name}</td><td>${(x.b.rate * 100).toFixed(1)}%</td><td>${(x.b.allInRate * 100).toFixed(1)}%</td></tr>`).join("")}</tbody></table><p class="threshold-note">${rows[0].route.name}を選択しました。${log.length ? "次回「最初から」で適用します。" : "現在の手順にも適用しました。"}</p>`;
-    } catch(e) { $("#routeResults").textContent=e.name==="AbortError"?"比較を中止しました。選択中の手順を維持しています。":"ルート比較を完了できませんでした。再実行してください。"; }
-    finally { endBenchmark(job); btn.disabled = other.disabled = false; btn.textContent = "固定ルートを再比較"; render(); }
+    btn.disabled = other.disabled = false; btn.textContent = "固定ルートを再比較"; render();
   });
-
-  // RELEASE_VALIDATION_START
-  const releaseValidation = {"trials":2000,"great":1459,"allIn":1965,"focus":253,"verifiedAt":"2026-09-07","failures":{"errorOver":506,"below":15,"over":13,"focusOut":4,"tempOut":3,"noMove":0},"batches":[{"trials":1000,"great":737,"seed":20260814},{"trials":1000,"great":722,"seed":20260907}],"averageFocusUsed":232.9545,"averageCrits":3.678,"rate":0.7295,"allInRate":0.9825,"comparison":[{"name":"準備手順を調整した案","trials":1000,"great":715,"allIn":972,"selected":false},{"name":"現行の推奨ロジック","trials":1000,"great":722,"allIn":981,"selected":true},{"name":"終盤の先読みを強めた案","trials":1000,"great":724,"allIn":987,"selected":false}]};
-  {
-    const b=releaseValidation, pct=(b.rate*100).toFixed(1), ci=AI.wilsonInterval(b.great,b.trials);
-    $("#headlineRate").textContent=pct+"%";
-    $("#validationTitle").textContent=`検証 ${pct}%・80%目標は${b.rate>=.8?"達成":"未達"}`;
-    $("#validationDetail").textContent=`${b.trials.toLocaleString()}回・開始集中力253・標準11手＋AI。内蔵モデルの結果です。`;
-    $("#benchmarkResult").className=`benchmark-result ${b.rate>=.8?"pass":"fail"}`;
-    const comparisons=b.comparison.map(x=>`<tr><td>${x.selected?"✓ ":""}${x.name}</td><td>${(x.great/x.trials*100).toFixed(1)}%</td><td>${(x.allIn/x.trials*100).toFixed(1)}%</td></tr>`).join("");
-    const batches=b.batches.map(x=>`${x.trials.toLocaleString()}回：${x.great}回大成功 / シード ${x.seed}`).join("<br>");
-    $("#benchmarkResult").innerHTML=`<strong>${pct}%</strong><span>${b.great.toLocaleString()} / ${b.trials.toLocaleString()}回 大成功<br>集中力253・標準11手＋AI<br>全マス範囲内 ${(b.allInRate*100).toFixed(1)}%</span><p class="threshold-note">95%区間 ${(ci.low*100).toFixed(1)}〜${(ci.high*100).toFixed(1)}%<br>${b.verifiedAt}集計。正しい盤面入力を前提とする内蔵モデルの結果で、実機の成功率は未計測です。</p><details class="validation-evidence"><summary>追加検証の比較と試行条件</summary><p>以下は同じ乱数条件・各1,000回で比較した追加検証です。差が小さく、大成功率の改善を確認できなかったため、現行方式を継続しています。</p><table class="route-table"><thead><tr><th>比較した案</th><th>大成功</th><th>全マス範囲内</th></tr></thead><tbody>${comparisons}</tbody></table><p>採用した推奨ロジックの検証内訳<br>${batches}</p></details>`;
-    $("#benchmarkBar").style.width=pct+"%";
-    showFailures(b);
-  }
-  // RELEASE_VALIDATION_END
 
   if (window.ForgeCam) { window.ForgeCam.bind(); window.onCamReady = render; }
   render();
 })();
-</script>
-<script id="forge-liquid-view">
-/* View-only enhancements. No AI, OCR, state, storage, or calculation hooks are replaced. */
-(() => {
-  "use strict";
-  const byId = id => document.getElementById(id);
-  const board = byId("board");
-  const forecast = byId("forecast");
-  const action = byId("actionName");
-  const pending = byId("resultEntry");
-  let selectedResult = "";
-  const boundInputs = new WeakSet();
-
-  function watch(element, callback, options = {childList:true}) {
-    if (!element) return;
-    let queued = false;
-    const schedule = () => {
-      if (queued) return;
-      queued = true;
-      queueMicrotask(() => { queued = false; callback(); });
-    };
-    new MutationObserver(schedule).observe(element, options);
-    callback();
-  }
-
-  function styleAction() {
-    action.title = action.textContent;
-    if (action.querySelector(".action-targets")) return;
-    const match = action.textContent.match(/^(.+?)( → )([A-F](?:・[A-F])*)$/);
-    if (match) {
-      const arrow = document.createElement("span");
-      arrow.className = "sr-only";
-      arrow.textContent = match[2];
-      const targets = document.createElement("span");
-      targets.className = "action-targets";
-      targets.textContent = match[3];
-      action.replaceChildren(document.createTextNode(match[1]), arrow, targets);
-    }
-    styleMeta();
-  }
-
-  function styleMeta() {
-    byId("actionMeta").title = byId("actionMeta").textContent;
-    byId("actionMeta").querySelectorAll("span").forEach(span => {
-      if (span.textContent.startsWith("対象 ") && action.querySelector(".action-targets")) {
-        span.dataset.uiTarget = "";
-      } else delete span.dataset.uiTarget;
-    });
-  }
-
-  function paintMeters() {
-    const focus = Number(byId("focusInput").value);
-    const maximum = Number(byId("focusMax").textContent.replace(/[^0-9.]/g,""));
-    const chance = Number.parseFloat(byId("probNow").textContent);
-    byId("uiFocusFill").style.width = `${maximum > 0 ? Math.max(0,Math.min(100,focus / maximum * 100)) : 0}%`;
-    byId("uiChanceFill").style.width = `${Number.isFinite(chance) ? Math.max(0,Math.min(100,chance)) : 0}%`;
-    byId("uiChanceTrack").hidden = !Number.isFinite(chance);
-  }
-
-  function paintBoard() {
-    board.querySelectorAll(".mass").forEach(cell => {
-      const letter = cell.querySelector(".mass-letter").textContent.trim();
-      const range = cell.querySelector(".mass-zone").textContent.match(/(\d+)\D+(\d+)/);
-      const input = cell.querySelector('input[type="number"]');
-      if (range) {
-        const end = Number(range[2]) * 1.08;
-        cell.style.setProperty("--range-start",`${Number(range[1]) / end * 100}%`);
-        cell.style.setProperty("--range-width",`${(Number(range[2]) - Number(range[1])) / end * 100}%`);
-      }
-      cell.querySelectorAll(".nudge").forEach(button => {
-        button.setAttribute("aria-label",`${letter}のたたき値を1${button.dataset.d === "1" ? "増やす" : "減らす"}`);
-        button.title = button.getAttribute("aria-label");
-      });
-      input.title = `${letter}のたたき値を直接修正`;
-      if (!boundInputs.has(input)) {
-        input.addEventListener("focus",() => input.select());
-        boundInputs.add(input);
-      }
-      if (!cell.querySelector(".mass-forecast")) {
-        const line = document.createElement("span");
-        line.className = "mass-forecast";
-        cell.append(line);
-      }
-    });
-    paintForecast();
-    paintMeters();
-  }
-
-  function paintForecast() {
-    const rows = new Map();
-    Array.from(forecast.children).forEach(row => {
-      const letter = row.textContent.match(/^([A-F])\s/);
-      const amount = row.textContent.match(/非会心\s*(\+\d+〜\d+)/);
-      if (letter && amount) rows.set(letter[1],{short:`予測 ${amount[1]}`,full:row.textContent});
-    });
-    board.querySelectorAll(".mass").forEach(cell => {
-      const line = cell.querySelector(".mass-forecast");
-      if (!line) return;
-      const letter = cell.querySelector(".mass-letter").textContent.trim();
-      const row = rows.get(letter);
-      line.textContent = row ? row.short : "";
-      line.title = row ? row.full : "";
-    });
-  }
-
-  function paintReason() {
-    const text = byId("actionReason").textContent.trim();
-    const preview = text.match(/^.*?[。！？]/);
-    byId("uiReasonPreview").textContent = preview ? preview[0] : text;
-    byId("uiReasonDetails").hidden = !text;
-  }
-
-  function styleCandidateGroup(host) {
-    const lists = Array.from(host.children).filter(child => child.classList.contains("cand-list"));
-    const normal = lists.find(list => list.querySelector(".cand[data-v]") && !list.querySelector(".crit"));
-    const critical = lists.find(list => list.querySelector(".crit"));
-    const actions = lists.find(list => list.querySelector(".snapbtn,.other"));
-    if (normal) normal.classList.add("ui-normal");
-    if (critical) critical.classList.add("ui-critical");
-    if (actions) actions.classList.add("ui-result-actions");
-    host.classList.toggle("ui-has-critical",!!critical);
-    if (normal && !host.querySelector(".ui-normal-label")) {
-      const label = document.createElement("div");
-      label.className = "ui-normal-label";
-      label.textContent = "通常";
-      host.append(label);
-    }
-  }
-
-  function paintResultTabs() {
-    if (pending.hidden) return;
-    const rows = Array.from(pending.children).filter(child => child.classList.contains("cand-row"));
-    rows.forEach(styleCandidateGroup);
-    if (!rows.length || pending.querySelector(".result-tabs")) return;
-    if (rows.length === 1) { rows[0].hidden = false; return; }
-    const candidates = rows.map(row => ({
-      row,
-      letter:row.querySelector(".cand-head b").textContent.trim(),
-      done:row.classList.contains("done")
-    }));
-    const active = candidates.find(item => item.letter === selectedResult && !item.done)
-      || candidates.find(item => !item.done) || candidates[0];
-    selectedResult = active.letter;
-    const tabs = document.createElement("div");
-    tabs.className = "result-tabs";
-    tabs.setAttribute("role","tablist");
-    tabs.setAttribute("aria-label","結果を入力するマス");
-    const activate = (letter,focusTab = false) => {
-      selectedResult = letter;
-      candidates.forEach(item => {
-        const selected = item.letter === letter;
-        item.row.hidden = !selected;
-        item.button.setAttribute("aria-selected",String(selected));
-        item.button.tabIndex = selected ? 0 : -1;
-        if (selected && focusTab) item.button.focus();
-      });
-    };
-    candidates.forEach((item,index) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "result-tab";
-      button.id = `ui-result-tab-${item.letter}`;
-      button.dataset.done = String(item.done);
-      button.setAttribute("role","tab");
-      button.textContent = `${item.letter}${item.done ? " ✓" : ""}`;
-      item.row.id = `ui-result-panel-${item.letter}`;
-      item.row.setAttribute("role","tabpanel");
-      item.row.setAttribute("aria-labelledby",button.id);
-      button.setAttribute("aria-controls",item.row.id);
-      button.addEventListener("click",() => activate(item.letter));
-      button.addEventListener("keydown",event => {
-        let next = index;
-        if (event.key === "ArrowRight") next = (index + 1) % candidates.length;
-        else if (event.key === "ArrowLeft") next = (index + candidates.length - 1) % candidates.length;
-        else if (event.key === "Home") next = 0;
-        else if (event.key === "End") next = candidates.length - 1;
-        else return;
-        event.preventDefault();
-        activate(candidates[next].letter,true);
-      });
-      item.button = button;
-      tabs.append(button);
-    });
-    pending.prepend(tabs);
-    activate(selectedResult);
-  }
-
-  function paintOcrStatus() {
-    const source = byId("ocrState");
-    const label = source.querySelector("b");
-    byId("uiOcrText").textContent = label ? label.textContent : "OCR待機";
-    byId("uiOcr").dataset.kind = source.dataset.kind || "waiting";
-    byId("uiOcr").title = source.textContent.trim();
-    const detail = source.querySelector("span");
-    byId("uiOcrFeedback").dataset.kind = source.dataset.kind || "waiting";
-    byId("uiOcrStateLabel").textContent = label ? label.textContent : "OCR待機";
-    byId("uiOcrStateDetail").textContent = detail ? detail.textContent : "";
-    byId("uiOcrFeedback").title = source.textContent.trim();
-  }
-
-  function reveal(panel) {
-    panel.open = !panel.open;
-    if (panel.open) panel.scrollIntoView({block:"nearest"});
-  }
-  byId("uiOcr").addEventListener("click",() => reveal(byId("uiCaptureDetails")));
-  byId("uiOcrInspect").addEventListener("click",() => reveal(byId("uiCaptureDetails")));
-  byId("uiOcrRetry").addEventListener("click",() => {
-    if (window.ForgeCam && window.ForgeCam.retry) window.ForgeCam.retry();
-  });
-  byId("uiSetup").addEventListener("click",() => reveal(byId("setupPanel")));
-  byId("uiSetupClose").addEventListener("click",() => { byId("setupPanel").open = false; byId("uiSetup").focus(); });
-  byId("setupPanel").addEventListener("toggle",() => {
-    byId("uiSetup").setAttribute("aria-expanded",String(byId("setupPanel").open));
-    if (byId("setupPanel").open) byId("setupPanel").scrollIntoView({block:"nearest"});
-  });
-  byId("uiCaptureDetails").addEventListener("toggle",() => {
-    byId("uiOcr").setAttribute("aria-expanded",String(byId("uiCaptureDetails").open));
-  });
-  byId("uiSetup").setAttribute("aria-expanded","false");
-  byId("uiOcr").setAttribute("aria-expanded","false");
-  byId("uiCandidates").addEventListener("click",() => {
-    if (!document.body.classList.contains("drawer-open")) byId("toggleLog").click();
-    byId("altList").scrollIntoView({block:"nearest"});
-  });
-  document.querySelectorAll("[data-ui-click]").forEach(button => {
-    button.addEventListener("click",() => {
-      const target = byId(button.dataset.uiClick);
-      if (target) target.click();
-    });
-  });
-  watch(action,styleAction);
-  watch(byId("actionMeta"),styleMeta);
-  watch(board,paintBoard);
-  watch(forecast,paintForecast);
-  watch(byId("probNow"),paintMeters);
-  watch(byId("probNote"),() => { byId("probNote").title = byId("probNote").textContent; });
-  watch(byId("actionReason"),paintReason);
-  watch(pending,paintResultTabs);
-  watch(byId("quickPlay"),() => styleCandidateGroup(byId("quickPlay")));
-  watch(byId("ocrState"),paintOcrStatus,{childList:true,subtree:true,attributes:true,attributeFilter:["data-kind"]});
-  watch(byId("savedLogNote"),() => {
-    byId("uiSavedStatus").textContent = "進行を自動保存";
-    byId("uiSavedStatus").title = byId("savedLogNote").textContent;
-  });
-})();
-
 </script>
 </body>
 </html>
