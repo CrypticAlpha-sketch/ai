@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 超あまつゆ Forge  version 2026.09.07-41 -->
+<!-- 超あまつゆ Forge  version 2026.09.08-42 -->
 <html lang="ja">
 <head>
 <meta charset="utf-8">
@@ -478,7 +478,7 @@ body.drawer-open #drawer{transform:none}
   .flags{margin-left:0}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-/* Liquid workbench — presentation only. The five original application scripts are unchanged. */
+/* Liquid workbench — visual layer. */
 :root {
   --paper:#fbfcfe; --mist:#edf1f6; --sink:#d9e0e8; --ink:#111820; --slate:#465361;
   --rule:rgba(43,62,85,.13); --ember:#e9513e; --jade:#18764c; --crimson:#b52f2d; --azure:#245fb2;
@@ -769,6 +769,101 @@ body.drawer-open #drawer{transform:translateX(0)}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
+/* State changes never resize the workbench. Overflow stays in the input area. */
+:root{--rec-height:156px;--meter-height:90px;--phase-height:42px;--cell-height:99px;--input-height:270px}
+.scroll{scrollbar-gutter:stable;overflow-anchor:none;scroll-behavior:auto}
+.hero{gap:7px;align-content:start}
+.recommendation-panel,.hero[data-mode=result] .recommendation-panel{
+  height:var(--rec-height);min-height:var(--rec-height);max-height:var(--rec-height);
+  grid-template-columns:minmax(0,1fr) 322px;grid-template-rows:18px 52px 21px 24px;
+  align-content:center;padding:11px 16px;gap:4px 12px;z-index:5;
+}
+.picker{grid-row:1;align-self:center;justify-self:end;height:32px;align-items:center;padding:2px}
+.picker button{height:28px;width:30px}
+#actionName,.hero[data-mode=result] #actionName{grid-column:1/-1;grid-row:2;height:52px;min-width:0;font-size:42px;line-height:1.1;flex-wrap:nowrap;white-space:nowrap;gap:12px}
+.action-targets{flex:none;padding:6px 14px 8px}
+.action-meta{height:21px;min-width:0;flex-wrap:nowrap;overflow:hidden;white-space:nowrap;font-size:11px}
+.act{height:48px;grid-row:3/span 2;align-self:center;flex-wrap:nowrap;gap:10px;max-width:none;width:100%}
+.primary-button{min-width:0;flex:1;font-size:12px;min-height:46px;height:46px;padding:8px 10px}
+#applyButton::after{font-size:18px;margin-left:5px}
+#undoButton,.hero[data-mode=result] #undoButton{flex:none;width:88px;min-height:46px;height:46px;font-size:11px}
+.reason-details,.reason-details[open]{grid-column:1;grid-row:4;padding:0;background:none;position:relative;height:24px;font-size:11px;border-radius:0}
+.reason-details>summary{height:24px;align-items:center;overflow:hidden}
+.reason-preview,.hero[data-mode=result] .reason-preview{display:block;-webkit-line-clamp:unset;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reason-details[open] #actionReason{position:absolute;z-index:55;top:27px;left:0;width:min(580px,80vw);max-height:240px;overflow:auto;padding:14px 17px;margin:0;border:1px solid #fff;border-radius:16px;background:#f8fbfff7;box-shadow:var(--lift-lg);backdrop-filter:var(--blur-lg)}
+.picked-note{position:absolute;top:12px;left:128px;right:170px;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:18px}
+.meters{height:var(--meter-height);min-height:var(--meter-height);max-height:var(--meter-height);padding:8px 16px}
+.meter,.stat{height:72px;position:relative;justify-content:flex-start;gap:1px}
+.meter>span:first-child,.stat>span:first-child{height:16px;line-height:16px;white-space:nowrap}
+.meter-readout{height:42px;flex:none}
+.stat.great>b,.stat.great.idle>b{height:37px;line-height:37px;flex:none;font-size:34px}
+#probNote{display:block;height:14px;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;margin:0}
+.ui-meter{position:absolute;bottom:1px;left:17px;right:17px;width:auto;height:3px;margin:0}
+.meter:first-child .ui-meter{left:0}.stat:last-child .ui-meter{right:0}
+.ui-meter[hidden]{display:block!important;visibility:hidden}
+.phase-row{height:var(--phase-height);min-height:var(--phase-height);max-height:var(--phase-height);flex-wrap:nowrap;padding:6px 12px}
+.phase-context{min-width:0;white-space:nowrap}.flags{flex:none}.turn-context{flex:none}
+#phaseBadge{display:none}#stepLabel{font-size:12px}#skipFixed{font-size:9px}
+.board-shell{padding:7px 9px 8px}
+.board-shell>.section-heading{height:26px;min-height:26px;padding:0 6px 6px}
+.forge-board,.hero .forge-board{grid-auto-rows:var(--cell-height);align-items:stretch}
+.mass,.mass.targeted,.mass.waiting,.mass.over,.mass.bad-crit{
+  height:var(--cell-height);min-height:var(--cell-height);max-height:var(--cell-height);
+  grid-template-rows:17px 42px 18px;padding-top:7px;padding-bottom:7px;row-gap:2px;
+}
+.mass-edit input[type=number],.mass-value{font-size:42px;height:42px}
+.mass.waiting .mass-edit input[type=number]{height:20px;font-size:12px}
+.mass-flag{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.input-shell{height:var(--input-height);min-height:var(--input-height);max-height:var(--input-height);display:grid;grid-template-rows:24px 38px minmax(0,1fr);gap:6px;padding:8px 13px 10px;overflow:hidden}
+.input-shell>.section-heading{height:24px;min-height:24px;padding:0 1px}
+.ocr-feedback{display:grid;grid-template-columns:85px minmax(0,1fr) 124px 78px 78px;gap:7px;align-items:center;min-width:0;padding:0 2px 6px;border-bottom:1px solid var(--rule);color:var(--slate)}
+.ocr-feedback>strong{font-size:11px;white-space:nowrap;color:var(--ink)}
+.ocr-feedback>span{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ocr-feedback>button,.ocr-feedback #hudOff{min-width:0;min-height:31px;height:31px;padding:4px 8px;margin:0;font-size:10px;white-space:nowrap;border-radius:10px;border:1px solid #ffffffbd;background:#ffffffa6;box-shadow:var(--edge);color:var(--ink);cursor:pointer;line-height:1.2}
+.ocr-feedback #hudOff[hidden]{display:block!important;visibility:hidden}
+.ocr-feedback #hudOff{color:#24579a;background:#e7f1fe}
+.ocr-feedback #uiOcrRetry{background:#253747;color:#fff;border-color:#253747}
+.ocr-feedback[data-kind=error]>strong{color:#a73524}.ocr-feedback[data-kind=warning]>strong{color:#8c5714}.ocr-feedback[data-kind=success]>strong{color:#156c46}
+.input-viewport{min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-gutter:stable;overflow-anchor:none;padding:0 3px 1px 0}
+.result-tabs{height:32px;min-height:32px;flex-wrap:nowrap;margin-bottom:5px;padding:1px 3px}
+.result-tab{min-height:28px;height:28px;padding:2px 10px}
+.cand-row,#quickPlay{gap:4px 12px}
+.ui-normal,.ui-critical{height:52px;max-height:52px;min-height:52px;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;padding:1px 2px 5px;scrollbar-gutter:auto}
+.ui-normal .cand,.ui-critical .cand{flex:0 0 auto;scroll-snap-align:start}
+.ui-result-actions{min-height:33px;align-items:center;gap:10px}
+#resultEntry>.section-head{margin-top:5px;min-height:30px}
+.input-viewport:has(#resultEntry:not([hidden]))>.quick{display:none}
+.input-viewport:has(#quickPlay[hidden])>.quick{display:none}
+.input-viewport:has(.quick[open]):has(#quickPlay:not([hidden]))>.input-idle{display:none}
+.input-shell .input-idle{padding-top:32px;text-align:center}
+.input-viewport:has(.quick:not([open]))>.input-idle{display:block}
+.ocr-pill{width:124px;min-width:124px;max-width:124px;height:32px;overflow:hidden;font-size:10px}
+.ocr-pill::before{flex:none}.ocr-pill>span{overflow:hidden;text-overflow:ellipsis}
+#camNotice{position:fixed;z-index:80;left:50%;bottom:22px;transform:translateX(-50%);width:min(700px,calc(100vw - 40px));max-height:160px;overflow:auto;margin:0;box-shadow:var(--lift-lg)}
+.capture-details[open]{position:fixed;z-index:60;left:50%;bottom:60px;transform:translateX(-50%);width:min(920px,calc(100vw - 32px));max-height:60dvh;overflow:auto;box-shadow:var(--lift-lg);background:#f7fafff7}
+.tool-dock{height:44px;min-height:44px;max-height:44px;padding:4px;margin-top:7px}
+.utility-foot{height:28px;min-height:28px;max-height:28px;flex-wrap:nowrap;padding-top:0}
+@media(min-width:681px) and (max-height:990px){:root{--input-height:220px}.app{padding-top:6px;gap:5px}.topbar{min-height:32px}.hero{gap:5px}.tool-dock{margin-top:5px}}
+@media(min-width:681px) and (max-width:850px){
+ .recommendation-panel,.hero[data-mode=result] .recommendation-panel{grid-template-columns:minmax(0,1fr) 292px}
+ #actionName,.hero[data-mode=result] #actionName{font-size:38px}.ocr-feedback{grid-template-columns:80px minmax(0,1fr) 114px 68px 70px;gap:5px}
+ .phase-row{gap:6px}.flags{gap:7px}.phase-context{gap:7px}.meter-controls{position:absolute;right:6px;bottom:4px}.meter-readout{padding-bottom:5px}.meter input{font-size:30px}
+}
+@media(max-width:680px){
+ :root{--rec-height:213px;--meter-height:160px;--phase-height:75px;--cell-height:126px;--input-height:290px}
+ .recommendation-panel,.hero[data-mode=result] .recommendation-panel{grid-template-columns:minmax(0,1fr) auto;grid-template-rows:20px 52px 23px 23px 48px;padding:10px 13px}
+ #actionName,.hero[data-mode=result] #actionName{font-size:clamp(24px,6vw,36px);gap:8px}.action-targets{font-size:.75em;padding:6px 9px}
+ .action-meta,.reason-details,.reason-details[open]{grid-column:1/-1}.act{grid-column:1/-1;grid-row:5;padding:0;height:48px}
+ .picked-note{left:122px;right:135px;font-size:8px}
+ .meters{padding:9px 12px;grid-template-columns:1fr 1fr;grid-template-rows:67px 64px;gap:8px 0}.meter{height:67px}.stat.great{height:64px;display:grid;grid-template-columns:1fr auto;grid-template-rows:17px 16px 14px;padding:5px 0 0}.stat.great>b{grid-row:1/span 2;height:35px;line-height:35px;font-size:30px}.stat.great #probNote{grid-row:3}.stat .ui-meter{left:0;bottom:0}.stat.great .goal-label{top:auto}
+ .phase-row{flex-wrap:wrap;padding:8px 11px}.phase-context{flex-wrap:nowrap}.flags{height:22px;width:100%;justify-content:flex-end}.turn-context{margin-left:auto}
+ .mass,.mass.targeted,.mass.waiting,.mass.over,.mass.bad-crit{grid-template-rows:17px 38px 16px 8px 18px;padding:7px;row-gap:3px}
+ .mass-edit input[type=number],.mass-value{font-size:38px}.mass.waiting .mass-edit input[type=number]{font-size:12px}
+ .ocr-feedback{grid-template-columns:76px minmax(0,1fr) 65px 66px;gap:5px}.ocr-feedback>span{display:none}.ocr-feedback #hudOff{grid-column:2;font-size:9px;padding:3px}
+ .ocr-pill{width:110px;min-width:110px;max-width:110px}.utility-foot .ver{display:none}
+ .tool-dock{overflow-x:auto;justify-content:flex-start}.tool-button,.tool-dock .menu{flex:none}.tool-button{min-width:108px}
+}
+
 </style>
 </head>
 <body>
@@ -805,7 +900,6 @@ body.drawer-open #drawer{transform:translateX(0)}
           <p class="picked-note" id="pickedNote" hidden>AIの一番手ではなく、選び直した候補を表示しています。</p>
           <div class="act">
             <button id="applyButton" class="primary-button" type="button"><span id="applyLabel">この手を実行した</span></button>
-            <button id="hudOff" class="ghost-button" type="button" hidden></button>
             <button id="undoButton" class="ghost-button" type="button">1手戻す</button>
           </div>
         </section>
@@ -831,9 +925,16 @@ body.drawer-open #drawer{transform:translateX(0)}
         </section>
         <section class="input-shell" aria-labelledby="uiResultTitle">
           <div class="section-heading"><span class="section-index" aria-hidden="true">03</span><h2 id="uiResultTitle">結果入力</h2><span class="section-hint">実機に出たダメージを選択</span></div>
+          <div class="ocr-feedback" id="uiOcrFeedback" data-kind="waiting">
+            <strong id="uiOcrStateLabel">OCR待機</strong><span id="uiOcrStateDetail">画面を取り込むと自動で読み取ります。</span>
+            <button id="hudOff" class="ghost-button" type="button" hidden></button>
+            <button id="uiOcrInspect" type="button">状況・画像</button><button id="uiOcrRetry" type="button" title="未反映の対象を再読取します。読み取り済みの表示は二重反映しません。">再読取 ↻</button>
+          </div>
+          <div class="input-viewport">
           <p class="input-idle">数値の入力が必要になると、ここに候補が表示されます。</p>
           <div id="resultEntry" hidden></div>
-          <details class="quick"><summary>実機を見ながら1タップで実行＋入力</summary><div id="quickPlay" hidden></div></details>
+          <details class="quick" open><summary>実機を見ながら1タップで実行＋入力</summary><div id="quickPlay" hidden></div></details>
+          </div>
         </section>
         <span hidden id="nextName"></span><span hidden id="nextMeta"></span>
       </main>
@@ -844,7 +945,7 @@ body.drawer-open #drawer{transform:translateX(0)}
         <button id="uiCandidates" class="tool-button" type="button"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>候補一覧</span></button>
         <details class="menu"><summary aria-label="ログの書き出し"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M4 15v6h16v-6"/></svg><span>JSON / CSV</span></summary><div class="menu-pop"><button class="chip" type="button" data-ui-click="exportJson">JSONを書き出す</button><button class="chip" type="button" data-ui-click="exportCsv">CSVを書き出す</button></div></details>
       </nav>
-      <footer class="utility-foot"><button id="validationOpen" class="text-button" type="button"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10m7 10V4m7 16V7"/></svg>AI検証 1,000回</button><button class="text-button" type="button" data-ui-click="openOcrTest"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="m15 15 6 6"/></svg>OCR精度診断</button><span id="uiSavedStatus">進行を自動保存</span><span class="ver" id="appVersion">v2026.09.07-41</span></footer>
+      <footer class="utility-foot"><button id="validationOpen" class="text-button" type="button"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10m7 10V4m7 16V7"/></svg>AI検証 1,000回</button><button class="text-button" type="button" data-ui-click="openOcrTest"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="m15 15 6 6"/></svg>OCR精度診断</button><span id="uiSavedStatus">進行を自動保存</span><span class="ver" id="appVersion">v2026.09.08-42</span></footer>
       <details class="capture-details" id="uiCaptureDetails"><summary>読み取り状況と診断</summary>
         <div class="rail"><div id="ocrState" role="status" aria-live="polite" class="ocr-state" data-kind="waiting"><b>OCR待機</b><span>とくぎ実行後、対象マスを監視します。</span></div><span id="camStatus">待機中</span><span class="rail-side"><button id="camCopy" class="chip" type="button" title="いまの診断内容を書き出します">診断をコピー</button><button id="camTape" class="chip" type="button" title="取りこぼした瞬間の映像を画像にして保存します" hidden>映像を保存</button></span></div>
         <div id="camShots" hidden></div>
@@ -903,7 +1004,7 @@ body.drawer-open #drawer{transform:translateX(0)}
     <label class="autoskip"><input id="autoSkipToggle" type="checkbox" checked>基本手順のなかの火力上げは自動で進める（冷やしこみ・必殺・アドリブ帯は自動化しません）</label>
     <h3>バージョン</h3>
     <p class="hint">超あまつゆ Forge <b>v2026.09.07-41</b><br>
-      UI：縦長のリキッドグラス表示。OCR・AI推奨手・入力処理は v2026.09.07-41 のままです。</p>
+      UI：高さ固定のリキッドグラス表示。OCR：桁ごとの判別差・新しい複数フレームを確認、薄い数字の検出と再読取を改善。AI推奨手の計算は v2026.09.07-41 と同一です。</p>
     <h3>使い方</h3>
     <p class="hint">緑のマス目が鉱石の3×2からズレていたら、映像上のオレンジの丸をドラッグして<b>板（羊皮紙）の外周4隅</b>に合わせてください。位置はこのブラウザに記憶されます。とくぎの説明枠が板に重なると読み取りを邪魔するので、カーソルを外しておくと安定します。</p>
     <p class="hint">AIは隠れた基準値を一切参照せず、画面上のたたき値・温度・集中力・本会心状態だけで判断します。非公式の練習・判断支援ツールです。</p>
@@ -3049,10 +3150,10 @@ Object.assign(P,{monteCarloSamples:256,monteCarloRoots:7,monteCarloExactFinish:f
   function digitProfile(store, v) {
     if (!v) return null;
     const hit = profCache.get(v);
-    if (hit && hit.gen === storeGen) return hit.p;
+    if (hit && hit.store === store && hit.gen === storeGen) return hit.p;
     const p = new Array(10);
     for (let d = 0; d <= 9; d++) p[d] = matchDigit(v, store[d]);
-    profCache.set(v, { gen: storeGen, p: p });
+    profCache.set(v, { store, gen: storeGen, p: p });
     return p;
   }
   function digitScore(store, v) {
@@ -3083,15 +3184,28 @@ Object.assign(P,{monteCarloSamples:256,monteCarloRoots:7,monteCarloExactFinish:f
   // 候補読みと食い違ったら「候補リストのほうが間違っている」と判断できる。
   function bestFree(store, vecs) {
     let text = "", tot = 0;
+    const digits = [];
     for (const v of vecs) {
       if (!v) return null;
       const prof = digitProfile(store, v);
       let bd = -9, bc = null;
       for (let d = 0; d <= 9; d++) if (prof[d] > bd) { bd = prof[d]; bc = d; }
       if (bc == null) return null;
+      let runner = -9, runnerDigit = null;
+      for (let d = 0; d <= 9; d++) if (d !== bc && prof[d] > runner) {
+        runner = prof[d]; runnerDigit = d;
+      }
+      const fourSix = (bc === 4 && runnerDigit === 6) || (bc === 6 && runnerDigit === 4);
+      const margin = bd - runner;
+      // 全桁平均が高くても、1桁の4/6の接戦を他の桁で埋め合わせない。
+      digits.push({ digit: bc, score: bd, runner: runnerDigit, margin, fourSix,
+        clear: bd >= 0.66 && margin >= (fourSix ? 0.035 : 0.025) });
       text += bc; tot += bd;
     }
-    return { text: text, score: tot / vecs.length };
+    return { text, score: tot / vecs.length, digits,
+      minDigit: Math.min(...digits.map(d => d.score)),
+      minMargin: Math.min(...digits.map(d => d.margin)),
+      clear: digits.length > 0 && digits.every(d => d.clear) };
   }
 
   /* ---------- テンプレート辞書 ---------- */
@@ -3397,7 +3511,8 @@ Object.assign(P,{monteCarloSamples:256,monteCarloRoots:7,monteCarloExactFinish:f
 // Rearm only after a continuous, sufficiently long blank interval. Never use
 // the next action's candidate digit lengths as evidence that the display ended.
 class DisplayGate {
-  constructor() { this.cells = Array.from({length:6}, () => ({epoch:0, consumed:-1,
+  constructor() { this.reset(); }
+  reset() { this.cells = Array.from({length:6}, () => ({epoch:0, consumed:-1,
     emptySince:null, emptyFrames:0, clear:false, ready:false, lastAt:null})); }
   observe(i, visible, now) {
     const s = this.cells[i];
@@ -3411,7 +3526,7 @@ class DisplayGate {
     else {
       if (s.emptySince == null) s.emptySince = now;
       s.emptyFrames++;
-      if (!s.clear && s.emptyFrames >= 3 && now - s.emptySince >= 220) {
+      if (!s.clear && s.emptyFrames >= 3 && now - s.emptySince >= 120) {
         s.epoch++; s.clear = true; s.ready = true; justCleared = true;
       }
     }
@@ -3438,11 +3553,13 @@ class DisplayGate {
   const MAX_STORED_SAMPLES = 500, MAX_IMPORT_SAMPLES = 500, MAX_IMPORT_BYTES = 25 * 1024 * 1024;
   const VECTOR_LEN = V.CW * V.CH;
 
-  function status(t) { const el = $("#camStatus"); if (el) el.textContent = t; }
+  function status(t) { const el = $("#camStatus"); if (el && el.textContent !== t) el.textContent = t; }
   function reason(kind, title, detail) {
     const el = $("#ocrState"); if (!el) return;
-    el.hidden = false; el.dataset.kind = kind || "waiting";
-    el.innerHTML = `<b>${title}</b><span>${detail}</span>`;
+    const nextKind = kind || "waiting", html = `<b>${title}</b><span>${detail}</span>`;
+    el.hidden = false;
+    if (el.dataset.kind !== nextKind) el.dataset.kind = nextKind;
+    if (el.innerHTML !== html) el.innerHTML = html;
   }
   // パネル非表示のときでも見える通知行（取り込み停止・エラー用）
   function notice(t) { const el = $("#camNotice"); if (!el) return; el.textContent = t || ""; el.hidden = !t; }
@@ -3455,7 +3572,7 @@ class DisplayGate {
     return !!(target && Array.isArray(target.guarded) && target.guarded.some((x) => +x === +val));
   }
   function lastEvidenceAccept(L) {
-    if (!L || (L.guarded && !L.guardOK)) return false;
+    if (!L || !L.precisionOK || (L.guarded && !L.guardOK)) return false;
     const classic = L.nb >= 3 && L.mean >= L.floor - 0.08
       && L.leadAdj >= (L.risky ? 0.05 : 0.02);
     // 実測5〜16fpsでは、複数マス表示の末尾が2コマしか取れないことがある。
@@ -3470,6 +3587,48 @@ class DisplayGate {
   }
   cam.__guardedValue = guardedValue;
   cam.__lastEvidenceAccept = lastEvidenceAccept;
+
+  // 古い薄いコマを無期限に平均しない。直近8枚・700msの実フレームだけを比較する。
+  function addEvidence(v, r, now) {
+    v.frames = (v.frames || []).filter(f => now - f.at <= 700);
+    v.frames.push({ at: now, scores: r.scores, free: r.free });
+    if (v.frames.length > 8) v.frames.shift();
+    v.n = v.frames.length; v.acc = {}; v.cnt = {}; v.freeAcc = {}; v.freeN = {};
+    for (const f of v.frames) {
+      for (const k of Object.keys(f.scores)) {
+        v.acc[k] = (v.acc[k] || 0) + f.scores[k]; v.cnt[k] = (v.cnt[k] || 0) + 1;
+      }
+      if (f.free) {
+        const k = f.free.text;
+        v.freeAcc[k] = (v.freeAcc[k] || 0) + f.free.score; v.freeN[k] = (v.freeN[k] || 0) + 1;
+      }
+    }
+  }
+  function preciseEvidence(v, value, finalFrame = false) {
+    const fs = v.frames || [], same = f => f.free && +f.free.text === +value && f.free.clear;
+    const clearN = fs.filter(same).length, last = fs[fs.length - 1];
+    if (!last || !same(last)) return false;
+    if (clearN >= 2 && clearN / fs.length >= 0.6) return true;
+    // 表示が消えた時だけ救済。全桁が極めて鮮明で競合が離れた単独フレームに限定。
+    return finalFrame && fs.length === 1 && last.free.minDigit >= 0.94 && last.free.minMargin >= 0.12;
+  }
+  cam.__preciseEvidence = preciseEvidence;
+  cam.__addEvidence = addEvidence;
+
+  function claimFrame(source, key) {
+    if (key == null) return false;
+    const keys = cam.frameKeys || (cam.frameKeys = {});
+    if (keys[source] != null && key <= keys[source]) return false;
+    keys[source] = key;
+    if (cam.evidenceSource && cam.evidenceSource !== source) {
+      // フレーム時計の違う経路を混ぜると同じ映像を複数票として数えるため、票だけを捨てる。
+      cam.votes = {};
+      for (const s of displayGate.cells) { s.emptySince = null; s.emptyFrames = 0; }
+    }
+    cam.evidenceSource = source;
+    return true;
+  }
+  cam.__claimFrame = claimFrame;
   function vw() { return cam.video.videoWidth || 1280; }
   function vh() { return cam.video.videoHeight || 720; }
 
@@ -3687,6 +3846,7 @@ class DisplayGate {
 
   function startFrameLoop() {
     stopFrameLoop();
+    cam.frameKeys = {}; cam.evidenceSource = "";
     cam.frameMode = "timer";
     cam.lastTickAt = performance.now(); cam.lastMediaTime = -1;
     const track = cam.stream ? cam.stream.getVideoTracks()[0] : null;
@@ -3708,7 +3868,9 @@ class DisplayGate {
     cam.timer = setInterval(() => {
       if (!cam.stream || !cam.video) return;
       // Processor / rVFC が正常なら触らず、止まった場合だけ video から救済する。
-      if (performance.now() - cam.lastTickAt < 80) return;
+      const gap = performance.now() - cam.lastTickAt;
+      if (gap < (cam.reader ? 500 : 80)) return;
+      if (gap > 1400 && cam.active) reason("error", "映像更新停止", "新しい映像が届いていません。再読取を押すか、共有元のゲーム画面を確認してください。");
       const mt = cam.video.currentTime;
       if (mt === cam.lastMediaTime) return;
       try { tick(); } catch (e) { frameError("timer", e); }
@@ -3769,6 +3931,8 @@ class DisplayGate {
     cam.lock = {}; cam.off = {}; cam.readIdx = {}; cam.cleared = {};
     cam.epoch = {}; cam.readEpoch = {}; cam.emptyRun = {};
     cam.watchToken = ""; cam.preEmpty = {}; cam.ready = {};
+    displayGate.reset(); cam.votes = {}; cam.sig = ""; cam.unresolved = {};
+    cam.executedAt = 0; cam.frameKeys = {}; cam.evidenceSource = "";
     cam.measuredFps = 0; cam.fpsFrames = 0; cam.fpsStarted = 0;
     stopFrameLoop();
     if (cam.stream) { cam.stream.getTracks().forEach((t) => t.stop()); cam.stream = null; }
@@ -4027,6 +4191,7 @@ class DisplayGate {
         cam.readIdx = {}; cam.off = {}; cam.seen = {}; cam.lowStreak = {}; cam.executedAt = 0;
         cam.missReported = false; cam.diag = {}; cam.cleared = {}; cam.preEmpty = {}; cam.ready = {};
         cam.targetCount = list.length;
+        cam.unresolved = {}; cam.watchStartedAt = Date.now();
       }
     }
     cam.watchToken = token;
@@ -4047,8 +4212,19 @@ class DisplayGate {
     cam.tmax = { grab: 0, scan: 0, paint: 0, outside: 0 };
     cam.tape = []; cam.tapeFrozen = false;
     cam.gapMax = 0;
+    cam.unresolved = {};
     const letters = cam.targets.map((t) => t.letter).join("・");
     if (letters) reason("waiting", "表示待ち", `${letters} の数字表示を30fpsで待っています。`);
+  };
+
+  cam.retry = function () {
+    if (!cam.stream) { notice("「画面を取り込む」でゲーム画面を共有してください。"); return; }
+    if (cam.video) cam.video.play().catch(() => {});
+    if (!cam.active) { reason("waiting", "OCR待機", "未反映の対象はありません。次の推奨手を監視します。"); return; }
+    // 読み取り済み表示のロックは維持。未反映の対象だけ今から読み直す。
+    cam.markExecuted();
+    notice("");
+    reason("waiting", "再読取中", `${cam.targets.map(t => t.letter).join("・")} を再確認しています。読み取り済みの表示は二重反映しません。`);
   };
 
   // 画面取り込みは再取得のたびに共有ダイアログが出るので、自動では取り直さない
@@ -4475,6 +4651,13 @@ class DisplayGate {
     let grid = cam.__testGrid || null;
     if (!grid) {
       if (!ensureAlive(!!frame)) return;
+      let source = frame ? "track" : "video";
+      let key = frame ? frame.timestamp : cam.video.currentTime;
+      if (!frame && typeof cam.video.getVideoPlaybackQuality === "function") {
+        const quality = cam.video.getVideoPlaybackQuality();
+        if (quality && quality.totalVideoFrames > 0) { key = quality.totalVideoFrames; source = "video-decoded"; }
+      }
+      if (!claimFrame(source, key)) return;
       try { grid = grabGrid(frame); } catch (e) { frameError("grab", e); return; }
     }
     if (!grid) return;
@@ -4539,14 +4722,14 @@ class DisplayGate {
       const strictFound = gs.length > 0;
       // 演出で数字が薄い・欠けている瞬間は通常条件で拾えないため、監視対象だけ
       // 緩和条件でもう一度探す。採用は後段の候補照合と投票を必ず通す。
-      if (!gs.length && tg && cam.executedAt) gs = V.scanCell(grid, i, minD, true, null, false, wantLens);
+      if (!gs.length && tg && !displayGate.locked(i)) gs = V.scanCell(grid, i, minD, true, null, false, wantLens);
       // 桁が1つ足りないまま読むと、108 が 18 になって2桁候補に化ける。
       // 候補にもっと長い桁数があるなら、空洞の 0 や細い 1 も拾える設定で
       // もう一度だけ探し、長いまとまりが見つかったらそちらを使う。
       // いちばん緩い設定での探索は、これまで「まとまりは見つかったが桁が足りないとき」
       // だけ動いていた。実測では数字が大きすぎて1つも見つからない場面があり、
       // そのときこそ必要なのに動かず、検出0のまま終わっていた。
-      if (tg && cam.executedAt) {
+      if (tg && !displayGate.locked(i)) {
         const maxLen = tg.candidates.reduce((m, c) => Math.max(m, String(c).length), 0);
         const bestLen = gs.reduce((m, g0) => Math.max(m, g0.count || 0), 0);
         if (!gs.length || bestLen < maxLen) {
@@ -4573,9 +4756,15 @@ class DisplayGate {
         if (tg && old && old.last && !displayGate.locked(i)
             && displayGate.cells[i].consumed < priorEpoch && lastEvidenceAccept(old.last)) {
           const L = old.last;
-          done.push({idx:i, letter:L.letter, val:L.val, vecs:L.vecs, box:L.box,
+          done.push({idx:i, letter:L.letter, val:L.val, vecs:L.vecs, box:L.box, url:old.pendingShot && old.pendingShot.url,
             lead:L.leadAdj, confidence:L.mean, candidates:L.candidates,
             onCorrect:cam.onCorrect, lastCall:true, displayEpoch:priorEpoch});
+        } else if (tg && old && old.pendingShot && displayGate.cells[i].consumed < priorEpoch) {
+          const ps = old.pendingShot;
+          addShot(ps.url, ps.letter, `確認待ち ${ps.predicted}`, false,
+            { idx:i, predicted:ps.predicted, vecs:ps.vecs, candidates:ps.candidates,
+              confidence:ps.confidence, reason:"ambiguous-digits", onApply:cam.onRead, onCorrect:cam.onCorrect });
+          cam.unresolved = cam.unresolved || {}; cam.unresolved[i] = true;
         }
         delete cam.votes[i];
         delete cam.readEpoch[i];
@@ -4644,18 +4833,11 @@ class DisplayGate {
           // フレームごとに勝者を決めず、候補ごとの一致度を足し込んでいく。
           // 1枚だと「2」と「3」が0.001差で入れ替わるので、数枚ぶんならすと安定する。
           const v = (cam.votes[i] = cam.votes[i] || { n: 0, acc: {}, cnt: {}, freeAcc: {}, freeN: {}, vecs: null, t0: now0 });
-          v.n++; v.vecs = r.vecs;
+          v.vecs = r.vecs;
           // 桁数が合わなかったフレームでは、その候補は採点されない。
           // 全フレーム数で割ると、演出の光でブレた数コマのせいで平均が落ちて
           // いつまでも確定しなくなるので、候補ごとに採点された回数で割る。
-          for (const k of Object.keys(r.scores)) {
-            v.acc[k] = (v.acc[k] || 0) + r.scores[k];
-            v.cnt[k] = (v.cnt[k] || 0) + 1;
-          }
-          if (r.free) {
-            v.freeAcc[r.free.text] = (v.freeAcc[r.free.text] || 0) + r.free.score;
-            v.freeN[r.free.text] = (v.freeN[r.free.text] || 0) + 1;
-          }
+          addEvidence(v, r, now0);
           const mean = (k) => v.acc[k] / v.cnt[k];
           let best = null, second = null;
           for (const k of Object.keys(v.acc)) {
@@ -4668,14 +4850,16 @@ class DisplayGate {
           const frameBest = r.scores[best] == null ? -9 : r.scores[best];
           if (v.bestFrameScore == null || frameBest > v.bestFrameScore) { v.bestFrameScore = frameBest; v.bestVecs = r.vecs; }
           // 同じ候補が何コマ連続で1位を保っているか
-          if (v.lastBest === best) v.streak = (v.streak || 1) + 1; else { v.lastBest = best; v.streak = 1; }
+          const frameWinner = Object.keys(r.scores).reduce((a, b) => r.scores[b] > r.scores[a] ? b : a);
+          if (v.lastBest === frameWinner) v.streak = (v.streak || 1) + 1; else { v.lastBest = frameWinner; v.streak = 1; }
           label = `${best}（${v.cnt[best]}枚 ${meanBest.toFixed(2)}）`;
 
           // 候補に縛らない読みのほうが明らかに良く、候補側の一致度も低いときは
           // 候補リスト自体が間違っている。すり替わりを防ぐため採用しない。
           let freeTop = null;
           for (const k of Object.keys(v.freeAcc))
-            if (freeTop === null || v.freeAcc[k] / v.freeN[k] > v.freeAcc[freeTop] / v.freeN[freeTop]) freeTop = k;
+            if (freeTop === null || v.freeN[k] > v.freeN[freeTop]
+                || (v.freeN[k] === v.freeN[freeTop] && v.freeAcc[k] > v.freeAcc[freeTop])) freeTop = k;
           const freeMean = freeTop === null ? -9 : v.freeAcc[freeTop] / v.freeN[freeTop];
           // 候補読みの平均は、数字が出かけ・消えかけの薄いコマまで含めて割るため下がる。
           // 一方、自由読みの平均はその値が1位になったコマだけで割るので必ず高く出る。
@@ -4706,7 +4890,7 @@ class DisplayGate {
             // わずかな差で決め打ちせず、はっきり離れるまで待つ。
             // 黙って別の数字を入れるより、読めないままのほうが害が小さい。
             // 一致度がそこそこ止まりのときだけ厳しくする。はっきり読めているなら待たない。
-            const risky = second !== null && meanBest < 0.88 && V.confusable(+best, +second);
+            const risky = second !== null && V.confusable(+best, +second);
             const need = risky ? 0.04 : 0.012;
             const shown = now0 - (v.t0 || now0);
             // 一致度は全桁の平均なので、候補どうしが一部の桁しか違わないと差が薄まる。
@@ -4730,7 +4914,7 @@ class DisplayGate {
               || (nb >= 1 && meanBest >= 0.91 && leadAdj >= 0.08 && r.free && String(+r.free.text) === String(+best) && r.free.score >= 0.91);
             // 候補に縛らない読みが、候補内の同じ値で何枚も高い一致度を出しているなら、
             // 薄いコマに引きずられた平均が伸びなくても採用してよい。
-            const freeSure = freeInCand && v.freeN[freeTop] >= 3 && freeMean >= 0.86;
+            const freeSure = freeInCand && v.freeN[freeTop] >= 3 && freeMean >= 0.86 && preciseEvidence(v, freeTop);
             // 複数マス技は表示時間内に得られるコマ数が少ない。候補読みと自由読みが
             // 同じ値で一致している2コマは、片方だけの2コマより安全なので早めに確定する。
             const multiAgree = cam.targetCount > 1 && freeInCand && +freeTop === +best
@@ -4743,13 +4927,15 @@ class DisplayGate {
               && meanBest >= 0.58 && leadAdj >= (risky ? 0.08 : 0.05);
             const conflict = (sure || stable) && freeSure && +best !== +freeTop;
             const chosen = (sure || stable || multiAgree) ? +best : +freeTop;
+            const precisionOK = preciseEvidence(v, chosen);
             const chosenGuarded = guardedValue(t, chosen);
             const freeSameN = freeTop !== null && +freeTop === chosen ? v.freeN[freeTop] : 0;
             // 本会心専用候補は独立系の自由読みが2枚一致、または双方が極めて鮮明な1枚に限る。
             const guardOK = !chosenGuarded || (freeTop !== null && +freeTop === chosen
               && ((freeSameN >= 2 && freeMean >= 0.88)
                 || (freeSameN >= 1 && freeMean >= 0.94 && meanBest >= 0.94)));
-            cam.diag[i] = { letter: g.letter, val: +best, score: meanBest, n: nb, lead: leadAdj };
+            cam.diag[i] = { letter: g.letter, val: +best, score: meanBest, n: nb, lead: leadAdj,
+              minDigit: r.free && r.free.minDigit, minMargin: r.free && r.free.minMargin, precisionOK };
             if (fnote[i]) { fnote[i].v = +best; fnote[i].s = meanBest; fnote[i].d = String(best).length; }
             const lastGuarded = guardedValue(t, +best);
             const lastFreeN = freeTop !== null && +freeTop === +best ? v.freeN[freeTop] : 0;
@@ -4757,12 +4943,14 @@ class DisplayGate {
               && ((lastFreeN >= 2 && freeMean >= 0.88)
                 || (lastFreeN >= 1 && freeMean >= 0.94 && meanBest >= 0.94)));
             v.last = { val: +best, mean: meanBest, nb: nb, leadAdj: leadAdj, floor: floor, risky: risky,
+              precisionOK: preciseEvidence(v, best, true),
               freeTop: freeTop, freeN: lastFreeN, freeMean: freeMean, guarded: lastGuarded, guardOK: lastGuardOK,
               vecs: v.bestVecs || v.vecs, box: g.box, letter: g.letter, candidates: t.candidates.slice() };
-            if (conflict) label = `${+best}? ${+freeTop}? 判別中`;
+            if (!precisionOK) label = `${best}? 桁ごとの形を確認中`;
+            else if (conflict) label = `${+best}? ${+freeTop}? 判別中`;
             else if (chosenGuarded && !guardOK) label = `${chosen}? 本会心候補を独立照合中`;
             else if (!sure && !stable && risky && nb >= 5) label = `${best}? ${second}? 判別中`;
-            if (!conflict && guardOK && (sure || stable || freeSure || multiAgree)) {
+            if (!conflict && guardOK && precisionOK && (sure || stable || freeSure || multiAgree)) {
               const val = chosen;
               done.push({ idx: i, letter: g.letter, val: val, vecs: v.bestVecs || v.vecs, box: g.box, lead: lead,
                 confidence: (sure || stable) ? meanBest : freeMean, candidates: t.candidates.slice(), onCorrect: cam.onCorrect, displayEpoch: cycle.epoch });
@@ -4770,10 +4958,10 @@ class DisplayGate {
               causes.reading.push(g.letter);
               // 確定できないまま数字が消えると手動入力になり、手本も増えない。
               // 一番よく見えたコマを控えておき、取りこぼし時に「正解/訂正」を出す。
-              if (!v.pendingShot && nb >= 3) {
+              if (nb >= 1 && (!v.pendingShot || frameBest > v.pendingShot.confidence + 0.03)) {
                 try {
                   v.pendingShot = { url: cropShot(grid, g.box), letter: g.letter, idx: i, predicted: String(+best),
-                    vecs: v.bestVecs || v.vecs, candidates: t.candidates.slice(), confidence: meanBest };
+                    vecs: r.vecs, candidates: t.candidates.slice(), confidence: frameBest };
                 } catch (e) {}
               }
             }
@@ -4830,13 +5018,22 @@ class DisplayGate {
     paint(grid, done.length > 0);
     if (cam.active) {
       const elapsed = cam.executedAt ? now0 - cam.executedAt : 0;
-      if (!cam.executedAt) reason("waiting", "監視準備", `${cam.targets.map((t) => t.letter).join("・")} の古い表示が消え、新しい数字が出るのを待っています。`);
-      else if (causes.outside.length) reason("error", "候補外", `${causes.outside.join("・")} は温度から計算した候補と一致しません。スクショで正解を指定できます。`);
-      else if (causes.low.length) reason("error", "低信頼度", `${causes.low.join("・")} の数字らしい輪郭は見つかりましたが、桁または形を確定できません。`);
-      else if (causes.locked.length) reason("warning", "前の表示待ち", `${causes.locked.join("・")} は前回の数字が消えるのを待っています。`);
-      else if (causes.reading.length) reason("warning", "判別中", `${causes.reading.join("・")} の複数フレームを比較しています。`);
-      else if (causes.miss.length && elapsed < 4500) reason("waiting", "表示待ち", `${causes.miss.join("・")} の数字表示を30fpsで待っています。通常画面は失敗画像として保存しません。`);
-      else if (causes.miss.length && !cam.missReported) {
+      const timedOut = elapsed >= 2200 && done.length < cam.targets.length;
+      const unresolved = cam.targets.filter(t => (cam.unresolved || {})[t.idx]).map(t => t.letter);
+      if (cam.missReported) reason("error", "要確認", "自動反映を保留しています。画像で数値を確認するか、表示中なら再読取してください。");
+      else if (!timedOut && unresolved.length) reason("error", "画像で確認", `${unresolved.join("・")} は数字の判別がつかず、画像を残しました。「状況・画像」で確認して入力できます。`);
+      else if (!cam.executedAt) {
+        const ready = cam.targets.every(t => displayGate.cells[t.idx].ready);
+        reason(ready ? "waiting" : "warning", ready ? "監視中" : "表示切替待ち",
+          ready ? "実機で打つと、対象マスの新しいダメージを自動で読み取ります。"
+            : "前の表示が消えるのを確認中です。すでに実機で打った場合は「再読取」を押してください。");
+      }
+      else if (!timedOut && causes.outside.length) reason("error", "候補外", `${causes.outside.join("・")} は温度から計算した候補と一致しません。スクショで正解を指定できます。`);
+      else if (!timedOut && causes.low.length) reason("error", "低信頼度", `${causes.low.join("・")} の輪郭は検出しましたが、桁の形を確定できません。`);
+      else if (!timedOut && causes.locked.length) reason("warning", "前の表示待ち", `${causes.locked.join("・")} は前回の数字が消えるのを待っています。`);
+      else if (!timedOut && causes.reading.length) reason("warning", "判別中", `${causes.reading.join("・")} を桁ごとに照合中です。4・6などの僅差は自動反映しません。`);
+      else if (!timedOut && causes.miss.length) reason("waiting", "表示待ち", `${causes.miss.join("・")} のダメージ表示を監視しています。`);
+      else if (timedOut && !cam.missReported) {
         cam.missReported = true;
         const fpsTxt = cam.measuredFps ? cam.measuredFps.toFixed(1) : "計測中";
         const gapTxt = cam.gapMax ? Math.round(cam.gapMax) + "ms" : "-";
@@ -4887,8 +5084,8 @@ class DisplayGate {
           targets: cam.targets.map((x) => x.letter + "[" + x.candidates.join(",") + "]"),
           tmax: Object.assign({}, cam.tmax)
         };
-        reason("error", "読み取りなし",
-          `${causes.miss.join("・")} で数字表示を確認できませんでした（監視 ${cam.scanFrames || 0}コマ・実測 ${fpsTxt}fps・最大フレーム間隔 ${gapTxt}）。`
+        reason("error", "要確認",
+          `${cam.targets.map(t => t.letter).join("・")} を自動反映できませんでした（監視 ${cam.scanFrames || 0}コマ・実測 ${fpsTxt}fps・最大フレーム間隔 ${gapTxt}）。`
           + (notes.length ? notes.join("／") + "。下の画像で「正解」を押すと手本が増えます。" : "")
           + (slow ? "映像が途切れています。ドラクエ10をウィンドウ／ボーダレスにして、このブラウザが完全に隠れないように置いてください。"
                   : notes.length ? "" : "枠位置を確認し、数値は手動入力してください。"));
@@ -4897,11 +5094,11 @@ class DisplayGate {
     // 読み取れたマスをまとめて反映（1フレームに複数マスでも取りこぼさない）
     const accepted = [];
     for (const dn of done) {
+      dn.gateBefore = {...displayGate.cells[dn.idx]};
+      dn.targetBefore = cam.targets.find(t => t.idx === dn.idx);
+      dn.votesBefore = cam.votes[dn.idx];
       if (cam.watchToken !== batchToken || !displayGate.consume(dn.idx, dn.displayEpoch)) continue;
       accepted.push(dn);
-      addShot(cropShot(grid, dn.box), dn.letter, dn.val + (dn.snap ? "（本会心）" : ""), true,
-        { idx: dn.idx, predicted: String(dn.val), vecs: dn.vecs, reason: "accepted", candidates: dn.candidates,
-          confidence: dn.confidence, onCorrect: dn.onCorrect });
       delete cam.votes[dn.idx];
       cam.targets = cam.targets.filter((x) => x.idx !== dn.idx);
       cam.readIdx[dn.idx] = true;
@@ -4911,14 +5108,40 @@ class DisplayGate {
         delete cam.readEpoch[dn.idx]; cam.emptyRun[dn.idx] = 2;
       } else cam.readEpoch[dn.idx] = cam.epoch[dn.idx] || 0;   // この表示は消費済み
       delete cam.off[dn.idx];
+      if (cam.unresolved) delete cam.unresolved[dn.idx];
     }
     cam.active = cam.targets.length > 0;
     cam.lastEnd = performance.now();
     if (done.length) draw();
-    if (done.length) {
-      status(done.map((x) => `${x.letter} = ${x.val}`).join(" / ") + " を読み取りました");
-      reason("success", "読み取り成功", done.map((x) => `${x.letter}=${x.val}`).join(" / ") + "。正しければ下のスクショで「正解」を押すと学習します。");
-      for (const dn of accepted) if (batchRead) batchRead(dn.idx, dn.val);
+    if (accepted.length) {
+      const committed = [];
+      for (const dn of accepted) {
+        let applied = false, threw = false;
+        try { applied = !!batchRead && batchRead(dn.idx, dn.val) !== false; }
+        catch (e) { threw = true; frameError("apply", e); }
+        if (!applied) {
+          // 拒否された読みを「成功・消費済み」にしない。同じ手なら再試行を許可する。
+          if (!threw && cam.watchToken === batchToken) {
+            displayGate.cells[dn.idx] = dn.gateBefore;
+            if (dn.targetBefore && !cam.targets.some(t => t.idx === dn.idx)) cam.targets.push(dn.targetBefore);
+            if (dn.votesBefore) cam.votes[dn.idx] = dn.votesBefore;
+            delete cam.readIdx[dn.idx]; delete cam.readEpoch[dn.idx];
+            cam.active = cam.targets.length > 0;
+          }
+          reason("warning", "反映を再確認", threw
+            ? "反映処理でエラーが起きました。重複加算を避けるため、盤面と実機の値を確認してください。"
+            : "入力状態が変わったため反映を保留しました。未反映の対象を再読取します。");
+          continue;
+        }
+        committed.push(dn);
+        addShot(dn.url || cropShot(grid, dn.box), dn.letter, dn.val + (dn.snap ? "（本会心）" : ""), true,
+          { idx:dn.idx, predicted:String(dn.val), vecs:dn.vecs, reason:"accepted", candidates:dn.candidates,
+            confidence:dn.confidence, onCorrect:dn.onCorrect });
+      }
+      if (committed.length) {
+        status(committed.map(x => `${x.letter} = ${x.val}`).join(" / ") + " を反映しました");
+        reason("success", "読み取り成功", committed.map(x => `${x.letter}=${x.val}`).join(" / ") + " を盤面へ反映しました。");
+      }
     }
   }
 
@@ -5074,7 +5297,7 @@ class DisplayGate {
 </script>
 <script>(function () {
   "use strict";
-  const APP_VERSION = "2026.09.07-41";
+  const APP_VERSION = "2026.09.08-42";
   const AI = window.AmatsuyuAI;
   const $ = (s) => document.querySelector(s);
   const L = AI.LETTERS, Z = AI.ZONES;
@@ -5302,12 +5525,9 @@ class DisplayGate {
     const hero = $("#hero");
     if (!hero) return;
     const mode = pending ? "result" : "play";
-    // 実行と結果入力を行き来したときは、主役ゾーンの先頭に戻す。
-    // 見出しが画面外に出たまま次の指示が始まらないようにする。
+    // 表示モードだけ切り替え、ユーザーが見ている位置は保つ。
     if (hero.dataset.mode !== mode) {
       hero.dataset.mode = mode;
-      const sc = document.querySelector(".scroll");
-      if (sc) sc.scrollTop = 0;
     }
   }
 
@@ -6055,6 +6275,7 @@ class DisplayGate {
   }
 
   function styleAction() {
+    action.title = action.textContent;
     if (action.querySelector(".action-targets")) return;
     const match = action.textContent.match(/^(.+?)( → )([A-F](?:・[A-F])*)$/);
     if (match) {
@@ -6070,6 +6291,7 @@ class DisplayGate {
   }
 
   function styleMeta() {
+    byId("actionMeta").title = byId("actionMeta").textContent;
     byId("actionMeta").querySelectorAll("span").forEach(span => {
       if (span.textContent.startsWith("対象 ") && action.querySelector(".action-targets")) {
         span.dataset.uiTarget = "";
@@ -6220,6 +6442,11 @@ class DisplayGate {
     byId("uiOcrText").textContent = label ? label.textContent : "OCR待機";
     byId("uiOcr").dataset.kind = source.dataset.kind || "waiting";
     byId("uiOcr").title = source.textContent.trim();
+    const detail = source.querySelector("span");
+    byId("uiOcrFeedback").dataset.kind = source.dataset.kind || "waiting";
+    byId("uiOcrStateLabel").textContent = label ? label.textContent : "OCR待機";
+    byId("uiOcrStateDetail").textContent = detail ? detail.textContent : "";
+    byId("uiOcrFeedback").title = source.textContent.trim();
   }
 
   function reveal(panel) {
@@ -6227,6 +6454,10 @@ class DisplayGate {
     if (panel.open) panel.scrollIntoView({block:"nearest"});
   }
   byId("uiOcr").addEventListener("click",() => reveal(byId("uiCaptureDetails")));
+  byId("uiOcrInspect").addEventListener("click",() => reveal(byId("uiCaptureDetails")));
+  byId("uiOcrRetry").addEventListener("click",() => {
+    if (window.ForgeCam && window.ForgeCam.retry) window.ForgeCam.retry();
+  });
   byId("uiSetup").addEventListener("click",() => reveal(byId("setupPanel")));
   byId("uiSetupClose").addEventListener("click",() => { byId("setupPanel").open = false; byId("uiSetup").focus(); });
   byId("setupPanel").addEventListener("toggle",() => {
@@ -6253,6 +6484,7 @@ class DisplayGate {
   watch(board,paintBoard);
   watch(forecast,paintForecast);
   watch(byId("probNow"),paintMeters);
+  watch(byId("probNote"),() => { byId("probNote").title = byId("probNote").textContent; });
   watch(byId("actionReason"),paintReason);
   watch(pending,paintResultTabs);
   watch(byId("quickPlay"),() => styleCandidateGroup(byId("quickPlay")));
